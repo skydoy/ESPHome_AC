@@ -1,6 +1,6 @@
 """ESPHome climate platform for Hisense ACs on the RS-485 F4F5 bus.
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 """
 
 import esphome.codegen as cg

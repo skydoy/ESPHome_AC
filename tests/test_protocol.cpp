@@ -1,6 +1,6 @@
 // Host unit tests for components/hisense_ac/hisense_protocol.{h,cpp}.
 // Build and run:  make -C tests
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #include "../components/hisense_ac/hisense_protocol.h"
 
 #include <cstdio>

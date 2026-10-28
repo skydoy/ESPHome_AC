@@ -7,7 +7,7 @@ AEH-W4x Wi-Fi module talk the "XM" protocol (`F4 F5 … F4 FB` frames) over **RS
 |---|---|
 | Status | Supported (component builds, protocol unit tested; field reports welcome) |
 | Package | [`hisense-ac.yaml`](hisense-ac.yaml) |
-| Component | [`components/hisense_ac`](../../components/hisense_ac) (MIT) |
+| Component | [`components/hisense_ac`](../../components/hisense_ac) (PolyForm Noncommercial 1.0.0) |
 | Adapter | RS-485 transceiver, e.g. M5Stack Hat RS485 on an M5StickC Plus2 |
 | Wiring | [docs/wiring.md](../../docs/wiring.md), [hardware.md](hardware.md) |
 | Protocol | [protocol.md](protocol.md) |

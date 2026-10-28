@@ -25,8 +25,9 @@ static/index.html         ESP Web Tools installer page
      `ac_fault_codes` and `ac_outdoor_temperature` (template entities are fine) so the core
      screen works;
    - prefer an existing upstream ESPHome component referenced by URL. Do not copy code from
-     projects without a licence, and keep licences compatible (this repo is MIT; GPL code
-     cannot be added to it).
+     projects without a licence, and keep licences compatible (this repo is PolyForm Noncommercial 1.0.0; only code
+     under permissive licences such as MIT, BSD or Apache-2.0 can be added, keeping its notice;
+     GPL code cannot be added to it). Contributions are accepted under the same licence.
 3. Add `brands/<brand>/README.md` and `hardware.md` (adapter, pin-out, voltages, sources).
 4. Add `devices/<brand>-<board>.yaml`, add it to `.github/workflows/validate.yml`, and to the
    publish workflow and `static/index.html` once it is tested.

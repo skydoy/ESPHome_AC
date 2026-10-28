@@ -1,6 +1,6 @@
 # Brand package: Hisense AC over the RS-485 "XM" bus (F4 F5 ... F4 FB frames, 9600 8N1).
 # Adapter: RS-485 transceiver (M5Stack Hat RS485), see brands/hisense/hardware.md.
-# The hisense_ac component lives in this repository (components/hisense_ac, MIT).
+# The hisense_ac component lives in this repository (components/hisense_ac, PolyForm-Noncommercial-1.0.0).
 #
 # Needs from the board package: substitutions ac_tx_pin / ac_rx_pin.
 # Needs from core/diagnostics.yaml: time id "ha_time" (daily energy).

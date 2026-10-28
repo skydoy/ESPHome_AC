@@ -1,6 +1,6 @@
 // ESPHome climate component for Hisense (and OEM) split air conditioners that use an
 // AEH-W4x Wi-Fi module on the indoor unit's RS-485 "XM" bus (F4 F5 protocol).
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #pragma once
 
 #include "esphome/core/component.h"

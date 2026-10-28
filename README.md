@@ -3,10 +3,12 @@
 [![Build](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml)
 [![Validate](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/skydoy/ESPHome_AC?sort=semver)](https://github.com/skydoy/ESPHome_AC/releases/latest)
-[![License: MIT](https://img.shields.io/github/license/skydoy/ESPHome_AC)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 
 Replace your **Hisense** AC's Wi-Fi module (AEH-W4x / **AEH-W41H1**) with an **M5StickC Plus2 +
 RS485 Hat** and control it locally from Home Assistant. No cloud, no app.
+
+Free for personal and non-commercial use. Forks welcome. Commercial use is not permitted.
 
 **[Installer](https://skydoy.github.io/ESPHome_AC/)** · [Wiring](docs/wiring.md) ·
 [Configuration](docs/configuration.md) · [Protocol](brands/hisense/protocol.md) ·
@@ -55,7 +57,7 @@ Only Hisense is supported today. Other brands (Mitsubishi, Daikin, Midea, …) w
 with real hardware; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
-Original MIT implementation; no code copied. Protocol knowledge from
+Original implementation; no code copied. Protocol knowledge from
 [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1),
 [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome),
 [Druidblack/AC-Hisense](https://github.com/Druidblack/AC-Hisense),
@@ -66,5 +68,6 @@ Original MIT implementation; no code copied. Protocol knowledge from
 [artshevchenko/AC-Hi](https://github.com/artshevchenko/AC-Hi).
 
 ## License
-[MIT](LICENSE). Use at your own risk: the indoor unit has mains voltage inside. Hisense is a
+[PolyForm Noncommercial 1.0.0](LICENSE): free for personal and non-commercial use, forks
+welcome, commercial use not permitted. Use at your own risk: the indoor unit has mains voltage inside. Hisense is a
 trademark of its owner; this project is not affiliated with it.

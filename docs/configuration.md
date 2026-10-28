@@ -95,7 +95,7 @@ the installer page and `firmware/manifest.json` to GitHub Pages (Settings → Pa
 - Opening the unit may void its warranty. You are responsible for your installation.
 
 ## Credits and provenance
-The component is an original implementation (MIT). No source code was copied from the projects
+The component is an original implementation (PolyForm Noncommercial 1.0.0, see [LICENSE](../LICENSE)). No source code was copied from the projects
 below; they were used as documentation of the protocol and of real-world behaviour:
 
 - [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1) (MIT): W41H1 link

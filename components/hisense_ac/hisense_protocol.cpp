@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Implementation of the platform independent protocol helpers. See hisense_protocol.h.
 #include "hisense_protocol.h"
 

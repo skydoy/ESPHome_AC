@@ -4,7 +4,7 @@
 // This file is platform independent (no ESPHome includes) so it can be unit tested on a
 // host compiler. See brands/hisense/protocol.md for the byte map and the sources of every fact.
 //
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #pragma once
 
 #include <cstddef>
