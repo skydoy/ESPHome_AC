@@ -13,7 +13,25 @@ sensor:
     update_interval: 60s
     entity_category: diagnostic
 
+# Reset reason ("power-on event", "brownout", ...). The status screen flags brownouts, which
+# usually mean the 5 V supply from the AC port is too weak or badly connected.
+debug:
+  update_interval: never
+
 text_sensor:
+  - platform: debug
+    reset_reason:
+      id: reset_reason
+      name: "Reset Reason"
+      entity_category: diagnostic
+      on_value:
+        - if:
+            condition:
+              lambda: return x.find("brownout") != std::string::npos;
+            then:
+              - logger.log:
+                  level: WARN
+                  format: "Brownout reset: the 5 V supply dipped. Check the X/GND wires (5 V or 12 V input, see docs/wiring.md)."
   - platform: version
     name: "ESPHome Version"
     hide_timestamp: true

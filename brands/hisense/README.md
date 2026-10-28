@@ -9,7 +9,7 @@ AEH-W4x Wi-Fi module talk the "XM" protocol (`F4 F5 … F4 FB` frames) over **RS
 | Package | [`hisense-ac.yaml`](hisense-ac.yaml) |
 | Component | [`components/hisense_ac`](../../components/hisense_ac) (MIT) |
 | Adapter | RS-485 transceiver, e.g. M5Stack Hat RS485 on an M5StickC Plus2 |
-| Wiring | [hardware.md](hardware.md) |
+| Wiring | [docs/wiring.md](../../docs/wiring.md), [hardware.md](hardware.md) |
 | Protocol | [protocol.md](protocol.md) |
 | Device config | [`devices/hisense-m5stickc-plus2.yaml`](../../devices/hisense-m5stickc-plus2.yaml) |
 
@@ -28,4 +28,4 @@ connector (+5 V, A, B, GND) and protocol.
 - The module is rated 5 V / 450 mA; the M5StickC Plus2 + RS485 Hat stays well within that.
 
 ## Generic ids provided (used by `core/screen/*`)
-`ac_climate`, `ac_link`, `ac_link_status`, `ac_fault`, `ac_outdoor_temperature`.
+`ac_climate`, `ac_link`, `ac_link_status`, `ac_fault`, `ac_fault_codes`, `ac_outdoor_temperature`.

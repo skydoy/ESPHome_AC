@@ -82,7 +82,7 @@ Current is estimated as `P / (V * 0.95)`.
 
 ## Not on the bus
 - **iFeel** (room temperature measured at the remote) is only sent over infrared
-  (Kelon 168-bit IR protocol). It is not implemented; see README "Ideas".
+  (Kelon 168-bit IR protocol). It is not implemented.
 
 ## Sources
 - AndrewDemsDS/hisense-w41h1 (MIT): W41H1 link bring-up, frame templates, 160-byte status map,

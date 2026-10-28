@@ -11,6 +11,9 @@
     label { display: block; padding: .2rem 0; }
     label.disabled { color: #888; }
     .soon { font-size: .85em; background: #eee; border-radius: .25rem; padding: 0 .35rem; margin-left: .35rem; }
+    .help img { width: 100%; height: auto; border: 1px solid #ddd; border-radius: .5rem; }
+    .help table { border-collapse: collapse; margin: .5rem 0; }
+    .help td, .help th { border: 1px solid #ccc; padding: .2rem .5rem; text-align: left; }
     .warn { background: #fff4e5; border-left: 4px solid #f0a020; padding: .5rem .75rem; }
   </style>
 </head>
@@ -33,7 +36,7 @@
     </fieldset>
   </form>
   <p>Have one of the "coming soon" units and want to help test? See
-     <a href="https://github.com/skydoy/ESPHome_HisenceAC/blob/main/adapters/README.md">adapters</a>.</p>
+     <a href="https://github.com/skydoy/ESPHome_AC/blob/main/adapters/README.md">adapters</a>.</p>
 
   <h2>2. Install</h2>
   <ol>
@@ -46,11 +49,31 @@
   <p>No USB? The device also opens a <code>Hisense-AC Setup</code> hotspot with a captive portal
      and supports Improv over Bluetooth.</p>
 
+  <section class="help" id="wiring">
+    <h2>3. Wire it to the AC</h2>
+    <p>Switch the AC off at the breaker. Measure the plug's <b>X</b> wire to <b>GND</b> with a
+       multimeter, then follow the matching panel.</p>
+    <a href="wiring.svg"><img src="wiring.svg" alt="Wiring diagram for the 5 V and 12 V cases"></a>
+    <table>
+      <tr><th>AC plug</th><th>X = 5 V</th><th>X = 12 V</th></tr>
+      <tr><td>A (+)</td><td colspan="2">Hat terminal 2</td></tr>
+      <tr><td>B (−)</td><td colspan="2">Hat terminal 1</td></tr>
+      <tr><td>GND</td><td colspan="2">Hat terminal 4</td></tr>
+      <tr><td>X</td><td>Stick 5V header pin (terminal 3 empty)</td><td>Hat terminal 3 (12V)</td></tr>
+    </table>
+    <p><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up
+       from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</p>
+    <h2>4. Add to Home Assistant</h2>
+    <p>Once it is on Wi-Fi, Home Assistant finds it: <b>Settings → Devices &amp; services →
+       ESPHome → Configure</b>. Updates install from the <b>Firmware Update</b> entity.
+       Full guide: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>.</p>
+  </section>
+
   <p class="warn"><b>Safety:</b> the indoor unit has mains voltage inside. Switch the AC off at
      the breaker before opening it, and measure the module port with a multimeter before
      connecting anything.</p>
   <p>Wiring, caveats and credits:
-     <a href="https://github.com/skydoy/ESPHome_HisenceAC">github.com/skydoy/ESPHome_HisenceAC</a>.</p>
+     <a href="https://github.com/skydoy/ESPHome_AC">github.com/skydoy/ESPHome_AC</a>.</p>
 
   <script>
     const button = document.getElementById("install");

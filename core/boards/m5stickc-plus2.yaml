@@ -40,13 +40,13 @@ light:
     internal: true
 
 binary_sensor:
-  # Button A (front, "M5") wakes the status screen; see core/screen/m5stickc-plus2.yaml.
+  # Buttons A (front, "M5") and B (side) only wake the status screen; they never control the
+  # AC. See core/screen/m5stickc-plus2.yaml.
   - platform: gpio
     id: button_a
     pin: { number: GPIO37, inverted: true }
     name: "Button A"
     entity_category: diagnostic
-  # Button B (side) is free for your own automations.
   - platform: gpio
     id: button_b
     pin: { number: GPIO39, inverted: true }
@@ -66,5 +66,6 @@ sensor:
 # Notes:
 # - Do not enable the built-in microphone (SPM1423 uses G0 as its clock) or I2S on G0/G26:
 #   those pins belong to the hat.
-# - G19 drives the red LED and the IR transmitter. It is intentionally unused for now
-#   (idea: send iFeel room temperature or IR commands; see README "Ideas").
+# - G19 drives the red LED and the IR transmitter. It is intentionally unused.
+# - G0 is a boot strapping pin. If the Stick does not boot when powered from the AC, add a
+#   10k pull-up from G0 to 3.3V (see docs/wiring.md).

@@ -21,8 +21,9 @@ static/index.html         ESP Web Tools installer page
    connector and labels.
 2. Add `brands/<brand>/<brand>-ac.yaml`. It must:
    - use the board's `ac_tx_pin` / `ac_rx_pin` substitutions for its UART;
-   - provide the generic ids `ac_climate`, `ac_link`, `ac_link_status`, `ac_fault` and
-     `ac_outdoor_temperature` (template entities are fine) so the core screen works;
+   - provide the generic ids `ac_climate`, `ac_link`, `ac_link_status`, `ac_fault`,
+     `ac_fault_codes` and `ac_outdoor_temperature` (template entities are fine) so the core
+     screen works;
    - prefer an existing upstream ESPHome component referenced by URL. Do not copy code from
      projects without a licence, and keep licences compatible (this repo is MIT; GPL code
      cannot be added to it).
@@ -39,5 +40,5 @@ static/index.html         ESP Web Tools installer page
   and that the AC's own remote still works.
 
 ## Safety
-Read the [safety section](README.md#safety) before opening any AC. Never connect an ESP32
+Read the [safety notes](docs/wiring.md) before opening any AC. Never connect an ESP32
 directly to an AC port: always use the adapter for that bus, and measure voltages first.

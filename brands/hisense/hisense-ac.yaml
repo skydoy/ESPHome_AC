@@ -5,11 +5,11 @@
 # Needs from the board package: substitutions ac_tx_pin / ac_rx_pin.
 # Needs from core/diagnostics.yaml: time id "ha_time" (daily energy).
 # Provides the generic ids used by core/screen/*: ac_climate, ac_link, ac_link_status,
-# ac_fault, ac_outdoor_temperature.
+# ac_fault, ac_fault_codes, ac_outdoor_temperature.
 substitutions:
   # Where ESPHome fetches the component from. The release workflow switches this to the
   # local "../components" folder so every release is built from its own tagged source.
-  hisense_component_source: github://skydoy/ESPHome_HisenceAC@main
+  hisense_component_source: github://skydoy/ESPHome_AC@main
 
 external_components:
   - source: ${hisense_component_source}
@@ -64,6 +64,7 @@ climate:
       id: ac_fault
     fault_codes:
       name: "AC Fault Codes"
+      id: ac_fault_codes
     link_status:
       name: "AC Link Status"
       id: ac_link_status

@@ -1,26 +1,26 @@
 # Device: Hisense AC (RS-485 F4F5 bus) on an M5StickC Plus2 + M5Stack RS485 Hat.
 #
 # Factory configuration: built by GitHub Actions on every v* tag and published to the
-# ESP Web Tools installer at https://skydoy.github.io/ESPHome_HisenceAC/
+# ESP Web Tools installer at https://skydoy.github.io/ESPHome_AC/
 #
 # A device config only composes packages:  core (brand agnostic) + board + brand.
 substitutions:
   name: hisense-ac
   friendly_name: Hisense AC
-  project_version: "0.1.0"
-  update_manifest_url: https://skydoy.github.io/ESPHome_HisenceAC/firmware/manifest.json
+  project_version: "0.2.0"
+  update_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/manifest.json
 
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
   name_add_mac_suffix: true
   project:
-    name: skydoy.hisense-ac
+    name: skydoy.esphome-ac
     version: ${project_version}
 
 # Lets the ESPHome Dashboard / Home Assistant "adopt" a device flashed from the web installer.
 dashboard_import:
-  package_import_url: github://skydoy/ESPHome_HisenceAC/devices/hisense-m5stickc-plus2.yaml@main
+  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@main
   import_full_config: false
 
 packages:

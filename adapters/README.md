@@ -21,4 +21,4 @@ no code from them is included in this repository.
 
 Voltage levels, pin orders and baud rates above are summaries from the linked projects; always
 confirm them on your own unit with a multimeter before connecting anything. See the safety notes
-in the main [README](../README.md#safety).
+in [docs/wiring.md](../docs/wiring.md) and [docs/configuration.md](../docs/configuration.md#safety).

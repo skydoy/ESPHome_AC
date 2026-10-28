@@ -36,7 +36,7 @@ jobs:
       - name: Assemble Pages site
         run: |
           mkdir -p "site/$SITE_DIR"
-          cp static/index.html site/
+          cp static/* site/
           cp -r "${{ steps.esphome.outputs.name }}"/* "site/$SITE_DIR/"
           ls -R site
       - uses: actions/upload-pages-artifact@v3

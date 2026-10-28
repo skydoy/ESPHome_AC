@@ -1,18 +1,32 @@
-# Status screen for the built-in 1.14" ST7789V LCD (135x240) of the M5StickC Plus2.
+# Status screen for the built-in 1.14" ST7789V LCD (240x135 landscape) of the M5StickC Plus2.
+#
+#   +--------------------------------------+
+#   | Hisense AC                  (o) OK   |   link: OK / Handshake / Searching / No link
+#   |                              SET     |
+#   |  23°                         22°     |   big room temperature, target temperature
+#   |                              COOL    |   mode
+#   | Out 14°            192.168.1.40      |   hint line: fault code, setup or wiring hints
+#   +--------------------------------------+
+#
 # Brand agnostic: it only reads these generic ids, which every brand package must provide
 # (a template entity is fine if a brand has no such value):
 #
 #   ac_climate             climate        the AC
 #   ac_link                binary_sensor  ON when the AC answers on its bus
-#   ac_link_status         text_sensor    short link state text ("Connected", "Searching", ...)
+#   ac_link_status         text_sensor    short link state text ("Connected", "Handshake", ...)
 #   ac_fault               binary_sensor  ON when the AC reports a fault
+#   ac_fault_codes         text_sensor    fault description ("OK" when none)
 #   ac_outdoor_temperature sensor         outdoor temperature in °C (NaN when unknown)
 #
-# The backlight switches off 30 s after boot or after the last press of button A, so the
-# device can be left behind the AC panel and forgotten. While Wi-Fi or the AC link is down
-# the screen stays on so problems are visible during installation.
+# Uses "reset_reason" from core/diagnostics.yaml to flag brownouts (weak 5 V supply).
+#
+# The backlight turns off ${screen_timeout_ms} ms after the last wake-up. It wakes on a press of
+# button A or B, or when something changes (mode, set point, link state, fault). The buttons
+# only wake the screen; they never control the AC. During the first 5 minutes after boot the
+# screen stays on while Wi-Fi or the AC link is down, so problems are visible while installing.
 substitutions:
   screen_timeout_ms: "30000"
+  screen_brightness: 60%
 
 spi:
   id: lcd_spi
@@ -23,14 +37,27 @@ globals:
   - id: screen_awake_until
     type: uint32_t
     initial_value: "0"
+  - id: screen_signature
+    type: uint32_t
+    initial_value: "0"
+  - id: link_down_since
+    type: uint32_t
+    initial_value: "0"
+  - id: link_hint_logged
+    type: bool
+    initial_value: "false"
 
 font:
   - file: "gfonts://Roboto@500"
-    id: font_title
-    size: 18
+    id: font_big
+    size: 64
+    glyphs: "0123456789-°"
+  - file: "gfonts://Roboto@500"
+    id: font_mid
+    size: 24
   - file: "gfonts://Roboto"
-    id: font_body
-    size: 15
+    id: font_small
+    size: 14
 
 text_sensor:
   - platform: wifi_info
@@ -45,7 +72,7 @@ script:
       - lambda: id(screen_awake_until) = millis() + ${screen_timeout_ms};
       - light.turn_on:
           id: lcd_backlight
-          brightness: 60%
+          brightness: ${screen_brightness}
       - component.update: lcd
 
 esphome:
@@ -58,19 +85,54 @@ binary_sensor:
   - id: !extend button_a
     on_press:
       - script.execute: wake_screen
+  - id: !extend button_b
+    on_press:
+      - script.execute: wake_screen
 
 interval:
-  - interval: 2s
+  - interval: 1s
     then:
-      - if:
-          condition:
-            lambda: |-
-              // Keep the screen on while something needs attention.
-              bool healthy = wifi::global_wifi_component->is_connected() && id(ac_link).state;
-              return healthy && (int32_t) (millis() - id(screen_awake_until)) > 0 &&
-                     id(lcd_backlight).current_values.is_on();
-          then:
-            - light.turn_off: lcd_backlight
+      - lambda: |-
+          const uint32_t now = millis();
+          auto *ac = id(ac_climate);
+          const bool link = id(ac_link).state;
+
+          // Remember when the link went down, and log a wiring hint once after 60 s.
+          if (link) {
+            id(link_down_since) = 0;
+            id(link_hint_logged) = false;
+          } else if (id(link_down_since) == 0) {
+            id(link_down_since) = now == 0 ? 1 : now;
+          } else if (!id(link_hint_logged) && now - id(link_down_since) > 60000) {
+            id(link_hint_logged) = true;
+            ESP_LOGW("screen", "No answer from the AC for 60 s. Check: X/GND power, A and B "
+                               "not swapped (try swapping them), AC switched on at the breaker. "
+                               "If the Stick only boots from USB and not from the AC, add a 10k "
+                               "pull-up from G0 to 3.3V (see docs/wiring.md).");
+          }
+
+          // Wake the screen when anything shown on it changes.
+          uint32_t sig = (uint32_t) ac->mode;
+          sig = sig * 31 + (uint32_t) lroundf(std::isnan(ac->target_temperature) ? 0 : ac->target_temperature);
+          sig = sig * 31 + (link ? 1 : 0);
+          sig = sig * 31 + (id(ac_fault).state ? 1 : 0);
+          sig = sig * 31 + (uint32_t) id(ac_link_status).state.size();
+          if (sig != id(screen_signature)) {
+            const bool first = id(screen_signature) == 0;
+            id(screen_signature) = sig;
+            if (!first)
+              id(wake_screen).execute();
+          }
+
+          // Install window: keep the screen on while something needs attention.
+          const bool healthy = wifi::global_wifi_component->is_connected() && link;
+          if (!healthy && now < 5 * 60 * 1000)
+            id(screen_awake_until) = now + ${screen_timeout_ms};
+
+          if ((int32_t) (now - id(screen_awake_until)) > 0 && id(lcd_backlight).current_values.is_on()) {
+            auto call = id(lcd_backlight).turn_off();
+            call.perform();
+          }
 
 display:
   - platform: mipi_spi
@@ -90,67 +152,84 @@ display:
     buffer_size: 25%
     update_interval: 2s
     lambda: |-
-      const Color grey(140, 140, 140);
+      const Color grey(150, 150, 150);
       const Color green(60, 200, 90);
       const Color amber(255, 170, 0);
-      const Color red(230, 60, 60);
+      const Color red(235, 60, 60);
+      const Color blue(70, 160, 255);
+      const Color orange(255, 120, 40);
       it.fill(Color::BLACK);
       if (!id(lcd_backlight).current_values.is_on())
-        return;  // Nothing to see; skip the drawing work.
+        return;  // Screen is off; skip the drawing work.
 
-      it.print(4, 2, id(font_title), Color::WHITE, "${friendly_name}");
-
-      // Line 1: Wi-Fi
-      int y = 28;
-      it.print(4, y, id(font_body), grey, "Wi-Fi");
-      if (wifi::global_wifi_component->is_connected()) {
-        it.print(60, y, id(font_body), green, id(wifi_ip).state.c_str());
-      } else {
-        it.print(60, y, id(font_body), amber, "Setup hotspot");
-      }
-
-      // Line 2: link to the AC
-      y += 20;
-      bool link = id(ac_link).state;
-      it.print(4, y, id(font_body), grey, "AC link");
-      it.print(60, y, id(font_body), link ? green : red,
-               id(ac_link_status).has_state() ? id(ac_link_status).state.c_str() : "-");
-
-      // Line 3: mode and set point
-      y += 20;
+      const int W = it.get_width();   // 240
+      const int H = it.get_height();  // 135
       auto *ac = id(ac_climate);
-      it.print(4, y, id(font_body), grey, "Mode");
-      if (!link) {
-        it.print(60, y, id(font_body), grey, "-");
-      } else {
-        const char *mode = "Off";
-        switch (ac->mode) {
-          case climate::CLIMATE_MODE_COOL: mode = "Cool"; break;
-          case climate::CLIMATE_MODE_HEAT: mode = "Heat"; break;
-          case climate::CLIMATE_MODE_DRY: mode = "Dry"; break;
-          case climate::CLIMATE_MODE_FAN_ONLY: mode = "Fan"; break;
-          case climate::CLIMATE_MODE_HEAT_COOL:
-          case climate::CLIMATE_MODE_AUTO: mode = "Auto"; break;
-          default: break;
-        }
-        it.printf(60, y, id(font_body), Color::WHITE, "%s  set %.0f C", mode, ac->target_temperature);
+      const bool link = id(ac_link).state;
+      const bool wifi_ok = wifi::global_wifi_component->is_connected();
+      const std::string &ls = id(ac_link_status).state;
+
+      // Top bar: name and link indicator.
+      it.print(4, 4, id(font_small), grey, "${friendly_name}");
+      const char *link_txt = "No link";
+      Color link_col = red;
+      if (link) {
+        link_txt = "OK";
+        link_col = green;
+      } else if (ls == "Handshake" || ls == "Searching") {
+        link_txt = ls.c_str();
+        link_col = amber;
       }
+      int bx, by, bw, bh;
+      it.get_text_bounds(W - 4, 4, link_txt, id(font_small), TextAlign::TOP_RIGHT, &bx, &by, &bw, &bh);
+      it.print(W - 4, 4, id(font_small), link_col, TextAlign::TOP_RIGHT, link_txt);
+      it.filled_circle(bx - 9, 4 + bh / 2, 5, link_col);
 
-      // Line 4: temperatures
-      y += 20;
-      it.print(4, y, id(font_body), grey, "Temp");
-      float room = ac->current_temperature;
-      float out = id(ac_outdoor_temperature).state;
-      char buf[40];
-      snprintf(buf, sizeof(buf), "in %s  out %s",
-               std::isnan(room) ? "--" : str_sprintf("%.0f C", room).c_str(),
-               std::isnan(out) ? "--" : str_sprintf("%.0f C", out).c_str());
-      it.print(60, y, id(font_body), Color::WHITE, buf);
+      // Big room temperature.
+      const float room = ac->current_temperature;
+      if (std::isnan(room))
+        it.print(4, 22, id(font_big), Color::WHITE, "--°");
+      else
+        it.printf(4, 22, id(font_big), Color::WHITE, "%.0f°", room);
 
-      // Line 5: faults
-      y += 20;
+      // Right column: target temperature and mode.
+      const char *mode = "OFF";
+      Color mode_col = grey;
+      switch (ac->mode) {
+        case climate::CLIMATE_MODE_COOL: mode = "COOL"; mode_col = blue; break;
+        case climate::CLIMATE_MODE_HEAT: mode = "HEAT"; mode_col = orange; break;
+        case climate::CLIMATE_MODE_DRY: mode = "DRY"; mode_col = Color(80, 220, 220); break;
+        case climate::CLIMATE_MODE_FAN_ONLY: mode = "FAN"; mode_col = Color::WHITE; break;
+        case climate::CLIMATE_MODE_HEAT_COOL:
+        case climate::CLIMATE_MODE_AUTO: mode = "AUTO"; mode_col = green; break;
+        default: break;
+      }
+      it.print(W - 4, 28, id(font_small), grey, TextAlign::TOP_RIGHT, "SET");
+      if (!link || std::isnan(ac->target_temperature))
+        it.print(W - 4, 44, id(font_mid), Color::WHITE, TextAlign::TOP_RIGHT, "--");
+      else
+        it.printf(W - 4, 44, id(font_mid), Color::WHITE, TextAlign::TOP_RIGHT, "%.0f°", ac->target_temperature);
+      it.print(W - 4, 76, id(font_mid), link ? mode_col : grey, TextAlign::TOP_RIGHT, link ? mode : "-");
+
+      // Hint line, most important first.
+      const int y = H - 20;
+      const uint32_t now = millis();
+      const bool link_lost_long = !link && id(link_down_since) != 0 && now - id(link_down_since) > 60000;
+      const std::string &boot = id(reset_reason).state;
       if (id(ac_fault).state) {
-        it.print(4, y, id(font_body), red, "Fault - see Home Assistant");
+        std::string f = id(ac_fault_codes).has_state() ? id(ac_fault_codes).state : std::string("see Home Assistant");
+        if (f.size() > 26)
+          f = f.substr(0, 25) + "~";
+        it.printf(4, y, id(font_small), red, "Fault: %s", f.c_str());
+      } else if (!wifi_ok) {
+        it.print(4, y, id(font_small), amber, "Wi-Fi: join \"Hisense-AC Setup\"");
+      } else if (now < 5 * 60 * 1000 && boot.find("brownout") != std::string::npos) {
+        it.print(4, y, id(font_small), amber, "Brownout reset: check 5V supply");
+      } else if (link_lost_long) {
+        it.print(4, y, id(font_small), red, "No AC: swap A/B? G0 10k pull-up?");
       } else {
-        it.print(4, y, id(font_body), grey, "Button A: wake screen");
+        const float out = id(ac_outdoor_temperature).state;
+        if (!std::isnan(out))
+          it.printf(4, y, id(font_small), grey, "Out %.0f°", out);
+        it.print(W - 4, y, id(font_small), grey, TextAlign::TOP_RIGHT, id(wifi_ip).state.c_str());
       }

@@ -19,13 +19,15 @@ the same F4 F5 RS-485 protocol. Typical pin order on the module (check it!):
 | 4 | GND |
 
 ## Wiring
+See **[docs/wiring.md](../../docs/wiring.md)** for the diagram and the 5 V / 12 V cases.
+
 | AC Wi-Fi module port (MEASURE FIRST!) | Goes to |
 |---|---|
-| +5 V | M5StickC Plus2 **USB-C VBUS** (recommended) or header pin 8 "5VIN" |
+| X = +5 V | M5StickC Plus2 **5V header pin** (hat terminal 3 stays empty) |
+| X = +12 V | Hat RS485 terminal pin 3 (12V, AOZ1282 buck to 5 V) |
 | A (+) | Hat RS485 terminal pin 2 (A) |
 | B (−) | Hat RS485 terminal pin 1 (B) |
 | GND | Hat RS485 terminal pin 4 (GND) |
-| — | Hat terminal pin 3 (+12 V): **leave unconnected** |
 
 Hat -> Stick header: TX = G0, RX = G26, 5VOUT powers the SP485EEN, 5VIN = buck output.
 
@@ -42,5 +44,5 @@ If A and B are swapped nothing is damaged, the link just stays in "Searching": s
   when powered from the AC, power it once from USB, or add a 10 kΩ pull-up from G0 to 3.3 V.
   Test this before closing the AC panel.
 - Do not enable the microphone (G0 is its clock) or anything else on G0/G26.
-- G19 is the red LED and the IR transmitter; it is unused (see README "Ideas").
+- G19 is the red LED and the IR transmitter; it is unused.
 - Always switch the AC off at the breaker before opening the indoor unit.

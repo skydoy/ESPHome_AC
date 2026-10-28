@@ -10,7 +10,7 @@ esphome:
 
 packages:
   hisense_m5:
-    url: https://github.com/skydoy/ESPHome_HisenceAC
+    url: https://github.com/skydoy/ESPHome_AC
     ref: main
     refresh: 1d
     files:
