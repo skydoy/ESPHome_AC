@@ -20,7 +20,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build the components from this checkout (not from @main)
         run: sed -i 's|^\(\s*hisense_component_source:\).*|\1 ../components|' brands/hisense/hisense-ac.yaml
       - name: Use the tag as firmware version
@@ -39,12 +39,12 @@ jobs:
           cp static/* site/
           cp -r "${{ steps.esphome.outputs.name }}"/* "site/$SITE_DIR/"
           ls -R site
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - name: Keep the firmware images for the release job
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: firmware
           path: ${{ steps.esphome.outputs.name }}
@@ -62,7 +62,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
   release:
     # Create (or update) the GitHub Release for a v* tag: notes from CHANGELOG.md, images attached.
     if: startsWith(github.ref, 'refs/tags/v')
@@ -74,8 +74,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: firmware
           path: fw
