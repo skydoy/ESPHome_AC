@@ -1,0 +1,92 @@
+name: Bug report
+description: Something does not work as documented.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Please check the
+        [wiring guide](https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md) and the
+        [existing issues](https://github.com/skydoy/ESPHome_AC/issues?q=is%3Aissue) first.
+        **Never post Wi-Fi passwords, API keys or OTA passwords.**
+  - type: input
+    id: ac_model
+    attributes:
+      label: AC brand and model
+      description: From the label on the indoor unit.
+      placeholder: Hisense AS-12UW4RVETG00A
+    validations:
+      required: true
+  - type: input
+    id: wifi_module
+    attributes:
+      label: Original Wi-Fi module
+      description: Printed on the module you replaced.
+      placeholder: AEH-W41H1
+    validations:
+      required: true
+  - type: dropdown
+    id: board
+    attributes:
+      label: Board
+      options:
+        - M5StickC Plus2 + RS485 Hat
+        - Other (describe below)
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      description: The "Firmware Version" entity in Home Assistant, or the boot splash.
+      placeholder: 0.2.4
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How was it installed?
+      options:
+        - Web installer (prebuilt firmware)
+        - Own build (dashboard import / package)
+    validations:
+      required: true
+  - type: dropdown
+    id: power
+    attributes:
+      label: Supply voltage on the AC connector
+      options:
+        - 5 V
+        - 12 V
+        - Not measured
+    validations:
+      required: true
+  - type: textarea
+    id: wiring
+    attributes:
+      label: Wiring
+      description: Which AC pin goes to which Hat terminal, and whether the G0 pull-up is fitted.
+      placeholder: |
+        5V -> Hat 5V, GND -> GND, A -> A, B -> B. G0 pull-up: no.
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        ESPHome logs from boot, ideally with `logger: level: DEBUG`. Include the
+        "AC Link Status" and "Reset Reason" values if you can.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed passwords and keys from everything above.
+          required: true

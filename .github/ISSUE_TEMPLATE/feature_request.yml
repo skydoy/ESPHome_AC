@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement or a new brand, board or entity.
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware involved
+      description: AC model, Wi-Fi module and board, if relevant. New brands need someone with the hardware to test.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else

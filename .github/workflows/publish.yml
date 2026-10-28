@@ -42,6 +42,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+      - name: Keep the firmware images for the release job
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: ${{ steps.esphome.outputs.name }}
+          if-no-files-found: error
   deploy:
     # Publish the installer and the OTA manifest only for release tags (or a manual run).
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
@@ -56,3 +63,53 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  release:
+    # Create (or update) the GitHub Release for a v* tag: notes from CHANGELOG.md, images attached.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware
+          path: fw
+      - name: Release notes from CHANGELOG.md
+        run: |
+          v="${TAG#v}"
+          awk -v h="## [$v]" 'index($0,h)==1{f=1;next} f&&/^## /{exit} f&&/^\[[^]]+\]: /{exit} f{print}' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::warning::No '## [$v]' section in CHANGELOG.md"
+            echo "See [CHANGELOG.md](CHANGELOG.md)." > notes.md
+          fi
+          # Relative links in the changelog point into the repository at this tag.
+          sed -i -E "s#\]\(([^):#][^):]*)\)#](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${TAG}/\1)#g" notes.md
+          {
+            echo
+            echo "---"
+            echo "**Install or update:** flash from the [web installer](https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/) (Chrome or Edge)."
+            echo "Devices already running this firmware update over the air through the **Firmware Update** entity."
+            echo "\`*.factory.bin\` is the full image for a first USB flash at offset 0x0; \`*.ota.bin\` is for manual OTA uploads."
+          } >> notes.md
+          cat notes.md
+      - name: Prepare assets
+        run: |
+          mkdir assets
+          for f in fw/*.factory.bin fw/*.ota.bin; do
+            b=$(basename "$f"); cp "$f" "assets/${b%%.*}-${TAG}.${b#*.}"
+          done
+          (cd assets && sha256sum * > SHA256SUMS.txt)
+          ls -l assets && cat assets/SHA256SUMS.txt
+      - name: Create or update the release
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file notes.md
+            gh release upload "$TAG" assets/* --clobber
+          else
+            gh release create "$TAG" assets/* --title "$TAG" --notes-file notes.md --verify-tag
+          fi

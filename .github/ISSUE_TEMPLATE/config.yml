@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas (Discussions)
+    url: https://github.com/skydoy/ESPHome_AC/discussions
+    about: Ask a question or share your setup.
+  - name: Documentation
+    url: https://github.com/skydoy/ESPHome_AC#readme
+    about: Install, wiring, configuration and compatibility.
+  - name: Web installer
+    url: https://skydoy.github.io/ESPHome_AC/
+    about: Flash the firmware from Chrome or Edge.
+  - name: Security issue
+    url: https://github.com/skydoy/ESPHome_AC/security/advisories/new
+    about: Report security problems privately, not in a public issue.

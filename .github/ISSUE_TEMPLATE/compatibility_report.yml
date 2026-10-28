@@ -1,0 +1,73 @@
+name: Compatibility report
+description: Tell us whether this firmware works (or not) with your AC.
+title: "[Compatibility] <brand> <model> with <module>"
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports like this one fill the
+        [compatibility table](https://github.com/skydoy/ESPHome_AC/blob/main/docs/compatibility.md).
+        "It does not work" reports are just as useful.
+  - type: input
+    id: ac_model
+    attributes:
+      label: AC brand and indoor unit model
+      placeholder: Hisense AS-13UW4RYRCM04G
+    validations:
+      required: true
+  - type: input
+    id: wifi_module
+    attributes:
+      label: Original Wi-Fi module
+      placeholder: AEH-W4G2
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: Country / year of purchase (optional)
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      placeholder: 0.2.4
+    validations:
+      required: true
+  - type: dropdown
+    id: power
+    attributes:
+      label: Supply voltage on the AC connector
+      options:
+        - 5 V
+        - 12 V
+        - Not measured
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works fully
+        - Works partly (describe below)
+        - Does not work
+    validations:
+      required: true
+  - type: checkboxes
+    id: features
+    attributes:
+      label: What did you test?
+      options:
+        - label: Power on / off
+        - label: Modes (cool, heat, dry, fan, auto)
+        - label: Target temperature
+        - label: Fan speeds
+        - label: Swing
+        - label: Presets (eco, boost, sleep, 8 °C)
+        - label: Sensors (outdoor temperature, compressor, power…)
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes, photos and logs
+      description: Photos of the module label and connector help a lot. Attach logs if something failed.
