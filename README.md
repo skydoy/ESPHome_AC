@@ -1,13 +1,17 @@
 <p align="center">
-  <img src="docs/logo.png" alt="ESPHome AC logo" width="200">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.png">
+    <img src="docs/logo-light.png" alt="ESPHome AC" width="256">
+  </picture>
 </p>
 
-<h1 align="center">ESPHome AC</h1>
-
-[![Build](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml)
-[![Validate](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/skydoy/ESPHome_AC?sort=semver)](https://github.com/skydoy/ESPHome_AC/releases/latest)
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
+<p align="center">
+  <a href="https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml"><img src="https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml"><img src="https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="https://github.com/skydoy/ESPHome_AC/releases/latest"><img src="https://img.shields.io/github/v/release/skydoy/ESPHome_AC?sort=semver" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue" alt="License: PolyForm Noncommercial"></a>
+</p>
 
 Replace your **Hisense** AC's Wi-Fi module (AEH-W4x / **AEH-W41H1**) with an **M5StickC Plus2 +
 RS485 Hat** and control it locally from Home Assistant. No cloud, no app.
