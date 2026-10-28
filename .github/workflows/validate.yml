@@ -6,7 +6,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Protocol unit tests (host C++)
         run: make -C tests
   config:
@@ -17,8 +17,8 @@ jobs:
         device:
           - devices/hisense-m5stickc-plus2.yaml
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with: { python-version: "3.13" }
       - run: pip install esphome==2026.10.1
       - name: Validate the device config against the local components
