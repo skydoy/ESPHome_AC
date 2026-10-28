@@ -10,28 +10,34 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  # Device config to build and the folder it is published to on GitHub Pages.
+  # The Hisense device keeps "firmware/" so the existing OTA manifest URL keeps working.
+  # When more brands are supported, add their device configs here (e.g. as a matrix).
+  DEVICE_YAML: devices/hisense-m5stickc-plus2.yaml
+  SITE_DIR: firmware
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build the component from this checkout (not from @main)
-        run: sed -i 's|^\(\s*hisense_component_source:\).*|\1 components|' packages/hisense-ac.yaml
+      - name: Build the components from this checkout (not from @main)
+        run: sed -i 's|^\(\s*hisense_component_source:\).*|\1 ../components|' brands/hisense/hisense-ac.yaml
       - name: Use the tag as firmware version
         if: startsWith(github.ref, 'refs/tags/v')
-        run: sed -i "s|^\(\s*project_version:\).*|\1 \"${GITHUB_REF_NAME#v}\"|" hisense-ac-m5stickc-plus2.yaml
+        run: sed -i "s|^\(\s*project_version:\).*|\1 \"${GITHUB_REF_NAME#v}\"|" "$DEVICE_YAML"
       - id: esphome
         uses: esphome/build-action@v8.1.0   # consider pinning to the release commit SHA
         with:
-          yaml-file: hisense-ac-m5stickc-plus2.yaml
+          yaml-file: ${{ env.DEVICE_YAML }}
           version: "2026.10.1"
           complete-manifest: true
           release-url: ${{ github.server_url }}/${{ github.repository }}/releases
       - name: Assemble Pages site
         run: |
-          mkdir -p site/firmware
+          mkdir -p "site/$SITE_DIR"
           cp static/index.html site/
-          cp -r "${{ steps.esphome.outputs.name }}"/* site/firmware/
+          cp -r "${{ steps.esphome.outputs.name }}"/* "site/$SITE_DIR/"
           ls -R site
       - uses: actions/upload-pages-artifact@v3
         with:

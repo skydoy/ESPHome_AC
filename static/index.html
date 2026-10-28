@@ -2,27 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Hisense AC – ESPHome installer (M5StickC Plus2 + RS485 Hat)</title>
+  <title>ESPHome AC bridge – web installer</title>
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    body { font-family: system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
     code { background: #f2f2f2; padding: 0 .25rem; }
+    fieldset { border: 1px solid #ccc; border-radius: .5rem; padding: .75rem 1rem; }
+    label { display: block; padding: .2rem 0; }
+    label.disabled { color: #888; }
+    .soon { font-size: .85em; background: #eee; border-radius: .25rem; padding: 0 .35rem; margin-left: .35rem; }
+    .warn { background: #fff4e5; border-left: 4px solid #f0a020; padding: .5rem .75rem; }
   </style>
 </head>
 <body>
-  <h1>Hisense AC – ESPHome installer</h1>
-  <p>Firmware for an M5StickC Plus2 with the M5Stack RS485 Hat that replaces the Hisense
-     AEH-W4x / AEH-W41H1 Wi-Fi module and talks to Home Assistant locally.</p>
+  <h1>ESPHome AC bridge – web installer</h1>
+  <p>Firmware that replaces your air conditioner's Wi-Fi module with an ESP32 board and talks to
+     Home Assistant locally.</p>
+
+  <form id="brand-form">
+    <fieldset>
+      <legend>1. Choose your AC brand</legend>
+      <label><input type="radio" name="device" value="firmware/manifest.json" checked>
+        Hisense (AEH-W4x / AEH-W41H1 module port) – M5StickC Plus2 + RS485 Hat</label>
+      <label class="disabled"><input type="radio" name="device" disabled> Mitsubishi Electric (CN105)<span class="soon">coming soon</span></label>
+      <label class="disabled"><input type="radio" name="device" disabled> Daikin (S21 / P1P2)<span class="soon">coming soon</span></label>
+      <label class="disabled"><input type="radio" name="device" disabled> Midea and OEMs<span class="soon">coming soon</span></label>
+      <label class="disabled"><input type="radio" name="device" disabled> Toshiba<span class="soon">coming soon</span></label>
+      <label class="disabled"><input type="radio" name="device" disabled> Fujitsu<span class="soon">coming soon</span></label>
+      <label class="disabled"><input type="radio" name="device" disabled> Any brand via infrared<span class="soon">coming soon</span></label>
+    </fieldset>
+  </form>
+  <p>Have one of the "coming soon" units and want to help test? See
+     <a href="https://github.com/skydoy/ESPHome_HisenceAC/blob/main/adapters/README.md">adapters</a>.</p>
+
+  <h2>2. Install</h2>
   <ol>
-    <li>Connect the M5StickC Plus2 to this computer with a USB-C cable (Chrome or Edge on desktop).</li>
+    <li>Connect the board to this computer with a USB-C cable (Chrome or Edge on desktop).</li>
     <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.</li>
     <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).</li>
     <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.</li>
   </ol>
-  <esp-web-install-button manifest="firmware/manifest.json"></esp-web-install-button>
+  <esp-web-install-button id="install" manifest="firmware/manifest.json"></esp-web-install-button>
   <p>No USB? The device also opens a <code>Hisense-AC Setup</code> hotspot with a captive portal
      and supports Improv over Bluetooth.</p>
+
+  <p class="warn"><b>Safety:</b> the indoor unit has mains voltage inside. Switch the AC off at
+     the breaker before opening it, and measure the module port with a multimeter before
+     connecting anything.</p>
   <p>Wiring, caveats and credits:
      <a href="https://github.com/skydoy/ESPHome_HisenceAC">github.com/skydoy/ESPHome_HisenceAC</a>.</p>
+
+  <script>
+    const button = document.getElementById("install");
+    document.getElementById("brand-form").addEventListener("change", (e) => {
+      if (e.target.name === "device" && e.target.value) button.setAttribute("manifest", e.target.value);
+    });
+  </script>
 </body>
 </html>

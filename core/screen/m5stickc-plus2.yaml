@@ -1,7 +1,16 @@
-# Built-in 1.14" ST7789V LCD (135x240) of the M5StickC Plus2: a small status page for
-# installation and troubleshooting. The backlight switches off 30 s after boot or after the
-# last press of button A, so the device can be left behind the AC panel and forgotten.
-# If Wi-Fi or the AC link is down the screen stays on until things recover.
+# Status screen for the built-in 1.14" ST7789V LCD (135x240) of the M5StickC Plus2.
+# Brand agnostic: it only reads these generic ids, which every brand package must provide
+# (a template entity is fine if a brand has no such value):
+#
+#   ac_climate             climate        the AC
+#   ac_link                binary_sensor  ON when the AC answers on its bus
+#   ac_link_status         text_sensor    short link state text ("Connected", "Searching", ...)
+#   ac_fault               binary_sensor  ON when the AC reports a fault
+#   ac_outdoor_temperature sensor         outdoor temperature in °C (NaN when unknown)
+#
+# The backlight switches off 30 s after boot or after the last press of button A, so the
+# device can be left behind the AC panel and forgotten. While Wi-Fi or the AC link is down
+# the screen stays on so problems are visible during installation.
 substitutions:
   screen_timeout_ms: "30000"
 
@@ -57,14 +66,11 @@ interval:
           condition:
             lambda: |-
               // Keep the screen on while something needs attention.
-              bool healthy = id(wifi_component).is_connected() && id(hisense).is_connected();
+              bool healthy = wifi::global_wifi_component->is_connected() && id(ac_link).state;
               return healthy && (int32_t) (millis() - id(screen_awake_until)) > 0 &&
                      id(lcd_backlight).current_values.is_on();
           then:
             - light.turn_off: lcd_backlight
-
-wifi:
-  id: wifi_component
 
 display:
   - platform: mipi_spi
@@ -92,32 +98,33 @@ display:
       if (!id(lcd_backlight).current_values.is_on())
         return;  // Nothing to see; skip the drawing work.
 
-      it.print(4, 2, id(font_title), Color::WHITE, "Hisense AC");
+      it.print(4, 2, id(font_title), Color::WHITE, "${friendly_name}");
 
       // Line 1: Wi-Fi
       int y = 28;
-      bool wifi_ok = id(wifi_component).is_connected();
       it.print(4, y, id(font_body), grey, "Wi-Fi");
-      if (wifi_ok) {
+      if (wifi::global_wifi_component->is_connected()) {
         it.print(60, y, id(font_body), green, id(wifi_ip).state.c_str());
       } else {
-        it.print(60, y, id(font_body), amber, "Setup: Hisense-AC Setup");
+        it.print(60, y, id(font_body), amber, "Setup hotspot");
       }
 
-      // Line 2: RS-485 link to the AC
+      // Line 2: link to the AC
       y += 20;
+      bool link = id(ac_link).state;
       it.print(4, y, id(font_body), grey, "AC link");
-      it.print(60, y, id(font_body), id(hisense).is_connected() ? green : red,
-               id(hisense).get_link_state_text());
+      it.print(60, y, id(font_body), link ? green : red,
+               id(ac_link_status).has_state() ? id(ac_link_status).state.c_str() : "-");
 
       // Line 3: mode and set point
       y += 20;
+      auto *ac = id(ac_climate);
       it.print(4, y, id(font_body), grey, "Mode");
-      if (!id(hisense).has_status()) {
+      if (!link) {
         it.print(60, y, id(font_body), grey, "-");
       } else {
         const char *mode = "Off";
-        switch (id(hisense).mode) {
+        switch (ac->mode) {
           case climate::CLIMATE_MODE_COOL: mode = "Cool"; break;
           case climate::CLIMATE_MODE_HEAT: mode = "Heat"; break;
           case climate::CLIMATE_MODE_DRY: mode = "Dry"; break;
@@ -126,15 +133,14 @@ display:
           case climate::CLIMATE_MODE_AUTO: mode = "Auto"; break;
           default: break;
         }
-        it.printf(60, y, id(font_body), Color::WHITE, "%s  set %.0f C", mode,
-                  id(hisense).target_temperature);
+        it.printf(60, y, id(font_body), Color::WHITE, "%s  set %.0f C", mode, ac->target_temperature);
       }
 
       // Line 4: temperatures
       y += 20;
       it.print(4, y, id(font_body), grey, "Temp");
-      float room = id(hisense).current_temperature;
-      float out = id(hisense).get_outdoor_temperature();
+      float room = ac->current_temperature;
+      float out = id(ac_outdoor_temperature).state;
       char buf[40];
       snprintf(buf, sizeof(buf), "in %s  out %s",
                std::isnan(room) ? "--" : str_sprintf("%.0f C", room).c_str(),
@@ -143,7 +149,7 @@ display:
 
       // Line 5: faults
       y += 20;
-      if (id(hisense).has_fault()) {
+      if (id(ac_fault).state) {
         it.print(4, y, id(font_body), red, "Fault - see Home Assistant");
       } else {
         it.print(4, y, id(font_body), grey, "Button A: wake screen");

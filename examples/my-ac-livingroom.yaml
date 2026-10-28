@@ -14,9 +14,10 @@ packages:
     ref: main
     refresh: 1d
     files:
-      - packages/board-m5stickc-plus2-rs485-hat.yaml
-      - packages/m5stickc-plus2-screen.yaml   # optional status screen
-      - packages/hisense-ac.yaml
+      - core/boards/m5stickc-plus2.yaml
+      - core/screen/m5stickc-plus2.yaml   # optional status screen
+      - core/diagnostics.yaml             # provides the time source used by "Energy Today"
+      - brands/hisense/hisense-ac.yaml
 
 wifi:
   ssid: !secret wifi_ssid

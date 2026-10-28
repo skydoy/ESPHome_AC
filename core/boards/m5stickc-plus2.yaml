@@ -1,9 +1,9 @@
-# M5StickC Plus2 (ESP32-PICO-V3-02, 8 MB flash, 2 MB PSRAM)
-# + M5Stack Hat RS485 (U067: SP485EEN transceiver with automatic direction control,
-#   AOZ1282CI buck converter 12 V -> 5 V on the hat's terminal block).
+# Board: M5StickC Plus2 (ESP32-PICO-V3-02, 8 MB flash, 2 MB PSRAM).
 #
-# Hat RS485 -> StickC pins (official M5Stack pin map): TX = G0, RX = G26.
-# See docs/hardware.md for the wiring to the AC and the power options.
+# Brand agnostic. "ac_tx_pin"/"ac_rx_pin" are the UART pins of the Hat header that brand
+# packages use to talk to the AC (official M5Stack pin map for Hat RS485: TX = G0, RX = G26).
+# A different hat/adapter on the same pins only needs a different brand package; see
+# adapters/README.md.
 substitutions:
   ac_tx_pin: GPIO0
   ac_rx_pin: GPIO26
@@ -19,7 +19,7 @@ output:
   - platform: gpio
     id: power_hold
     pin: GPIO4
-  # LCD backlight (G27). Controlled by the screen package (auto-off after 30 s).
+  # LCD backlight (G27). Controlled by core/screen/m5stickc-plus2.yaml (auto-off after 30 s).
   - platform: ledc
     id: lcd_backlight_pwm
     pin: GPIO27
@@ -40,7 +40,7 @@ light:
     internal: true
 
 binary_sensor:
-  # Button A (front, "M5") wakes the status screen; see packages/m5stickc-plus2-screen.yaml.
+  # Button A (front, "M5") wakes the status screen; see core/screen/m5stickc-plus2.yaml.
   - platform: gpio
     id: button_a
     pin: { number: GPIO37, inverted: true }
@@ -65,6 +65,6 @@ sensor:
 
 # Notes:
 # - Do not enable the built-in microphone (SPM1423 uses G0 as its clock) or I2S on G0/G26:
-#   those pins belong to the RS485 hat.
+#   those pins belong to the hat.
 # - G19 drives the red LED and the IR transmitter. It is intentionally unused for now
 #   (idea: send iFeel room temperature or IR commands; see README "Ideas").

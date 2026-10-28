@@ -1,0 +1,28 @@
+# Common diagnostics for every device (brand agnostic).
+# Also provides the time source "ha_time" that brand packages may use (e.g. daily energy).
+time:
+  - platform: homeassistant
+    id: ha_time
+
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    entity_category: diagnostic
+  - platform: wifi_signal
+    name: "Wi-Fi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: version
+    name: "ESPHome Version"
+    hide_timestamp: true
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config
+  - platform: safe_mode
+    name: "Restart (Safe Mode)"
+    entity_category: config

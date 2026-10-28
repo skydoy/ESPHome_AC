@@ -1,4 +1,11 @@
-# ESPHome Hisense AC (M5StickC Plus2 + RS485 Hat)
+# ESPHome AC bridge (Hisense today, more brands later)
+
+Modular ESPHome firmware that replaces an air conditioner's Wi-Fi module with a small ESP32
+board, for local control from Home Assistant. The layout is multi-brand
+(`core` + `boards` + `brands` + `devices`), but **only Hisense is implemented**; other brands
+are open for testers (see [Roadmap](#roadmap)).
+
+## Hisense (supported)
 
 Replaces the Hisense Wi-Fi module (AEH-W4A1 / W4B1 / W4E1 / W4G1 / W4G2 / **AEH-W41H1**, all on
 the RS-485 "XM" bus with `F4 F5 … F4 FB` frames, 9600 8N1) with an **M5StickC Plus2 + M5Stack
@@ -10,7 +17,7 @@ RS485 Hat** running ESPHome, for local control from Home Assistant. No cloud, no
 - **Updates:** the `Firmware Update` entity installs new releases over the air (OTA via
   `http_request` from the manifest on GitHub Pages).
 
-> ⚠️ Switch the AC off at the breaker before opening the indoor unit. Use at your own risk.
+> ⚠️ Read [Safety](#safety) before opening the indoor unit. Use at your own risk.
 
 ## Features
 The `hisense_ac` component (in [`components/hisense_ac`](components/hisense_ac)) exposes:
@@ -33,7 +40,7 @@ The stock W41H1 module performs a bring-up sequence (device type, version, heart
 polling status, and its indoor units send long 160-byte status frames. This component does the
 same (`handshake: true`, default) and decodes 82-, 150- and 160-byte status frames. Set
 `handshake: false` for plain polling like the older community components. Details in
-[docs/protocol.md](docs/protocol.md).
+[brands/hisense/protocol.md](brands/hisense/protocol.md).
 
 ### Configuration
 ```yaml
@@ -48,27 +55,38 @@ climate:
     reply_timeout: 1000ms
     cycle_interval: 1000ms
     special_command_gap: 8s     # spacing between eco/turbo/sleep/quiet/8C frames
-    # Every sub-entity is optional, see packages/hisense-ac.yaml for the full list.
+    # Every sub-entity is optional, see brands/hisense/hisense-ac.yaml for the full list.
 ```
 
 ## Status screen and buttons
-The Plus2 screen shows Wi-Fi state and IP address, the AC link state, mode and set point,
+The status screen (`core/screen/m5stickc-plus2.yaml`) is brand agnostic. It shows Wi-Fi state and IP address, the AC link state, mode and set point,
 indoor/outdoor temperature and a fault hint. It turns off 30 s after boot or after the last
 press of **button A**; it stays on while Wi-Fi or the AC link is down so problems are visible
 during installation. Button B is exposed to Home Assistant for your own automations.
 
 ## Wiring
-See [docs/hardware.md](docs/hardware.md), including the **G0 boot pin caveat** of the RS485 hat.
+See [brands/hisense/hardware.md](brands/hisense/hardware.md), including the **G0 boot pin
+caveat** of the RS485 hat. Other adapters: [adapters/README.md](adapters/README.md).
 
 ## Repository layout
 | Path | What |
 |---|---|
-| `hisense-ac-m5stickc-plus2.yaml` | Factory config built by CI and offered by the web installer |
-| `packages/` | Board, screen, AC, provisioning and auto-update packages |
+| `devices/hisense-m5stickc-plus2.yaml` | Device config (core + board + brand) built by CI and offered by the web installer |
+| `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update |
+| `brands/hisense/` | Hisense package, wiring, W41H1/W4xx notes and protocol notes |
+| `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |
 | `components/hisense_ac/` | The ESPHome external component (ESP-IDF; Arduino untested) |
 | `tests/` | Host unit tests for the protocol layer (`make -C tests`) |
-| `static/index.html` | ESP Web Tools installer page |
+| `static/index.html` | ESP Web Tools installer page with brand selector |
 | `examples/` | Config for building in your own ESPHome Device Builder |
+
+### Building locally
+```bash
+pip install esphome==2026.10.1
+# Use the component from this checkout instead of github://...@main:
+esphome -s hisense_component_source ../components compile devices/hisense-m5stickc-plus2.yaml
+make -C tests
+```
 
 ## Releasing
 Push a tag `vX.Y.Z`: GitHub Actions builds the firmware with ESPHome 2026.10.1, then publishes
@@ -81,6 +99,30 @@ the installer page and `firmware/manifest.json` to GitHub Pages (Settings → Pa
 - **Button B:** toggle the AC or its display LED locally.
 - **Second screen page:** fault codes, power and today's energy.
 - **QR code** on screen pointing to the device's web page or the setup hotspot.
+
+## Roadmap
+| Brand | Status |
+|---|---|
+| Hisense (AEH-W4x, AEH-W41H1) | Supported |
+| Mitsubishi (CN105), Daikin (S21, P1/P2), Midea, Toshiba, Fujitsu, IR fallback | Not implemented - looking for testers |
+
+Other brands will only be added when someone with that unit can test on real hardware. The
+[adapters table](adapters/README.md) links the existing upstream projects for each of them.
+
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md): how to add a brand (brand package + docs + device
+config), the generic ids the core screen expects, and the testing required before a brand is
+marked supported.
+
+## Safety
+- Indoor units have **mains voltage (230 V AC)** next to the Wi-Fi module port. Switch the AC
+  off **at the breaker** (not just the remote) and wait a few minutes before opening it.
+- Module ports carry low voltage but not always 5 V: some brands put **12-15 V** on the same
+  connector or bus. **Measure every pin with a multimeter** before connecting anything.
+- Never connect ESP32 GPIOs directly to an AC port. Use the matching adapter (RS-485
+  transceiver, level shifter, bus transceiver) from [adapters/README.md](adapters/README.md).
+- Do not exceed what the port can supply (the AEH-W41H1 port is rated 5 V / 450 mA).
+- Opening the unit may void its warranty. You are responsible for your installation.
 
 ## Credits and provenance
 The component is an original implementation (MIT). No source code was copied from the projects

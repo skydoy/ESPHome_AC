@@ -2,7 +2,7 @@
 // indoor unit and the AEH-W4x Wi-Fi modules: W4A1, W4B1, W4E1, W4G2, W41H1, ...).
 //
 // This file is platform independent (no ESPHome includes) so it can be unit tested on a
-// host compiler. See docs/protocol.md for the byte map and the sources of every fact.
+// host compiler. See brands/hisense/protocol.md for the byte map and the sources of every fact.
 //
 // SPDX-License-Identifier: MIT
 #pragma once
