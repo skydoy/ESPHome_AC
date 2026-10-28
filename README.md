@@ -2,8 +2,6 @@
   <img src="docs/logo.png" alt="ESPHome AC logo" width="200">
 </p>
 
-<h1 align="center">ESPHome AC</h1>
-
 [![Build](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/publish.yml)
 [![Validate](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml/badge.svg)](https://github.com/skydoy/ESPHome_AC/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/skydoy/ESPHome_AC?sort=semver)](https://github.com/skydoy/ESPHome_AC/releases/latest)
