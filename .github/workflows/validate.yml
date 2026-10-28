@@ -1,5 +1,7 @@
 name: Validate
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   unit-tests:
     runs-on: ubuntu-latest

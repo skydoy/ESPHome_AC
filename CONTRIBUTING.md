@@ -40,6 +40,16 @@ static/index.html         ESP Web Tools installer page
   every mode, fan speeds, swing, set point, power off/on, recovery after a mains power cut,
   and that the AC's own remote still works.
 
+## Pull requests and releases
+- Use the [issue forms](https://github.com/skydoy/ESPHome_AC/issues/new/choose); model reports go
+  in a **Compatibility report** and end up in [docs/compatibility.md](docs/compatibility.md).
+- Add a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
+- Releases: move the Unreleased entries to a new `## [x.y.z]` section, bump `project_version`
+  in the device configs, then push a `vx.y.z` tag. CI builds the firmware, publishes the
+  installer and OTA manifest, and creates the GitHub Release with those notes and the images.
+- Be kind: see the [Code of Conduct](CODE_OF_CONDUCT.md). Security problems go through
+  [SECURITY.md](SECURITY.md), not public issues.
+
 ## Safety
 Read the [safety notes](docs/wiring.md) before opening any AC. Never connect an ESP32
 directly to an AC port: always use the adapter for that bus, and measure voltages first.

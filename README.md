@@ -18,9 +18,16 @@ RS485 Hat** and control it locally from Home Assistant. No cloud, no app.
 
 Free for personal and non-commercial use. Forks welcome. Commercial use is not permitted.
 
-**[Installer](https://skydoy.github.io/ESPHome_AC/)** · [Wiring](docs/wiring.md) ·
-[Configuration](docs/configuration.md) · [Protocol](brands/hisense/protocol.md) ·
-[Releases](https://github.com/skydoy/ESPHome_AC/releases)
+<p align="center">
+  <a href="https://skydoy.github.io/ESPHome_AC/"><img src="https://img.shields.io/badge/Open%20the%20web%20installer-1784F7?style=for-the-badge&logo=esphome&logoColor=white" alt="Open the web installer" height="36"></a>
+</p>
+
+[Wiring](docs/wiring.md) · [Configuration](docs/configuration.md) ·
+[Compatibility](docs/compatibility.md) · [Protocol](brands/hisense/protocol.md) ·
+[Changelog](CHANGELOG.md) · [Report a bug](https://github.com/skydoy/ESPHome_AC/issues/new/choose)
+
+<!-- TODO: photo of the M5StickC Plus2 + RS485 Hat installed in the indoor unit (docs/img/installed.jpg) -->
+<!-- TODO: GIF of the status screen cycling through states (docs/img/screen.gif) -->
 
 ## Install in 3 steps
 1. **Flash:** plug the Stick into your computer by USB and open the
@@ -58,9 +65,15 @@ Updates then arrive over the air through the **Firmware Update** entity.
 | Adapters and other brands | [adapters/README.md](adapters/README.md) |
 | Dashboard import / own build | [devices/hisense-m5stickc-plus2.yaml](devices/hisense-m5stickc-plus2.yaml), [examples/](examples/my-ac-livingroom.yaml) |
 | Contributing (new brands) | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Releases and changelog | [Releases](https://github.com/skydoy/ESPHome_AC/releases) |
-| Issues | [Issues](https://github.com/skydoy/ESPHome_AC/issues) |
+| Compatible models and modules | [docs/compatibility.md](docs/compatibility.md) |
+| Changelog and releases | [CHANGELOG.md](CHANGELOG.md), [Releases](https://github.com/skydoy/ESPHome_AC/releases) |
+| Bug, feature or compatibility report | [New issue](https://github.com/skydoy/ESPHome_AC/issues/new/choose) |
+| Questions | [Discussions](https://github.com/skydoy/ESPHome_AC/discussions) |
+| Security | [SECURITY.md](SECURITY.md) |
 
+Works with Hisense units whose Wi-Fi module sits on the 4-pin RS-485 connector; see the
+[compatibility table](docs/compatibility.md) and
+[tell us how it went](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml).
 Only Hisense is supported today. Other brands (Mitsubishi, Daikin, Midea, …) wait for testers
 with real hardware; see [CONTRIBUTING.md](CONTRIBUTING.md).
 

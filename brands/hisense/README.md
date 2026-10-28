@@ -14,8 +14,8 @@ AEH-W4x Wi-Fi module talk the "XM" protocol (`F4 F5 … F4 FB` frames) over **RS
 | Device config | [`devices/hisense-m5stickc-plus2.yaml`](../../devices/hisense-m5stickc-plus2.yaml) |
 
 ## Wi-Fi modules known to use this bus
-AEH-W4A1, AEH-W4B1, AEH-W4E1, AEH-W4G1, AEH-W4G2 and **AEH-W41H1**. They share the same 4-pin
-connector (+5 V, A, B, GND) and protocol.
+AEH-W4A1, AEH-W4B1, AEH-W4E1, AEH-W4F1, AEH-W4G1, AEH-W4G2 and **AEH-W41H1**. They share the same 4-pin
+connector (+5 V, A, B, GND) and protocol. Models reported so far: [compatibility table](../../docs/compatibility.md).
 
 ### AEH-W41H1 notes
 - The stock module runs a link bring-up (device type `0A`, version `07`, then a `1E` heartbeat
