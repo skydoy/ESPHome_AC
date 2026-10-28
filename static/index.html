@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hisense AC – ESPHome installer (M5StickC Plus2 + RS485 Hat)</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    code { background: #f2f2f2; padding: 0 .25rem; }
+  </style>
+</head>
+<body>
+  <h1>Hisense AC – ESPHome installer</h1>
+  <p>Firmware for an M5StickC Plus2 with the M5Stack RS485 Hat that replaces the Hisense
+     AEH-W4x / AEH-W41H1 Wi-Fi module and talks to Home Assistant locally.</p>
+  <ol>
+    <li>Connect the M5StickC Plus2 to this computer with a USB-C cable (Chrome or Edge on desktop).</li>
+    <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.</li>
+    <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).</li>
+    <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.</li>
+  </ol>
+  <esp-web-install-button manifest="firmware/manifest.json"></esp-web-install-button>
+  <p>No USB? The device also opens a <code>Hisense-AC Setup</code> hotspot with a captive portal
+     and supports Improv over Bluetooth.</p>
+  <p>Wiring, caveats and credits:
+     <a href="https://github.com/skydoy/ESPHome_HisenceAC">github.com/skydoy/ESPHome_HisenceAC</a>.</p>
+</body>
+</html>

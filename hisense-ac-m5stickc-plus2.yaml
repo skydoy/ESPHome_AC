@@ -1,0 +1,30 @@
+# Factory configuration: built by GitHub Actions on every v* tag and published to the
+# ESP Web Tools installer at https://skydoy.github.io/ESPHome_HisenceAC/
+#
+# Hardware: M5StickC Plus2 + M5Stack Hat RS485 (U067) wired to the AC's Wi-Fi module port
+# (the 4-pin connector used by the AEH-W4A1 / W4B1 / W4E1 / W4G2 / W41H1 modules).
+substitutions:
+  name: hisense-ac
+  friendly_name: Hisense AC
+  project_version: "0.1.0"
+  update_manifest_url: https://skydoy.github.io/ESPHome_HisenceAC/firmware/manifest.json
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: skydoy.hisense-ac
+    version: ${project_version}
+
+# Lets the ESPHome Dashboard / Home Assistant "adopt" a device flashed from the web installer.
+dashboard_import:
+  package_import_url: github://skydoy/ESPHome_HisenceAC/hisense-ac-m5stickc-plus2.yaml@main
+  import_full_config: false
+
+packages:
+  board: !include packages/board-m5stickc-plus2-rs485-hat.yaml
+  screen: !include packages/m5stickc-plus2-screen.yaml
+  hisense: !include packages/hisense-ac.yaml
+  provisioning: !include packages/provisioning.yaml
+  auto_update: !include packages/auto-update.yaml

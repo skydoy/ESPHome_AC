@@ -1,0 +1,14 @@
+# Generic firmware (no credentials baked in). Wi-Fi is set up with ESP Web Tools
+# (Improv Serial over USB), Improv over BLE, or the fallback hotspot + captive portal.
+wifi:
+  ap:
+    ssid: "Hisense-AC Setup"
+captive_portal:
+improv_serial:
+improv_ble:
+  authorizer: none
+api:
+ota:
+  - platform: esphome
+  - platform: http_request
+logger:

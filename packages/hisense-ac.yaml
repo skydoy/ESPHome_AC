@@ -1,0 +1,76 @@
+# Hisense AC over the RS-485 "XM" bus (F4 F5 ... F4 FB frames, 9600 8N1).
+# The hisense_ac component lives in this repository (components/hisense_ac, MIT).
+substitutions:
+  # Where ESPHome fetches the component from. The release workflow switches this to the
+  # local "components" folder so every release is built from its own tagged source.
+  hisense_component_source: github://skydoy/ESPHome_HisenceAC@main
+
+external_components:
+  - source: ${hisense_component_source}
+    components: [hisense_ac]
+
+uart:
+  id: ac_uart
+  tx_pin: ${ac_tx_pin}
+  rx_pin: ${ac_rx_pin}
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+climate:
+  - platform: hisense_ac
+    id: hisense
+    name: "Air Conditioner"
+    uart_id: ac_uart
+    # Link bring-up used by the stock W41H1 module (device type, version, heartbeat).
+    # Older W4x units also accept it; set to false for plain status polling only.
+    handshake: true
+    # Enable if your indoor unit has a motorised horizontal louvre.
+    horizontal_swing: false
+    # Sleep profile used by the SLEEP preset (1-4).
+    sleep_profile: 1
+    outdoor_temperature:
+      name: "Outdoor Temperature"
+    indoor_coil_temperature:
+      name: "Indoor Coil Temperature"
+    outdoor_coil_temperature:
+      name: "Outdoor Coil Temperature"
+    compressor_frequency:
+      name: "Compressor Frequency"
+    compressor_target_frequency:
+      name: "Compressor Target Frequency"
+    humidity:
+      name: "Indoor Humidity"
+    voltage:
+      name: "Supply Voltage"
+    power:
+      name: "Power"
+      id: ac_power
+    current:
+      name: "Current"
+    connected:
+      name: "AC Link"
+    fault:
+      name: "AC Fault"
+    fault_codes:
+      name: "AC Fault Codes"
+    link_status:
+      name: "AC Link Status"
+    aux_heater:
+      name: "Auxiliary Heater"
+    display:
+      name: "AC Display"
+    beep_switch:
+      name: "AC Beep"
+
+sensor:
+  - platform: total_daily_energy
+    name: "Energy Today"
+    power_id: ac_power
+    method: left
+    restore: true
+
+time:
+  - platform: homeassistant
+    id: ha_time

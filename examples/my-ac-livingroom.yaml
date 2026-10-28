@@ -1,0 +1,30 @@
+# Example for people who build in their own ESPHome Device Builder using the remote packages
+# (instead of the pre-built firmware from the web installer).
+substitutions:
+  name: ac-living-room
+  friendly_name: AC Living Room
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+packages:
+  hisense_m5:
+    url: https://github.com/skydoy/ESPHome_HisenceAC
+    ref: main
+    refresh: 1d
+    files:
+      - packages/board-m5stickc-plus2-rs485-hat.yaml
+      - packages/m5stickc-plus2-screen.yaml   # optional status screen
+      - packages/hisense-ac.yaml
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+api:
+  encryption:
+    key: !secret api_key
+ota:
+  - platform: esphome
+    password: !secret ota_password
+logger:

@@ -1,0 +1,9 @@
+# Over-the-air updates from the manifest published on GitHub Pages by the release workflow.
+http_request:
+  verify_ssl: true
+update:
+  - platform: http_request
+    id: firmware_update
+    name: "Firmware Update"
+    source: ${update_manifest_url}
+    update_interval: 6h
