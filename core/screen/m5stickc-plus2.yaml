@@ -18,6 +18,9 @@
 #   ac_fault_codes         text_sensor    fault description ("OK" when none)
 #   ac_outdoor_temperature sensor         outdoor temperature in °C (NaN when unknown)
 #
+# After boot a splash (logo, "ESPHome AC" and the firmware version) is shown for about
+# ${splash_ms} ms, then the status page.
+#
 # Uses "reset_reason" from core/diagnostics.yaml to flag brownouts (weak 5 V supply).
 #
 # The backlight turns off ${screen_timeout_ms} ms after the last wake-up. It wakes on a press of
@@ -27,6 +30,7 @@
 substitutions:
   screen_timeout_ms: "30000"
   screen_brightness: 60%
+  splash_ms: "2500"
 
 spi:
   id: lcd_spi
@@ -46,6 +50,9 @@ globals:
   - id: link_hint_logged
     type: bool
     initial_value: "false"
+  - id: splash_until
+    type: uint32_t
+    initial_value: "0"
 
 font:
   - file: "gfonts://Roboto@500"
@@ -58,6 +65,12 @@ font:
   - file: "gfonts://Roboto"
     id: font_small
     size: 14
+
+image:
+  - file: splash_badge.png   # 110x110 project badge (docs/icon.png) on the splash background
+    id: splash_badge
+    type: RGB565
+    resize: 110x110
 
 text_sensor:
   - platform: wifi_info
@@ -80,6 +93,9 @@ esphome:
     - priority: -100
       then:
         - script.execute: wake_screen
+        - delay: ${splash_ms}ms
+        - lambda: id(splash_until) = 1;  // splash done
+        - component.update: lcd
 
 binary_sensor:
   - id: !extend button_a
@@ -164,6 +180,19 @@ display:
 
       const int W = it.get_width();   // 240
       const int H = it.get_height();  // 135
+
+      // Boot splash: logo, name and firmware version (until on_boot clears it).
+      if (id(splash_until) == 0) {
+        it.fill(Color(8, 18, 40));
+        it.image(6, 12, id(splash_badge));
+        const int cx = 124 + (W - 4 - 124) / 2;
+        it.print(cx, 32, id(font_mid), Color::WHITE, TextAlign::TOP_CENTER, "ESPHome");
+        it.print(cx, 60, id(font_mid), blue, TextAlign::TOP_CENTER, "AC");
+      #ifdef ESPHOME_PROJECT_VERSION
+        it.printf(cx, 96, id(font_small), grey, TextAlign::TOP_CENTER, "v%s", ESPHOME_PROJECT_VERSION);
+      #endif
+        return;
+      }
       auto *ac = id(ac_climate);
       const bool link = id(ac_link).state;
       const bool wifi_ok = wifi::global_wifi_component->is_connected();

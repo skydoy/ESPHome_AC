@@ -42,6 +42,8 @@ climate:
 ## Status screen
 [`core/screen/m5stickc-plus2.yaml`](../core/screen/m5stickc-plus2.yaml) (brand agnostic):
 
+- boot splash for about 2.5 s: project logo, "ESPHome AC" and the firmware version
+  (`splash_ms` substitution; the badge is `core/screen/splash_badge.png`);
 - big room temperature, target temperature and mode;
 - link indicator: **OK** (green), **Handshake** / **Searching** (amber), **No link** (red);
 - hint line: fault code, Wi-Fi setup hotspot, brownout reset, or a wiring hint
