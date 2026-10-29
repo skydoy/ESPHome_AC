@@ -124,9 +124,8 @@ There are two kinds of firmware, built from two files per board:
 - **Adopted devices:** the device announces `dashboard_import`, so the ESPHome Device Builder can
   adopt it. Adoption imports the **base** file, which has no `Firmware Update` entity on purpose:
   installing the generic factory firmware over an adopted device would replace your config and
-  drop your API encryption key, so Home Assistant could no longer connect. Your adopted config
-  follows `@main`; to update, open the Device Builder and press **Install** (Wireless). The
-  Device Builder fetches the latest packages and keeps your key, name and extras.
+  drop your API encryption key, so Home Assistant could no longer connect. Update it from the
+  Device Builder instead, see [ESPHome Device Builder](#esphome-device-builder).
 - Adopted before v0.2.9? Those builds still include the update entity. Do not press *Install* on
   it; press **Install** in the Device Builder once and the entity disappears.
 - Progress: an update takes about 1-2 minutes. The download blocks the device's main loop, so
@@ -134,6 +133,45 @@ There are two kinds of firmware, built from two files per board:
   version. The Stick's screen shows a progress bar; the live log (Device Builder, or
   `http://<device-ip>/` until the update starts) shows `Progress: NN%`.
 - Build it yourself from remote packages: [`examples/my-ac-livingroom.yaml`](../examples/my-ac-livingroom.yaml).
+
+### ESPHome Device Builder
+**Your adopted YAML is yours.** Adopting writes a small YAML file in the Device Builder (name,
+API key, Wi-Fi) that *references* this repository. The repository never edits that file, so
+your key and extras are safe; what changes is the code that the reference points to.
+
+**Pin it to a release tag.** Each release tag is immutable, and the packages and the
+`hisense_ac` component of a release always come from that same tag (the component source is
+`github://skydoy/ESPHome_AC@v${project_version}`). Since v0.2.10, adoption already writes this:
+
+```yaml
+packages:
+  skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@v0.2.10
+  # ATOM Lite: devices/hisense-atom-lite-tail485.yaml
+```
+
+To update, change the tag to the [latest release](https://github.com/skydoy/ESPHome_AC/releases)
+(e.g. `@v0.2.10` → `@v0.2.11`) and press **Install** → *Wirelessly*.
+
+**Why not `@main`?** ESPHome caches git sources for one day (`refresh: 1d`, and the one-line
+`github://` form cannot change that). With `@main`, *Install* can rebuild an old version, or mix
+new YAML with an old cached component (errors like *`debug_frames` is an invalid option*).
+A tag never changes, so its cache can never be stale. If you still want to follow `main`
+(development only), use the long form with `refresh: 0s` and point the component at `main` too:
+
+```yaml
+substitutions:
+  hisense_component_source: github://skydoy/ESPHome_AC@main
+  hisense_component_refresh: 0s
+packages:
+  skydoy.esphome-ac:
+    url: https://github.com/skydoy/ESPHome_AC
+    ref: main
+    refresh: 0s
+    files: [devices/hisense-m5stickc-plus2.yaml]
+```
+
+**Errors after changing the reference?** Open the device's ⋮ menu → **Clean Build Files**, then
+*Install* again.
 
 ### API encryption and OTA password (optional)
 The packages deliberately set no API key and no OTA password, so the pre-built firmware and
@@ -178,8 +216,8 @@ To remove the page, use `web_server: !remove` in your config (or drop
 `core/web-server.yaml` from its packages). The captive portal for Wi-Fi setup is unaffected.
 
 ### Firmware Version sensor
-Shows `esphome: project: version` plus the build source in brackets: `0.2.6 (release)` for the
-web-installer/OTA firmware, `0.2.6 (main)` when the Device Builder builds the adopted
+Shows `esphome: project: version` plus the build source in brackets: `0.2.10 (release)` for the
+web-installer/OTA firmware, `0.2.10 (self-built)` when the Device Builder builds the adopted
 `github://` package (or you build a checkout), `main @abc1234` for CI builds of a branch.
 Override the `firmware_source` substitution in your own config to label your build
 (e.g. `firmware_source: "my fork @1a2b3c4"`, or `""` for the version only). Configs without
@@ -206,16 +244,19 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 ### Building locally
 ```bash
 pip install esphome==2026.10.1
-# Use the component from this checkout instead of github://...@main:
+# Use the component from this checkout instead of the release tag on GitHub:
 esphome -s hisense_component_source ../components compile devices/hisense-m5stickc-plus2.factory.yaml
 make -C tests
 ```
 
 ## Releasing
-Push a tag `vX.Y.Z`: GitHub Actions builds the firmware with ESPHome 2026.10.1, then publishes
+Bump `project_version` in both `devices/<board>.yaml` (and the tag in the example), then push a
+matching tag `vX.Y.Z`: GitHub Actions builds the firmware with ESPHome 2026.10.1, then publishes
 the installer page and `firmware/manifest.json` to GitHub Pages (Settings → Pages → Source:
 **GitHub Actions**). Devices running the factory firmware pick up the new version through the
-`Firmware Update` entity; adopted devices get it with **Install** in the Device Builder.
+`Firmware Update` entity; adopted devices get it by changing the tag in their `packages:` line
+and pressing **Install** in the Device Builder. After the release, CI validates the exact YAML
+the Device Builder generates on adoption, straight from GitHub.
 
 ## Safety
 - Indoor units have **mains voltage (230 V AC)** next to the Wi-Fi module port. Switch the AC

@@ -8,6 +8,25 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.10] - 2026-10-29
+### Fixed
+- **Device Builder rebuilt an old version, or failed with 28 errors after an update.** Adopted
+  configs referenced `@main`, and ESPHome caches git sources for one day (the one-line
+  `github://` form cannot change that), so *Install* could rebuild the old release, or combine
+  new YAML with an old cached component (`debug_frames is an invalid option`).
+  Adoption (`dashboard_import`) and the `hisense_ac` component are now pinned to the release tag
+  of the firmware (`@v<project_version>`): packages and component always come from the same
+  immutable tag, so a stale or mismatched cache is impossible. To update an adopted device,
+  change the tag in its `packages:` line and press *Install*
+  ([details](docs/configuration.md#esphome-device-builder)).
+
+### Changed
+- `hisense_component_source` defaults to `github://skydoy/ESPHome_AC@v${project_version}`; new
+  `hisense_component_refresh` substitution (default `1d`) for people tracking a branch.
+- Firmware Version shows `(self-built)` instead of `(main)` for Device Builder and local builds.
+- CI: the tag must match `project_version`; both boards must share one version; shipped configs
+  must not reference `@main`; after each release the adopted YAML is validated from GitHub.
+
 ## [0.2.9] - 2026-10-29
 ### Fixed
 - **Adopted devices were replaced by the generic firmware.** The `Firmware Update` entity was
@@ -154,7 +173,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...HEAD
+[0.2.10]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...v0.2.7

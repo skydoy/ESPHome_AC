@@ -7,14 +7,19 @@
 # Provides the generic ids used by core/screen/*: ac_climate, ac_link, ac_link_status,
 # ac_fault, ac_fault_codes, ac_outdoor_temperature.
 substitutions:
-  # Where ESPHome fetches the component from. The release workflow switches this to the
-  # local "../components" folder so every release is built from its own tagged source.
-  hisense_component_source: github://skydoy/ESPHome_AC@main
+  # Where ESPHome fetches the component from: the release tag that matches this config's
+  # project_version (set in devices/<board>.yaml), so the YAML packages and the C++ component
+  # always come from the SAME release. A tag never changes, so ESPHome's git cache can never
+  # serve a stale or mismatched copy. CI and local builds pass "../components" instead.
+  hisense_component_source: github://skydoy/ESPHome_AC@v${project_version}
+  # How often ESPHome re-fetches the component source. A release tag is immutable; set "0s"
+  # only if you point hisense_component_source at a branch (e.g. @main for development).
+  hisense_component_refresh: 1d
 
 external_components:
   - source: ${hisense_component_source}
     components: [hisense_ac]
-    refresh: 0s   # always fetch the latest component code (Device Builder caches git sources for 1 day otherwise)
+    refresh: ${hisense_component_refresh}
 
 uart:
   id: ac_uart

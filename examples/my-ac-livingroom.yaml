@@ -11,8 +11,7 @@ esphome:
 packages:
   hisense_m5:
     url: https://github.com/skydoy/ESPHome_AC
-    ref: main
-    refresh: 0s   # always build from the latest main (the Device Builder caches git packages for 1 day otherwise)
+    ref: v0.2.10   # a release tag: immutable, matches the component tag; bump it to update
     files:
       - core/boards/m5stickc-plus2.yaml   # or core/boards/atom-lite.yaml (then drop the screen)
       - core/screen/m5stickc-plus2.yaml   # optional status screen
