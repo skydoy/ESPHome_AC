@@ -132,6 +132,25 @@ ota:
 After flashing, Home Assistant asks for the new key when it reconnects. The Device Builder usually
 adds an API key for you when it adopts the device.
 
+### Web server
+Both device configs include [`core/web-server.yaml`](../core/web-server.yaml): open
+`http://<device-ip>/` on your LAN to see every entity, control them and read the live log
+(ESPHome web server v3, port 80). The page's JS/CSS loads from the ESPHome CDN, so the browser
+needs internet access; the firmware itself does not.
+
+**It has no password:** anyone on your network can view and control the AC. Keep the device on
+a trusted network. To add a login, add this to your own device YAML (it merges with the package):
+
+```yaml
+web_server:
+  auth:
+    username: admin
+    password: !secret web_password
+```
+
+To remove the page, use `web_server: !remove` in your config (or drop
+`core/web-server.yaml` from its packages). The captive portal for Wi-Fi setup is unaffected.
+
 ### Firmware Version sensor
 Shows `esphome: project: version` plus the build source in brackets: `0.2.6 (release)` for the
 web-installer/OTA firmware, `0.2.6 (main)` when the Device Builder builds the adopted
@@ -149,7 +168,7 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 | Path | What |
 |---|---|
 | `devices/hisense-m5stickc-plus2.yaml`, `devices/hisense-atom-lite-tail485.yaml` | Device configs (core + board + brand) built by CI and offered by the web installer |
-| `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update |
+| `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update, web server |
 | `brands/hisense/` | Hisense package, wiring, W41H1/W4xx notes and protocol notes |
 | `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |
 | `components/hisense_ac/` | The ESPHome external component (ESP-IDF; Arduino untested) |

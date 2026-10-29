@@ -7,7 +7,7 @@
 substitutions:
   name: hisense-ac
   friendly_name: Hisense AC
-  project_version: "0.2.7"
+  project_version: "0.2.8"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "main" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "main"
@@ -36,3 +36,4 @@ packages:
   provisioning: !include ../core/provisioning.yaml
   diagnostics: !include ../core/diagnostics.yaml
   auto_update: !include ../core/auto-update.yaml
+  web_server: !include ../core/web-server.yaml

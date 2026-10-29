@@ -18,6 +18,7 @@ packages:
       - core/screen/m5stickc-plus2.yaml   # optional status screen
       - core/diagnostics.yaml             # provides the time source used by "Energy Today"
       - brands/hisense/hisense-ac.yaml
+      - core/web-server.yaml              # optional: web page at http://<device-ip>/ (no login)
 
 wifi:
   ssid: !secret wifi_ssid
