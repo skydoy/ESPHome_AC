@@ -1,5 +1,6 @@
 # Generic firmware (no credentials baked in). Wi-Fi is set up with ESP Web Tools
 # (Improv Serial over USB), Improv over BLE, or the fallback hotspot + captive portal.
+#
 wifi:
   ap:
     ssid: "Hisense-AC Setup"
@@ -8,7 +9,19 @@ improv_serial:
 improv_ble:
   authorizer: none
 api:
+logger:
+
+# The OTA automations below log the start and the result of every update, and also switch on
+# ESPHome's OTA state listeners, which the status screen uses to draw a progress bar.
 ota:
   - platform: esphome
-  - platform: http_request
-logger:
+    id: ota_esphome
+    on_begin:
+      - logger.log: "OTA update started (do not unplug)"
+    on_end:
+      - logger.log: "OTA update finished, rebooting"
+    on_error:
+      - logger.log:
+          level: WARN
+          format: "OTA update failed (error %u), still running the old firmware"
+          args: [x]

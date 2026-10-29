@@ -1,6 +1,31 @@
 # Over-the-air updates from the manifest published on GitHub Pages by the release workflow.
+#
+# FACTORY BUILDS ONLY. This package is included by devices/*.factory.yaml (the firmware that
+# GitHub Actions publishes to the web installer). It adds a "Firmware Update" entity that
+# installs the generic factory firmware. A config adopted in the ESPHome Device Builder must NOT
+# include it: installing the factory firmware over an adopted device would silently replace
+# that config (API encryption key, name, extra components). Adopted devices are updated with
+# "Install" in the Device Builder instead.
+#
+# Note: the download runs inside the main loop, so Home Assistant sees no progress while it
+# runs; the device logs "Progress: NN%" and, with a screen, shows a progress bar. After the
+# reboot the device comes back with the new version (about 1-2 minutes in total).
 http_request:
   verify_ssl: true
+
+ota:
+  - platform: http_request
+    id: ota_http
+    on_begin:
+      - logger.log: "Firmware update download started (do not unplug)"
+    on_end:
+      - logger.log: "Firmware update installed, rebooting"
+    on_error:
+      - logger.log:
+          level: WARN
+          format: "Firmware update failed (error %u), still running the old firmware"
+          args: [x]
+
 update:
   - platform: http_request
     id: firmware_update

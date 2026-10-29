@@ -383,6 +383,84 @@ static void test_power_steps() {
   CHECK(power_watts(s) == 0.0f);
 }
 
+static void test_command_queue() {
+  const uint32_t GAP = 8000;
+  // Plain commands of one group coalesce; the newer value wins.
+  CommandQueue q;
+  Command a;
+  a.has_setpoint = true;
+  a.setpoint = 22;
+  Command b;
+  b.has_setpoint = true;
+  b.setpoint = 23;
+  b.has_fan = true;
+  b.fan = Fan::HIGH;
+  b.beep = false;
+  CHECK(q.push(a, false, 100, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(b, false, 150, GAP) == CommandQueue::Push::MERGED);
+  CHECK(q.size() == 1);
+  CommandQueue::Item it;
+  CHECK(q.pop_ready(150, &it));
+  CHECK(it.cmd.has_setpoint && it.cmd.setpoint == 23 && it.cmd.has_fan && it.cmd.fan == Fan::HIGH && !it.cmd.beep);
+  CHECK(!it.cmd.has_power && q.empty());
+
+  // Different groups (basic, swing axis, display) stay in separate frames, in order.
+  Command v;
+  v.has_vswing = v.vswing = true;
+  Command h;
+  h.has_hswing = true;
+  Command d;
+  d.has_display = true;
+  CHECK(q.push(a, false, 0, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(v, false, 0, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(h, false, 0, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(d, false, 0, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(d, false, 0, GAP) == CommandQueue::Push::MERGED);
+  CHECK(q.size() == 4);
+  CHECK(q.pop_ready(0, &it) && it.cmd.has_setpoint);
+  CHECK(q.pop_ready(0, &it) && it.cmd.has_vswing && !it.cmd.has_hswing);
+  CHECK(q.pop_ready(0, &it) && it.cmd.has_hswing);
+  CHECK(q.pop_ready(0, &it) && it.cmd.has_display && q.empty());
+
+  // Special commands never merge and are spaced GAP apart; plain ones overtake waiting specials.
+  Command e;
+  e.has_eco = e.eco = true;
+  Command t;
+  t.has_turbo = t.turbo = true;
+  CHECK(q.push(e, true, 1000, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(t, true, 1000, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.pop_ready(1000, &it) && it.special && it.cmd.has_eco);
+  CHECK(!q.has_ready(1000 + GAP - 1));
+  CHECK(q.push(a, false, 2000, GAP) == CommandQueue::Push::ADDED);  // not merged into a special
+  CHECK(q.pop_ready(2000, &it) && !it.special && it.cmd.has_setpoint);
+  CHECK(!q.pop_ready(1000 + GAP - 1, &it));
+  CHECK(q.pop_ready(1000 + GAP, &it) && it.cmd.has_turbo && q.empty());
+  // A special pushed right after one was sent waits for the gap too.
+  CHECK(q.push(e, true, 1000 + GAP + 10, GAP) == CommandQueue::Push::ADDED);
+  CHECK(!q.has_ready(1000 + GAP + 10) && q.has_ready(1000 + 2 * GAP));
+  q.clear();
+
+  // Capacity: distinct groups fill it, then FULL; timestamps survive millis() wrap-around.
+  for (size_t i = 0; i < CommandQueue::CAPACITY; i++)
+    CHECK(q.push(i % 2 ? v : d, false, 0, GAP) == CommandQueue::Push::ADDED);
+  CHECK(q.push(h, false, 0, GAP) == CommandQueue::Push::FULL);
+  q.clear();
+  CHECK(time_reached(5, 0xFFFFFFF0u) && !time_reached(0xFFFFFFF0u, 5));
+  CommandQueue w;
+  CHECK(w.push(e, true, 0xFFFFFFF0u, GAP) == CommandQueue::Push::ADDED);
+  CHECK(w.pop_ready(0xFFFFFFF0u, &it));
+  CHECK(w.push(t, true, 0xFFFFFFF8u, GAP) == CommandQueue::Push::ADDED);
+  CHECK(!w.has_ready(100) && w.has_ready(0xFFFFFFF0u + GAP));
+
+  // Groups and faults helpers.
+  CHECK(command_groups(Command()) == GROUP_NONE);
+  CHECK(command_groups(a) == GROUP_BASIC && command_groups(e) == GROUP_SPECIAL);
+  Faults f1, f2;
+  CHECK(f1 == f2);
+  f2.protect = 0x10;
+  CHECK(f1 != f2);
+}
+
 int main() {
   test_templates();
   test_checksum_and_valid();
@@ -395,6 +473,7 @@ int main() {
   test_commands();
   test_hex_bytes();
   test_power_steps();
+  test_command_queue();
   std::printf("%d passed, %d failed\n", g_passed, g_failed);
   return g_failed == 0 ? 0 : 1;
 }

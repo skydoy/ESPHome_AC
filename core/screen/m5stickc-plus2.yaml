@@ -23,6 +23,13 @@
 #
 # Uses "reset_reason" from core/diagnostics.yaml to flag brownouts (weak 5 V supply).
 #
+# Redraws only when something shown changes (checked every ${screen_check_ms} ms) and never while
+# the backlight is off, so the SPI bus and the CPU stay idle most of the time.
+#
+# OTA updates (Device Builder "Install", or the "Firmware Update" entity of the factory firmware)
+# show a progress bar. The OTA download blocks the main loop, so this hooks ESPHome's OTA state
+# listener (enabled by any ota on_* automation, see core/provisioning.yaml) and draws directly.
+#
 # The backlight turns off ${screen_timeout_ms} ms after the last wake-up. It wakes on a press of
 # button A or B, or when something changes (mode, set point, link state, fault). The buttons
 # only wake the screen; they never control the AC. During the first 5 minutes after boot the
@@ -31,6 +38,7 @@ substitutions:
   screen_timeout_ms: "30000"
   screen_brightness: 60%
   splash_ms: "2500"
+  screen_check_ms: "500"
 
 spi:
   id: lcd_spi
@@ -55,6 +63,13 @@ globals:
   - id: splash_until
     type: uint32_t
     initial_value: "0"
+  - id: screen_drawn_signature
+    type: uint32_t
+    initial_value: "0"
+  # -1 idle, 0..100 OTA progress in %, -2 the last OTA failed (shown until the screen sleeps).
+  - id: ota_progress
+    type: int
+    initial_value: "-1"
 
 font:
   - file: "gfonts://Roboto@500"
@@ -97,6 +112,40 @@ esphome:
   on_boot:
     - priority: -100
       then:
+        - lambda: |-
+            #ifdef USE_OTA_STATE_LISTENER
+              // OTA progress screen. Runs inside the OTA code while the main loop is blocked, so
+              // drive the backlight PWM directly (the light component cannot run) and draw now.
+              struct OtaScreen : public ota::OTAGlobalStateListener {
+                void on_ota_global_state(ota::OTAState state, float progress, uint8_t error,
+                                         ota::OTAComponent *component) override {
+                  int p = id(ota_progress);
+                  switch (state) {
+                    case ota::OTA_STARTED: p = 0; break;
+                    case ota::OTA_IN_PROGRESS: p = (int) progress; break;
+                    case ota::OTA_COMPLETED: p = 100; break;
+                    case ota::OTA_ERROR:
+                    case ota::OTA_ABORT: p = -2; break;
+                    default: return;
+                  }
+                  if (p > 100)
+                    p = 100;
+                  if (p == id(ota_progress))
+                    return;
+                  id(ota_progress) = p;
+                  id(screen_awake_until) = millis() + ${screen_timeout_ms};
+                  if (p >= 0)
+                    id(lcd_backlight_pwm).set_level(0.6f);
+                  id(lcd).update();
+                  if (p < 0)
+                    id(wake_screen).execute();  // the loop runs again: sync the light state
+                  (void) error;
+                  (void) component;
+                }
+              };
+              static OtaScreen ota_screen;
+              ota::get_global_ota_callback()->add_global_state_listener(&ota_screen);
+            #endif
         - script.execute: wake_screen
         - delay: ${splash_ms}ms
         - lambda: id(splash_until) = 1;  // splash done
@@ -111,7 +160,7 @@ binary_sensor:
       - script.execute: wake_screen
 
 interval:
-  - interval: 1s
+  - interval: ${screen_check_ms}ms
     then:
       - lambda: |-
           const uint32_t now = millis();
@@ -132,27 +181,59 @@ interval:
                                "pull-up from G0 to 3.3V (see docs/wiring.md).");
           }
 
-          // Wake the screen when anything shown on it changes.
-          uint32_t sig = (uint32_t) ac->mode;
-          sig = sig * 31 + (uint32_t) lroundf(std::isnan(ac->target_temperature) ? 0 : ac->target_temperature);
-          sig = sig * 31 + (link ? 1 : 0);
-          sig = sig * 31 + (id(ac_fault).state ? 1 : 0);
-          sig = sig * 31 + (uint32_t) id(ac_link_status).state.size();
+          // Wake the screen when anything important changes (mode, set point, link, fault).
+          auto mix = [](uint32_t h, uint32_t v) { return (h ^ v) * 16777619u; };
+          auto mix_str = [&mix](uint32_t h, const std::string &str) {
+            for (char c : str)
+              h = mix(h, (uint8_t) c);
+            return mix(h, 0xFFu);
+          };
+          auto rnd = [](float v) -> uint32_t { return std::isnan(v) ? 0xFFFFu : (uint32_t) (lroundf(v) + 1000); };
+          uint32_t sig = 2166136261u;
+          sig = mix(sig, (uint32_t) ac->mode);
+          sig = mix(sig, rnd(ac->target_temperature));
+          sig = mix(sig, link ? 1 : 0);
+          sig = mix(sig, id(ac_fault).state ? 1 : 0);
+          sig = mix_str(sig, id(ac_link_status).state);
           if (sig != id(screen_signature)) {
             const bool first = id(screen_signature) == 0;
             id(screen_signature) = sig;
-            if (!first)
+            if (!first) {
               id(wake_screen).execute();
+              return;  // wake_screen just redrew everything
+            }
           }
 
           // Install window: keep the screen on while something needs attention.
-          const bool healthy = wifi::global_wifi_component->is_connected() && link;
-          if (!healthy && now < 5 * 60 * 1000)
+          const bool wifi_ok = wifi::global_wifi_component->is_connected();
+          if ((!wifi_ok || !link) && now < 5 * 60 * 1000)
             id(screen_awake_until) = now + ${screen_timeout_ms};
 
-          if ((int32_t) (now - id(screen_awake_until)) > 0 && id(lcd_backlight).current_values.is_on()) {
+          const bool on = id(lcd_backlight).current_values.is_on();
+          if (on && (int32_t) (now - id(screen_awake_until)) > 0) {
             auto call = id(lcd_backlight).turn_off();
             call.perform();
+            if (id(ota_progress) == -2)
+              id(ota_progress) = -1;  // the "update failed" note goes away with the screen
+            return;
+          }
+          if (!on || id(splash_until) == 0)
+            return;
+
+          // Redraw only when something on the status page changed.
+          uint32_t d = sig;
+          d = mix(d, rnd(ac->current_temperature));
+          d = mix(d, wifi_ok ? 1 : 0);
+          d = mix(d, (uint32_t) id(ota_progress));
+          d = mix(d, (!link && id(link_down_since) != 0 && now - id(link_down_since) > 60000) ? 1 : 0);
+          d = mix(d, now < 5 * 60 * 1000 ? 1 : 0);
+          if (id(ac_fault).state)
+            d = mix_str(d, id(ac_fault_codes).state);
+          else
+            d = mix_str(mix(d, rnd(id(ac_outdoor_temperature).state)), id(wifi_ip).state);
+          if (d != id(screen_drawn_signature)) {
+            id(screen_drawn_signature) = d;
+            id(lcd).update();
           }
 
 display:
@@ -175,7 +256,8 @@ display:
     invert_colors: true
     rotation: 90
     buffer_size: 25%
-    update_interval: 2s
+    # Drawn on demand only (wake_screen, the change check above, OTA progress).
+    update_interval: never
     lambda: |-
       const Color grey(150, 150, 150);
       const Color green(60, 200, 90);
@@ -183,12 +265,29 @@ display:
       const Color red(235, 60, 60);
       const Color blue(70, 160, 255);
       const Color orange(255, 120, 40);
-      it.fill(Color::BLACK);
-      if (!id(lcd_backlight).current_values.is_on())
-        return;  // Screen is off; skip the drawing work.
-
       const int W = it.get_width();   // 240
       const int H = it.get_height();  // 135
+      it.fill(Color::BLACK);
+
+      // OTA update in progress (or just failed): progress bar, even if the light is off.
+      const int ota = id(ota_progress);
+      if (ota != -1) {
+        it.print(W / 2, 18, id(font_mid), Color::WHITE, TextAlign::TOP_CENTER,
+                 ota == -2 ? "Update failed" : "Updating");
+        if (ota >= 0) {
+          it.rectangle(20, 62, W - 40, 22, grey);
+          it.filled_rectangle(22, 64, (W - 44) * ota / 100, 18, blue);
+          it.printf(W / 2, 92, id(font_mid), Color::WHITE, TextAlign::TOP_CENTER, "%d%%", ota);
+          it.print(W / 2, H - 18, id(font_small), grey, TextAlign::TOP_CENTER,
+                   ota >= 100 ? "Rebooting..." : "Do not unplug");
+        } else {
+          it.print(W / 2, 70, id(font_small), grey, TextAlign::TOP_CENTER, "Running the old firmware.");
+          it.print(W / 2, 90, id(font_small), grey, TextAlign::TOP_CENTER, "See the logs for details.");
+        }
+        return;
+      }
+      if (!id(lcd_backlight).current_values.is_on())
+        return;  // Screen is off; skip the drawing work.
 
       // Boot splash: logo, name and firmware version (until on_boot clears it).
       if (id(splash_until) == 0) {

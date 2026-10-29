@@ -95,6 +95,9 @@ aioesphomeapi-logs --no-states <device-ip>   # prebuilt firmware has no API encr
   (`No AC: swap A/B? G0 10k pull-up?`) after 60 s without a link; otherwise outdoor
   temperature and IP address.
 
+During an OTA update the screen turns on and shows a progress bar (or *Update failed*). The
+screen is redrawn only when something it shows changes, never while the backlight is off.
+
 The backlight turns off after 30 s. It wakes on button A or B, or when the mode, set point,
 link or fault changes. The buttons only wake the screen. During the first 5 minutes after boot
 the screen stays on while Wi-Fi or the AC link is down.
@@ -108,11 +111,28 @@ turns the LED white; after **10 s** it does a factory reset. The **Status LED** 
 turns the LED off entirely. `status_led_brightness` (0.0–1.0, default 0.4) sets the brightness.
 
 ## Updates
-- **OTA:** the `Firmware Update` entity installs new releases from the board's manifest:
+There are two kinds of firmware, built from two files per board:
+
+| File | Who uses it | How it updates |
+|---|---|---|
+| `devices/<board>.factory.yaml` | The web installer firmware (not adopted) | **Firmware Update** entity in Home Assistant (OTA over HTTPS from GitHub Pages) |
+| `devices/<board>.yaml` (base) | Configs adopted in the ESPHome Device Builder, your own builds | **Install** in the Device Builder |
+
+- **Factory firmware:** the `Firmware Update` entity installs new releases from the board's manifest:
   `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json` (Stick) or
   `https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json` (ATOM).
-- **Adopt:** the device announces `dashboard_import`, so the ESPHome Device Builder can adopt
-  it and build your own copy from its device config.
+- **Adopted devices:** the device announces `dashboard_import`, so the ESPHome Device Builder can
+  adopt it. Adoption imports the **base** file, which has no `Firmware Update` entity on purpose:
+  installing the generic factory firmware over an adopted device would replace your config and
+  drop your API encryption key, so Home Assistant could no longer connect. Your adopted config
+  follows `@main`; to update, open the Device Builder and press **Install** (Wireless). The
+  Device Builder fetches the latest packages and keeps your key, name and extras.
+- Adopted before v0.2.9? Those builds still include the update entity. Do not press *Install* on
+  it; press **Install** in the Device Builder once and the entity disappears.
+- Progress: an update takes about 1-2 minutes. The download blocks the device's main loop, so
+  Home Assistant shows no progress and the device looks offline until it reboots with the new
+  version. The Stick's screen shows a progress bar; the live log (Device Builder, or
+  `http://<device-ip>/` until the update starts) shows `Progress: NN%`.
 - Build it yourself from remote packages: [`examples/my-ac-livingroom.yaml`](../examples/my-ac-livingroom.yaml).
 
 ### API encryption and OTA password (optional)
@@ -131,6 +151,12 @@ ota:
 
 After flashing, Home Assistant asks for the new key when it reconnects. The Device Builder usually
 adds an API key for you when it adopts the device.
+
+If a device with a key gets the factory firmware (no key), Home Assistant keeps trying the old key
+and the device shows as unavailable. Either install your own config again from the Device
+Builder (restores the key), or in Home Assistant open **Settings → Devices & services →
+ESPHome** and follow the re-authentication prompt or *Reconfigure* the device, leaving the
+encryption key empty (if neither is offered, delete the device there and add it again by IP).
 
 ### Web server
 Both device configs include [`core/web-server.yaml`](../core/web-server.yaml): open
@@ -167,7 +193,8 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 ## Repository layout
 | Path | What |
 |---|---|
-| `devices/hisense-m5stickc-plus2.yaml`, `devices/hisense-atom-lite-tail485.yaml` | Device configs (core + board + brand) built by CI and offered by the web installer |
+| `devices/hisense-m5stickc-plus2.yaml`, `devices/hisense-atom-lite-tail485.yaml` | Base device configs (core + board + brand); what the Device Builder adopts |
+| `devices/*.factory.yaml` | Base config + `core/auto-update.yaml`; built by CI and offered by the web installer |
 | `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update, web server |
 | `brands/hisense/` | Hisense package, wiring, W41H1/W4xx notes and protocol notes |
 | `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |
@@ -180,14 +207,15 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 ```bash
 pip install esphome==2026.10.1
 # Use the component from this checkout instead of github://...@main:
-esphome -s hisense_component_source ../components compile devices/hisense-m5stickc-plus2.yaml
+esphome -s hisense_component_source ../components compile devices/hisense-m5stickc-plus2.factory.yaml
 make -C tests
 ```
 
 ## Releasing
 Push a tag `vX.Y.Z`: GitHub Actions builds the firmware with ESPHome 2026.10.1, then publishes
 the installer page and `firmware/manifest.json` to GitHub Pages (Settings → Pages → Source:
-**GitHub Actions**). Devices pick up the new version through the `Firmware Update` entity.
+**GitHub Actions**). Devices running the factory firmware pick up the new version through the
+`Firmware Update` entity; adopted devices get it with **Install** in the Device Builder.
 
 ## Safety
 - Indoor units have **mains voltage (230 V AC)** next to the Wi-Fi module port. Switch the AC

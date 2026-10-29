@@ -367,6 +367,99 @@ static void append_bits_(std::string &out, uint8_t v, const BitName *names, size
   }
 }
 
+uint8_t command_groups(const Command &c) {
+  uint8_t g = GROUP_NONE;
+  if (c.has_power || c.has_mode || c.has_setpoint || c.has_fan)
+    g |= GROUP_BASIC;
+  if (c.has_vswing)
+    g |= GROUP_VSWING;
+  if (c.has_hswing)
+    g |= GROUP_HSWING;
+  if (c.has_display)
+    g |= GROUP_DISPLAY;
+  if (c.has_eco || c.has_turbo || c.has_quiet || c.has_heat8 || c.has_sleep)
+    g |= GROUP_SPECIAL;
+  return g;
+}
+
+void merge_command(Command &into, const Command &from) {
+#define HISENSE_MERGE(f) \
+  if (from.has_##f) { \
+    into.has_##f = true; \
+    into.f = from.f; \
+  }
+  HISENSE_MERGE(power)
+  HISENSE_MERGE(mode)
+  HISENSE_MERGE(setpoint)
+  HISENSE_MERGE(fan)
+  HISENSE_MERGE(vswing)
+  HISENSE_MERGE(hswing)
+  HISENSE_MERGE(eco)
+  HISENSE_MERGE(turbo)
+  HISENSE_MERGE(quiet)
+  HISENSE_MERGE(display)
+  HISENSE_MERGE(heat8)
+  HISENSE_MERGE(sleep)
+#undef HISENSE_MERGE
+  into.beep = from.beep;
+}
+
+static bool single_group(uint8_t g) { return g != 0 && (g & (g - 1)) == 0; }
+
+CommandQueue::Push CommandQueue::push(const Command &cmd, bool special, uint32_t now, uint32_t special_gap) {
+  if (!special && this->len_ > 0) {
+    Item &last = this->items_[this->len_ - 1];
+    const uint8_t g = command_groups(cmd);
+    if (!last.special && single_group(g) && g != GROUP_SPECIAL && command_groups(last.cmd) == g) {
+      merge_command(last.cmd, cmd);
+      return Push::MERGED;
+    }
+  }
+  if (this->len_ >= CAPACITY)
+    return Push::FULL;
+  Item q;
+  q.cmd = cmd;
+  q.special = special;
+  q.not_before = now;
+  if (special) {
+    if (this->any_special_sent_ && !time_reached(now, this->last_special_at_ + special_gap))
+      q.not_before = this->last_special_at_ + special_gap;
+    for (size_t i = 0; i < this->len_; i++) {
+      if (this->items_[i].special) {
+        const uint32_t t = this->items_[i].not_before + special_gap;
+        if (!time_reached(q.not_before, t))
+          q.not_before = t;
+      }
+    }
+  }
+  this->items_[this->len_++] = q;
+  return Push::ADDED;
+}
+
+bool CommandQueue::has_ready(uint32_t now) const {
+  for (size_t i = 0; i < this->len_; i++)
+    if (time_reached(now, this->items_[i].not_before))
+      return true;
+  return false;
+}
+
+bool CommandQueue::pop_ready(uint32_t now, Item *out) {
+  for (size_t i = 0; i < this->len_; i++) {
+    if (!time_reached(now, this->items_[i].not_before))
+      continue;
+    *out = this->items_[i];
+    for (size_t j = i + 1; j < this->len_; j++)
+      this->items_[j - 1] = this->items_[j];
+    this->len_--;
+    if (out->special) {
+      this->last_special_at_ = now;
+      this->any_special_sent_ = true;
+    }
+    return true;
+  }
+  return false;
+}
+
 std::string describe_faults(const Faults &f) {
   static const BitName INDOOR[] = {
       {0x80, "Indoor temperature sensor"}, {0x40, "Indoor coil sensor"}, {0x20, "Humidity sensor"},
