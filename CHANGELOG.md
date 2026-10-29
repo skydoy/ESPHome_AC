@@ -8,6 +8,14 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-10-29
+### Added
+- ConnectLife-style controls: **Eco**, **Super** (turbo) and **Fan Mute** (quiet) switches, a
+  **Sleep Mode** select (Off, Sleep 1–4) and **Light On** / **Light Off** buttons. They stay in
+  sync with the climate presets and fan mode.
+- One diagnostic problem binary sensor per fault bit (19 in total, e.g. indoor coil sensor,
+  outdoor EEPROM, exhaust sensor, WiFi/indoor communication). The fault codes text sensor stays.
+
 ## [0.2.5] - 2026-10-29
 ### Added
 - Raw frame logging: `debug_frames` / `debug_frames_interval` options and an
@@ -73,7 +81,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.2...v0.2.3

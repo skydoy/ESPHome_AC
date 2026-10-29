@@ -58,6 +58,101 @@ void HisenseFrameLogSwitch::write_state(bool state) {
 }
 #endif
 
+#ifdef USE_SWITCH
+void HisenseFeatureSwitch::write_state(bool state) {
+  this->parent_->set_feature(this->feature_, state);
+  this->publish_state(state);
+}
+#endif
+#ifdef USE_SELECT
+void HisenseSleepSelect::control(size_t index) {
+  this->parent_->set_sleep_option(static_cast<uint8_t>(index));
+  this->publish_state(index);
+}
+#endif
+#ifdef USE_BUTTON
+void HisenseLightButton::press_action() { this->parent_->set_display(this->on_); }
+#endif
+
+// ---- Dedicated feature controls ---------------------------------------------------------------
+void HisenseAC::set_feature(Feature f, bool on) {
+  auto call = this->make_call();
+  if (f == Feature::QUIET) {
+    call.set_fan_mode(on ? climate::CLIMATE_FAN_QUIET : climate::CLIMATE_FAN_AUTO);
+  } else {
+    const climate::ClimatePreset p = f == Feature::ECO ? climate::CLIMATE_PRESET_ECO : climate::CLIMATE_PRESET_BOOST;
+    const bool active = !this->has_custom_preset() && this->preset.has_value() && *this->preset == p;
+    if (on)
+      call.set_preset(p);
+    else if (active)
+      call.set_preset(climate::CLIMATE_PRESET_NONE);
+    else
+      return;
+  }
+  call.perform();
+}
+
+void HisenseAC::set_sleep_option(uint8_t profile) {
+  const bool sleeping = !this->has_custom_preset() && this->preset.has_value() &&
+                        *this->preset == climate::CLIMATE_PRESET_SLEEP;
+  if (profile == 0) {
+    if (sleeping) {
+      auto call = this->make_call();
+      call.set_preset(climate::CLIMATE_PRESET_NONE);
+      call.perform();
+    }
+    return;
+  }
+  if (profile > 4)
+    profile = 4;
+  this->sleep_profile_ = profile;
+  if (sleeping) {
+    // Already in sleep: switch profile directly.
+    proto::Command c = this->base_cmd_();
+    c.has_sleep = true;
+    c.sleep = profile;
+    c.beep = true;
+    this->enqueue_(c, true);
+    this->hold_until_ = millis() + COMMAND_SETTLE_MS;
+    return;
+  }
+  auto call = this->make_call();
+  call.set_preset(climate::CLIMATE_PRESET_SLEEP);
+  call.perform();
+}
+
+void HisenseAC::sync_controls_(const proto::Status &s) {
+#ifdef USE_SWITCH
+  for (auto *sw : this->feature_switches_) {
+    bool v = false;
+    switch (sw->get_feature()) {
+      case Feature::ECO:
+        v = s.eco;
+        break;
+      case Feature::TURBO:
+        v = s.turbo;
+        break;
+      case Feature::QUIET:
+        v = s.quiet || s.fan_quiet_step;
+        break;
+    }
+    if (!s.power)
+      v = false;
+    if (!sw->has_state() || sw->state != v)
+      sw->publish_state(v);
+  }
+#endif
+#ifdef USE_SELECT
+  if (this->sleep_select_ != nullptr) {
+    size_t idx = (s.power && s.sleep > 0) ? (s.sleep > 4 ? 4 : s.sleep) : 0;
+    auto cur = this->sleep_select_->active_index();
+    if (!cur.has_value() || *cur != idx)
+      this->sleep_select_->publish_state(idx);
+  }
+#endif
+  (void) s;
+}
+
 // ---- Raw frame logging ------------------------------------------------------------------------
 void HisenseAC::set_debug_frames_runtime(bool on) {
   if (on && !this->debug_frames_)
@@ -668,6 +763,8 @@ void HisenseAC::apply_status_(const proto::Status &s) {
   if (this->queue_len_ != 0 || !reached(now, this->hold_until_))
     return;
 
+  this->sync_controls_(s);
+
   // ---- Climate entity ----
   bool changed = false;
   climate::ClimateMode m = climate::CLIMATE_MODE_OFF;
@@ -839,6 +936,26 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
   if (this->aux_heater_ != nullptr &&
       (force || !this->aux_heater_->has_state() || this->aux_heater_->state != s.aux_heater))
     this->aux_heater_->publish_state(s.aux_heater);
+  for (auto &fs : this->fault_sensors_) {
+    uint8_t b = 0;
+    switch (fs.group) {
+      case FaultGroup::INDOOR:
+        b = s.faults.indoor;
+        break;
+      case FaultGroup::MODULE:
+        b = s.faults.module;
+        break;
+      case FaultGroup::OUTDOOR:
+        b = s.faults.outdoor;
+        break;
+      case FaultGroup::PROTECT:
+        b = s.faults.protect;
+        break;
+    }
+    const bool on = (b & fs.mask) != 0;
+    if (force || !fs.sensor->has_state() || fs.sensor->state != on)
+      fs.sensor->publish_state(on);
+  }
 #endif
 #ifdef USE_TEXT_SENSOR
   if (this->fault_text_ != nullptr) {

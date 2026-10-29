@@ -7,7 +7,7 @@
 substitutions:
   name: hisense-ac
   friendly_name: Hisense AC
-  project_version: "0.2.5"
+  project_version: "0.2.6"
   update_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/manifest.json
 
 esphome:

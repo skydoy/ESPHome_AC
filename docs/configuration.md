@@ -9,9 +9,28 @@ The `hisense_ac` component (in [`components/hisense_ac`](../components/hisense_a
 | Fan modes | Auto, Quiet, Low, Medium-Low, Medium, Medium-High, High |
 | Swing | Vertical; horizontal and both when `horizontal_swing: true` |
 | Presets | Eco, Boost (turbo), Sleep, Heat 8C (+8 °C frost protection) |
-| Switches | AC display LED, beep on command, AC frame logging (diagnostic) |
+| Switches | AC display LED, Eco, Super (turbo), Fan Mute (quiet), beep on command, AC frame logging (diagnostic) |
+| Select | Sleep Mode: Off, Sleep 1–4 |
+| Buttons | Light On, Light Off |
 | Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, power, current, energy today |
-| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater |
+| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below) |
+
+Eco, Super, Fan Mute and Sleep Mode drive the same commands as the climate presets and the Quiet
+fan mode, and follow the AC's reported state, so both views stay in sync. Eco, Super and Sleep
+are mutually exclusive presets: turning one on turns the others off.
+
+Per-fault sensors (all optional, names as in [hisense-ac.yaml](../brands/hisense/hisense-ac.yaml)):
+`fault_indoor_temperature_sensor`, `fault_indoor_coil_sensor`, `fault_indoor_humidity_sensor`,
+`fault_water_tank_full`, `fault_indoor_fan_motor`, `fault_grille_protection`,
+`fault_zero_crossing`, `fault_indoor_outdoor_communication` (byte 39);
+`fault_display_communication`, `fault_keypad_communication`, `fault_wifi_communication`,
+`fault_electrical`, `fault_indoor_eeprom` (byte 40); `fault_outdoor_eeprom`,
+`fault_outdoor_coil_sensor`, `fault_discharge_sensor`, `fault_outdoor_temperature_sensor`
+(byte 64); `fault_overheat_protection`, `fault_high_discharge_temperature` (byte 66).
+
+Compared with the ConnectLife app/integration, these are **not** available on the RS-485 bus:
+cooling/heating capacity (BTU/h) and the "electricity reporting mode" setting (cloud side).
+Daily energy is the "Energy Today" sensor (integrated from power) and current is reported in A.
 
 Units without an electrical block, humidity sensor or outdoor block simply leave those sensors
 unavailable. Humidity, supply voltage and current are not published at all until the AC sends a
