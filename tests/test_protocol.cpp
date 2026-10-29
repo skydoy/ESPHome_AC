@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #include "../components/hisense_ac/hisense_protocol.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <vector>
@@ -360,6 +361,28 @@ static void test_commands() {
   CHECK(f[17] == 0x05);
 }
 
+static void test_hex_bytes() {
+  const uint8_t f[] = {0xF4, 0xF5, 0x00, 0x0A, 0xFF};
+  CHECK(hex_bytes(f, 5, 0, 16) == "F4 F5 00 0A FF");
+  CHECK(hex_bytes(f, 5, 3, 16) == "0A FF");
+  CHECK(hex_bytes(f, 5, 1, 2) == "F5 00");
+  CHECK(hex_bytes(f, 5, 5, 16).empty());
+  CHECK(hex_bytes(nullptr, 5, 0, 16).empty());
+}
+
+static void test_power_steps() {
+  // W41H1 160-byte frames: P = 4.15 * b55^2. The maintainer's unit at 28-30 Hz reads raw 4 and 5.
+  Status s;
+  s.has_electrical = true;
+  s.frame_len = 160;
+  s.power_raw_hi = 4;
+  CHECK(std::fabs(power_watts(s) - 66.4f) < 0.01f);
+  s.power_raw_hi = 5;
+  CHECK(std::fabs(power_watts(s) - 103.75f) < 0.01f);
+  s.power_raw_hi = 0;
+  CHECK(power_watts(s) == 0.0f);
+}
+
 int main() {
   test_templates();
   test_checksum_and_valid();
@@ -370,6 +393,8 @@ int main() {
   test_status_82_and_150();
   test_capabilities();
   test_commands();
+  test_hex_bytes();
+  test_power_steps();
   std::printf("%d passed, %d failed\n", g_passed, g_failed);
   return g_failed == 0 ? 0 : 1;
 }

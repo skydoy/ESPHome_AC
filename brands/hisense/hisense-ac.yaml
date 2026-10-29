@@ -36,6 +36,10 @@ climate:
     horizontal_swing: false
     # Sleep profile used by the SLEEP preset (1-4).
     sleep_profile: 1
+    # Raw frame logging at DEBUG level (status replies at most every debug_frames_interval,
+    # commands always). The "AC Frame Logging" switch below toggles it at runtime.
+    debug_frames: false
+    debug_frames_interval: 10s
     outdoor_temperature:
       name: "Outdoor Temperature"
       id: ac_outdoor_temperature
@@ -47,15 +51,20 @@ climate:
       name: "Compressor Frequency"
     compressor_target_frequency:
       name: "Compressor Target Frequency"
+    # Humidity, voltage and current are only reported by some units: hidden by default,
+    # and they stay "unknown" until the AC sends a real value.
     humidity:
       name: "Indoor Humidity"
+      disabled_by_default: true
     voltage:
       name: "Supply Voltage"
+      disabled_by_default: true
     power:
       name: "Power"
       id: ac_power
     current:
       name: "Current"
+      disabled_by_default: true
     connected:
       name: "AC Link"
       id: ac_link
@@ -74,6 +83,8 @@ climate:
       name: "AC Display"
     beep_switch:
       name: "AC Beep"
+    frame_log_switch:
+      name: "AC Frame Logging"
 
 sensor:
   - platform: total_daily_energy

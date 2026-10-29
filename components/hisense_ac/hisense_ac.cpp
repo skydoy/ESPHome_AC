@@ -44,7 +44,45 @@ void HisenseBeepSwitch::write_state(bool state) {
   this->parent_->set_beep_runtime(state);
   this->publish_state(state);
 }
+
+void HisenseFrameLogSwitch::setup() {
+  auto initial = this->get_initial_state_with_restore_mode();
+  bool on = initial.has_value() ? *initial : this->parent_->get_debug_frames();
+  this->parent_->set_debug_frames_runtime(on);
+  this->publish_state(on);
+}
+
+void HisenseFrameLogSwitch::write_state(bool state) {
+  this->parent_->set_debug_frames_runtime(state);
+  this->publish_state(state);
+}
 #endif
+
+// ---- Raw frame logging ------------------------------------------------------------------------
+void HisenseAC::set_debug_frames_runtime(bool on) {
+  if (on && !this->debug_frames_)
+    this->status_dumped_ = false;  // dump the next status frame right away
+  this->debug_frames_ = on;
+  ESP_LOGI(TAG, "Raw frame logging %s", on ? "ON (DEBUG level)" : "off");
+}
+
+void HisenseAC::log_frame_(const char *what, const uint8_t *f, size_t len) {
+  // 16 bytes per line keeps every line well inside the logger buffer.
+  ESP_LOGD(TAG, "%s frame: class %02X sub %02X, %u bytes", what, f[proto::OFF_CLASS], f[proto::OFF_SUB],
+           (unsigned) len);
+  for (size_t off = 0; off < len; off += 16)
+    ESP_LOGD(TAG, "  %03u: %s", (unsigned) off, proto::hex_bytes(f, len, off, 16).c_str());
+  if (f[proto::OFF_CLASS] == proto::CLASS_STATUS && f[proto::OFF_SUB] != proto::SUB_PRODUCT_TYPE && len > 46) {
+    // The bytes still being calibrated, in decimal (temperatures signed).
+    auto b = [&](size_t i) -> int { return i < len ? static_cast<int>(f[i]) : -1; };
+    auto sb = [&](size_t i) -> int { return i < len ? static_cast<int>(static_cast<int8_t>(f[i])) : -999; };
+    ESP_LOGD(TAG, "  key: room b20=%d coil b21=%d b22=%d b23=%d | comp b41=%d b42=%d b43=%d | out b44=%d b45=%d",
+             sb(20), sb(21), b(22), b(23), b(41), b(42), b(43), sb(44), sb(45));
+    if (len >= 150)
+      ESP_LOGD(TAG, "  key: V b50=%d b51=%d | P b55=%d b56=%d b60=%d b71=%d | b144=%d b145=%d", b(50), b(51), b(55),
+               b(56), b(60), b(71), b(144), b(145));
+  }
+}
 
 // ---- Setup / config ---------------------------------------------------------------------------
 void HisenseAC::setup() {
@@ -73,6 +111,8 @@ void HisenseAC::dump_config() {
                 this->reply_timeout_ms_);
   ESP_LOGCONFIG(TAG, "  Special command gap: %" PRIu32 " ms", this->special_gap_ms_);
   ESP_LOGCONFIG(TAG, "  Device type pair: %02X %02X", this->type_hi_, this->type_lo_);
+  ESP_LOGCONFIG(TAG, "  Raw frame logging: %s (status every %" PRIu32 " ms)", ONOFF(this->debug_frames_),
+                this->debug_interval_ms_);
 }
 
 const char *HisenseAC::get_link_state_text() const {
@@ -137,6 +177,17 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
   this->frames_ok_++;
   const uint8_t cls = f[proto::OFF_CLASS];
   ESP_LOGV(TAG, "RX class %02X sub %02X len %u", cls, f[proto::OFF_SUB], (unsigned) len);
+  if (this->debug_frames_ && cls == proto::CLASS_STATUS) {
+    const uint32_t now = millis();
+    // Capability replies are rare: always log them. Status replies: at most one per interval.
+    if (f[proto::OFF_SUB] == proto::SUB_PRODUCT_TYPE) {
+      this->log_frame_("RX capabilities", f, len);
+    } else if (!this->status_dumped_ || reached(now, this->last_status_dump_ + this->debug_interval_ms_)) {
+      this->status_dumped_ = true;
+      this->last_status_dump_ = now;
+      this->log_frame_("RX status", f, len);
+    }
+  }
 
   switch (cls) {
     case proto::CLASS_DEVTYPE: {
@@ -250,6 +301,10 @@ void HisenseAC::run_step_(uint32_t now) {
       }
       proto::build_command(q.cmd, this->type_hi_, this->type_lo_, f);
       ESP_LOGD(TAG, "TX command%s (%u queued)", q.special ? " (special)" : "", (unsigned) this->queue_len_);
+      if (this->debug_frames_) {
+        this->log_frame_("TX command", f, proto::COMMAND_LEN);
+        this->status_dumped_ = false;  // show the AC's answer to this command too
+      }
       this->hold_until_ = now + COMMAND_SETTLE_MS;
       this->send_(f, proto::COMMAND_LEN, 0, now);
       return;
@@ -762,12 +817,21 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
   pub(this->outdoor_coil_temp_, od ? static_cast<float>(s.outdoor_coil_temp) : NAN);
   pub(this->compressor_hz_, s.has_outdoor ? static_cast<float>(s.compressor_hz) : NAN);
   pub(this->compressor_target_hz_, s.has_outdoor ? static_cast<float>(s.compressor_target_hz) : NAN);
-  pub(this->humidity_, s.has_humidity ? static_cast<float>(s.humidity) : NAN);
+  // Humidity, voltage and current are optional: many units never report them. Until a real value
+  // arrives nothing is published, so they stay "unknown" instead of flapping NaN updates.
+  const bool hum_ok = s.has_humidity && (!this->caps_.valid || this->caps_.humidity);
+  this->seen_humidity_ |= hum_ok;
+  if (this->seen_humidity_)
+    pub(this->humidity_, hum_ok ? static_cast<float>(s.humidity) : NAN);
   const float watts = proto::power_watts(s);
+  const bool watts_ok = watts >= 0 && watts <= 6000.0f;
   const bool volts_ok = s.has_electrical && s.voltage >= 50;
-  pub(this->voltage_, volts_ok ? static_cast<float>(s.voltage) : NAN);
-  pub(this->power_, watts >= 0 && watts <= 6000.0f ? watts : NAN);
-  pub(this->current_, (volts_ok && watts >= 0 && watts <= 6000.0f) ? watts / (s.voltage * 0.95f) : NAN);
+  this->seen_voltage_ |= volts_ok;
+  if (this->seen_voltage_) {
+    pub(this->voltage_, volts_ok ? static_cast<float>(s.voltage) : NAN);
+    pub(this->current_, (volts_ok && watts_ok) ? watts / (s.voltage * 0.95f) : NAN);
+  }
+  pub(this->power_, watts_ok ? watts : NAN);
 #endif
 #ifdef USE_BINARY_SENSOR
   if (this->fault_ != nullptr && (force || !this->fault_->has_state() || this->fault_->state != s.faults.any()))

@@ -63,7 +63,7 @@ Short units send 82 bytes, W4G1-type units 150 bytes, the W41H1 160 bytes. Field
 | 18 | Power `& 0C`, mode `(b >> 4) & 7` (>= 4 = auto) |
 | 19 | Set point |
 | 20 | Room temperature (signed) |
-| 21 | Indoor coil temperature (signed) |
+| 21 | Indoor coil temperature (signed; unconfirmed on the W41H1, read room temperature in Cool) |
 | 22 / 23 | Humidity set point / indoor humidity (0 or > 100 = not available) |
 | 26 | bit 1: panel is in °F |
 | 35 | bit 7 vertical swing, bit 6 horizontal swing, bit 4 aux heater, bit 2 eco, bit 1 turbo |
@@ -73,7 +73,7 @@ Short units send 82 bytes, W4G1-type units 150 bytes, the W41H1 160 bytes. Field
 | 41 / 42 | Compressor target / actual frequency (Hz) |
 | 44 / 45 | Outdoor / outdoor coil temperature (signed °C; both `EC` = not valid yet) |
 | 50 | Supply voltage (long frames only) |
-| 55 / 56 | Power: 160-byte frames `4.15 * b55^2` W (bench fit), 150-byte frames `b55:b56` W |
+| 55 / 56 | Power: 160-byte frames `4.15 * b55^2` W (bench fit, coarse at low load), 150-byte frames `b55:b56` W |
 | 64 | Outdoor fault bits |
 | 66 | Protection bits (bit 7 = +8 °C mode) |
 | 77 | bit 0: +8 °C mode (alternative location) |

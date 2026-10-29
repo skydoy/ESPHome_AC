@@ -394,6 +394,22 @@ std::string describe_faults(const Faults &f) {
   return out;
 }
 
+std::string hex_bytes(const uint8_t *f, size_t len, size_t off, size_t n) {
+  static const char HEX[] = "0123456789ABCDEF";
+  std::string out;
+  if (f == nullptr || off >= len)
+    return out;
+  const size_t end = (n > len - off) ? len : off + n;
+  out.reserve((end - off) * 3);
+  for (size_t i = off; i < end; i++) {
+    if (i != off)
+      out += ' ';
+    out += HEX[f[i] >> 4];
+    out += HEX[f[i] & 0x0F];
+  }
+  return out;
+}
+
 float power_watts(const Status &s) {
   if (!s.has_electrical)
     return -1.0f;
