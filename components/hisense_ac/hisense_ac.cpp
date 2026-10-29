@@ -23,6 +23,8 @@ static const uint8_t BOOT_TRIES = 5;
 static const uint8_t MAX_COMMANDS_PER_CYCLE = 2;
 // Sensors are re-published at least this often even if unchanged.
 static const uint32_t SENSOR_REFRESH_MS = 60000;
+// Bus error counters are checked this often and only published when they changed.
+static const uint32_t BUS_ERRORS_CHECK_MS = 10000;
 
 static inline bool reached(uint32_t now, uint32_t t) { return static_cast<int32_t>(now - t) >= 0; }
 
@@ -287,6 +289,12 @@ void HisenseAC::set_link_(LinkState s) {
 void HisenseAC::loop() {
   this->read_uart_();
   const uint32_t now = millis();
+#ifdef USE_SENSOR
+  if (reached(now, this->next_bus_errors_check_)) {
+    this->next_bus_errors_check_ = now + BUS_ERRORS_CHECK_MS;
+    this->publish_bus_errors_();
+  }
+#endif
   if (this->waiting_) {
     if (!reached(now, this->sent_at_ + this->reply_timeout_ms_))
       return;
@@ -349,6 +357,25 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
         this->type_hi_ = hi;
         this->type_lo_ = lo;
         this->handshake_ok_ = true;
+#ifdef USE_TEXT_SENSOR
+        if (this->device_type_text_ != nullptr) {
+          char buf[8];
+          snprintf(buf, sizeof(buf), "%02X %02X", hi, lo);
+          publish_text_if_changed_(this->device_type_text_, buf);
+        }
+#endif
+      }
+      break;
+    }
+    case proto::CLASS_VERSION: {
+      // Sent once at boot. The reply layout is unconfirmed, so the raw frame is always logged.
+      this->log_frame_("RX version", f, len);
+      proto::Version v;
+      if (proto::parse_version(f, len, &v)) {
+        ESP_LOGI(TAG, "AC version reply: %s", v.text.c_str());
+#ifdef USE_TEXT_SENSOR
+        publish_text_if_changed_(this->ac_version_text_, v.text);
+#endif
       }
       break;
     }
@@ -362,6 +389,10 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
           this->caps_ = c;
           ESP_LOGI(TAG, "Capabilities: heat/cool=%d power-save=%d purify=%d fan-mute=%d 8C-heat=%d humidity=%d",
                    c.cool_heat, c.power_save, c.purify, c.fan_mute, c.heat8, c.humidity);
+#ifdef USE_TEXT_SENSOR
+          if (this->capabilities_text_ != nullptr)
+            publish_text_if_changed_(this->capabilities_text_, proto::describe_capabilities(c));
+#endif
         }
       } else {
         proto::Status s;
@@ -791,6 +822,10 @@ void HisenseAC::apply_status_(const proto::Status &s) {
   this->have_status_ = true;
   if (unit_changed)
     ESP_LOGI(TAG, "Status frame %u bytes, panel unit %s", (unsigned) s.frame_len, s.fahrenheit ? "F" : "C");
+#ifdef USE_TEXT_SENSOR
+  if (this->panel_unit_text_ != nullptr && (unit_changed || !this->panel_unit_text_->has_state()))
+    publish_text_if_changed_(this->panel_unit_text_, s.fahrenheit ? "Fahrenheit" : "Celsius");
+#endif
 
   this->publish_sensors_(s);
 
@@ -935,6 +970,28 @@ void HisenseAC::apply_status_(const proto::Status &s) {
     this->publish_state();
 }
 
+void HisenseAC::publish_bus_errors_() {
+#ifdef USE_SENSOR
+  const uint32_t cs = this->rx_.checksum_errors();
+  const uint32_t fr = this->rx_.framing_errors();
+  const bool first = !this->bus_errors_published_;
+  if (this->checksum_errors_ != nullptr && (first || cs != this->last_checksum_errors_))
+    this->checksum_errors_->publish_state(static_cast<float>(cs));
+  if (this->framing_errors_ != nullptr && (first || fr != this->last_framing_errors_))
+    this->framing_errors_->publish_state(static_cast<float>(fr));
+  this->last_checksum_errors_ = cs;
+  this->last_framing_errors_ = fr;
+  this->bus_errors_published_ = true;
+#endif
+}
+
+#ifdef USE_TEXT_SENSOR
+void HisenseAC::publish_text_if_changed_(text_sensor::TextSensor *s, const std::string &v) {
+  if (s != nullptr && (!s->has_state() || s->state != v))
+    s->publish_state(v);
+}
+#endif
+
 void HisenseAC::publish_sensors_(const proto::Status &s) {
   const uint32_t now = millis();
   const bool force = reached(now, this->last_sensor_force_ + SENSOR_REFRESH_MS);
@@ -976,6 +1033,11 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
     pub(this->current_, (volts_ok && watts_ok) ? watts / (s.voltage * 0.95f) : NAN);
   }
   pub(this->power_, watts_ok ? watts : NAN);
+  // Desired humidity (byte 22): 0 on units without humidity control, so it stays "unknown" there.
+  const bool hset_ok = s.humidity_setting > 0 && s.humidity_setting <= 100;
+  this->seen_humidity_setpoint_ |= hset_ok;
+  if (this->seen_humidity_setpoint_)
+    pub(this->humidity_setpoint_, hset_ok ? static_cast<float>(s.humidity_setting) : NAN);
 #endif
 #ifdef USE_BINARY_SENSOR
   if (this->fault_ != nullptr && (!this->fault_->has_state() || this->fault_->state != s.faults.any()))

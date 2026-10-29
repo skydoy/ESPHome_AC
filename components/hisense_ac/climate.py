@@ -23,6 +23,7 @@ from esphome.const import (
     ENTITY_CATEGORY_CONFIG,
     ENTITY_CATEGORY_DIAGNOSTIC,
     STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
     UNIT_AMPERE,
     UNIT_CELSIUS,
     UNIT_HERTZ,
@@ -100,6 +101,13 @@ CONF_FAULT = "fault"
 CONF_AUX_HEATER = "aux_heater"
 CONF_FAULT_CODES = "fault_codes"
 CONF_LINK_STATUS = "link_status"
+CONF_HUMIDITY_SETPOINT = "humidity_setpoint"
+CONF_BUS_CHECKSUM_ERRORS = "bus_checksum_errors"
+CONF_BUS_FRAMING_ERRORS = "bus_framing_errors"
+CONF_PANEL_UNIT = "panel_unit"
+CONF_CAPABILITIES = "capabilities"
+CONF_DEVICE_TYPE = "device_type"
+CONF_AC_FIRMWARE_VERSION = "ac_firmware_version"
 CONF_DISPLAY = "display"
 CONF_BEEP_SWITCH = "beep_switch"
 CONF_FRAME_LOG_SWITCH = "frame_log_switch"
@@ -181,6 +189,21 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_CURRENT,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
+            cv.Optional(CONF_HUMIDITY_SETPOINT): sensor.sensor_schema(
+                unit_of_measurement=UNIT_PERCENT,
+                icon="mdi:water-percent",
+                accuracy_decimals=0,
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            ),
+            **{
+                cv.Optional(k): sensor.sensor_schema(
+                    icon="mdi:counter",
+                    accuracy_decimals=0,
+                    state_class=STATE_CLASS_TOTAL_INCREASING,
+                    entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+                )
+                for k in (CONF_BUS_CHECKSUM_ERRORS, CONF_BUS_FRAMING_ERRORS)
+            },
             **{
                 cv.Optional(k): binary_sensor.binary_sensor_schema(
                     device_class=DEVICE_CLASS_PROBLEM,
@@ -218,6 +241,15 @@ CONFIG_SCHEMA = (
                 icon="mdi:lan-connect",
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
+            **{
+                cv.Optional(k): text_sensor.text_sensor_schema(icon=icon, entity_category=ENTITY_CATEGORY_DIAGNOSTIC)
+                for k, icon in (
+                    (CONF_PANEL_UNIT, "mdi:temperature-celsius"),
+                    (CONF_CAPABILITIES, "mdi:format-list-checks"),
+                    (CONF_DEVICE_TYPE, "mdi:identifier"),
+                    (CONF_AC_FIRMWARE_VERSION, "mdi:chip"),
+                )
+            },
             # Switches
             cv.Optional(CONF_DISPLAY): switch.switch_schema(
                 HisenseDisplaySwitch,
@@ -256,6 +288,9 @@ _SENSORS = {
     CONF_VOLTAGE: "set_voltage_sensor",
     CONF_POWER: "set_power_sensor",
     CONF_CURRENT: "set_current_sensor",
+    CONF_HUMIDITY_SETPOINT: "set_humidity_setpoint_sensor",
+    CONF_BUS_CHECKSUM_ERRORS: "set_checksum_errors_sensor",
+    CONF_BUS_FRAMING_ERRORS: "set_framing_errors_sensor",
 }
 _BINARY_SENSORS = {
     CONF_CONNECTED: "set_connected_binary_sensor",
@@ -265,6 +300,10 @@ _BINARY_SENSORS = {
 _TEXT_SENSORS = {
     CONF_FAULT_CODES: "set_fault_text_sensor",
     CONF_LINK_STATUS: "set_link_text_sensor",
+    CONF_PANEL_UNIT: "set_panel_unit_text_sensor",
+    CONF_CAPABILITIES: "set_capabilities_text_sensor",
+    CONF_DEVICE_TYPE: "set_device_type_text_sensor",
+    CONF_AC_FIRMWARE_VERSION: "set_ac_firmware_version_text_sensor",
 }
 
 

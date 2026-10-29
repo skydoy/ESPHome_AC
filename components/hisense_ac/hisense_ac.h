@@ -113,6 +113,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_voltage_sensor(sensor::Sensor *s) { this->voltage_ = s; }
   void set_power_sensor(sensor::Sensor *s) { this->power_ = s; }
   void set_current_sensor(sensor::Sensor *s) { this->current_ = s; }
+  void set_humidity_setpoint_sensor(sensor::Sensor *s) { this->humidity_setpoint_ = s; }
+  void set_checksum_errors_sensor(sensor::Sensor *s) { this->checksum_errors_ = s; }
+  void set_framing_errors_sensor(sensor::Sensor *s) { this->framing_errors_ = s; }
 #endif
 #ifdef USE_BINARY_SENSOR
   void set_connected_binary_sensor(binary_sensor::BinarySensor *s) { this->connected_ = s; }
@@ -125,6 +128,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
 #ifdef USE_TEXT_SENSOR
   void set_fault_text_sensor(text_sensor::TextSensor *s) { this->fault_text_ = s; }
   void set_link_text_sensor(text_sensor::TextSensor *s) { this->link_text_ = s; }
+  void set_panel_unit_text_sensor(text_sensor::TextSensor *s) { this->panel_unit_text_ = s; }
+  void set_capabilities_text_sensor(text_sensor::TextSensor *s) { this->capabilities_text_ = s; }
+  void set_device_type_text_sensor(text_sensor::TextSensor *s) { this->device_type_text_ = s; }
+  void set_ac_firmware_version_text_sensor(text_sensor::TextSensor *s) { this->ac_version_text_ = s; }
 #endif
 #ifdef USE_SWITCH
   void set_display_switch(HisenseDisplaySwitch *s) { this->display_switch_ = s; }
@@ -188,6 +195,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void log_frame_(const char *what, const uint8_t *f, size_t len);
   void sync_controls_(const proto::Status &s);
   void sync_controls_from_climate_();
+  void publish_bus_errors_();
+#ifdef USE_TEXT_SENSOR
+  static void publish_text_if_changed_(text_sensor::TextSensor *s, const std::string &v);
+#endif
 
   // Bus state
   proto::FrameAssembler rx_;
@@ -246,6 +257,14 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   sensor::Sensor *voltage_{nullptr};
   sensor::Sensor *power_{nullptr};
   sensor::Sensor *current_{nullptr};
+  sensor::Sensor *humidity_setpoint_{nullptr};
+  sensor::Sensor *checksum_errors_{nullptr};
+  sensor::Sensor *framing_errors_{nullptr};
+  bool seen_humidity_setpoint_{false};
+  bool bus_errors_published_{false};
+  uint32_t last_checksum_errors_{0};
+  uint32_t last_framing_errors_{0};
+  uint32_t next_bus_errors_check_{0};
 #endif
 #ifdef USE_BINARY_SENSOR
   binary_sensor::BinarySensor *connected_{nullptr};
@@ -261,6 +280,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
 #ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *fault_text_{nullptr};
   text_sensor::TextSensor *link_text_{nullptr};
+  text_sensor::TextSensor *panel_unit_text_{nullptr};
+  text_sensor::TextSensor *capabilities_text_{nullptr};
+  text_sensor::TextSensor *device_type_text_{nullptr};
+  text_sensor::TextSensor *ac_version_text_{nullptr};
 #endif
 #ifdef USE_SWITCH
   HisenseDisplaySwitch *display_switch_{nullptr};

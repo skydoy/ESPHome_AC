@@ -8,6 +8,17 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.13] - 2026-10-29
+### Added
+- **AC Firmware Version** (diagnostic): the AC's reply to the `07` version request at boot.
+  The reply layout is not confirmed yet, so it is decoded best effort (text if printable,
+  otherwise the protocol word from bytes 18/19 plus the raw bytes) and the raw frame is logged.
+- **AC Bus Checksum Errors** / **AC Bus Framing Errors** (diagnostic, total increasing): RS-485
+  frame error counters since boot, published only when they change (checked every 10 s).
+- Hidden by default (diagnostic, enable in Home Assistant if needed): **Humidity Set Point**
+  (status byte 22), **AC Panel Unit** (Celsius/Fahrenheit), **AC Capabilities** (ProductType
+  reply as a list) and **AC Device Type** (`0A` type pair).
+
 ## [0.2.12] - 2026-10-29
 ### Changed
 - **Adopted devices update with just *Install*, no YAML edits.** Adoption (`dashboard_import`)
@@ -193,7 +204,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...HEAD
+[0.2.13]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...v0.2.10
