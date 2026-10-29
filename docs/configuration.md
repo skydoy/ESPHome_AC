@@ -99,11 +99,20 @@ The backlight turns off after 30 s. It wakes on button A or B, or when the mode,
 link or fault changes. The buttons only wake the screen. During the first 5 minutes after boot
 the screen stays on while Wi-Fi or the AC link is down.
 
+## Status LED and button (ATOM Lite)
+[`core/boards/atom-lite.yaml`](../core/boards/atom-lite.yaml) has no screen. The RGB LED shows
+**blue** (no Wi-Fi / setup mode), **red** (no AC link) or **green** (link OK). Green turns off
+after 30 s (`status_led_timeout_ms`, `"0"` = always on) and stays on during the first 5 minutes
+after boot; red and blue stay on. A short press on the button shows the status again. Holding it
+turns the LED white; after **10 s** it does a factory reset. The **Status LED** config switch
+turns the LED off entirely. `status_led_brightness` (0.0–1.0, default 0.4) sets the brightness.
+
 ## Updates
-- **OTA:** the `Firmware Update` entity installs new releases from
-  `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json`.
+- **OTA:** the `Firmware Update` entity installs new releases from the board's manifest:
+  `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json` (Stick) or
+  `https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json` (ATOM).
 - **Adopt:** the device announces `dashboard_import`, so the ESPHome Device Builder can adopt
-  it and build your own copy from [`devices/hisense-m5stickc-plus2.yaml`](../devices/hisense-m5stickc-plus2.yaml).
+  it and build your own copy from its device config.
 - Build it yourself from remote packages: [`examples/my-ac-livingroom.yaml`](../examples/my-ac-livingroom.yaml).
 
 ### API encryption and OTA password (optional)
@@ -139,7 +148,7 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 ## Repository layout
 | Path | What |
 |---|---|
-| `devices/hisense-m5stickc-plus2.yaml` | Device config (core + board + brand) built by CI and offered by the web installer |
+| `devices/hisense-m5stickc-plus2.yaml`, `devices/hisense-atom-lite-tail485.yaml` | Device configs (core + board + brand) built by CI and offered by the web installer |
 | `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update |
 | `brands/hisense/` | Hisense package, wiring, W41H1/W4xx notes and protocol notes |
 | `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |

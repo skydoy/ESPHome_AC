@@ -10,15 +10,24 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-env:
-  # Device config to build and the folder it is published to on GitHub Pages.
-  # The Hisense device keeps "firmware/" so the existing OTA manifest URL keeps working.
-  # When more brands are supported, add their device configs here (e.g. as a matrix).
-  DEVICE_YAML: devices/hisense-m5stickc-plus2.yaml
-  SITE_DIR: firmware
 jobs:
   build:
+    # One installer build per device. Each device has its own folder (and manifest.json) on
+    # GitHub Pages. The M5StickC Plus2 keeps "firmware/" so existing OTA manifest URLs keep working.
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: m5stickc-plus2
+            yaml: devices/hisense-m5stickc-plus2.yaml
+            site_dir: firmware
+          - key: atom-lite-tail485
+            yaml: devices/hisense-atom-lite-tail485.yaml
+            site_dir: firmware/atom-lite-tail485
+    env:
+      DEVICE_YAML: ${{ matrix.yaml }}
+      SITE_DIR: ${{ matrix.site_dir }}
     steps:
       - uses: actions/checkout@v7
       - name: Build the components from this checkout (not from @main)
@@ -38,26 +47,40 @@ jobs:
           version: "2026.10.1"
           complete-manifest: true
           release-url: ${{ github.server_url }}/${{ github.repository }}/releases
+      - name: Stage the firmware in its Pages folder
+        run: |
+          mkdir -p "out/$SITE_DIR"
+          cp -r "${{ steps.esphome.outputs.name }}"/* "out/$SITE_DIR/"
+          ls -R out
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fw-${{ matrix.key }}
+          path: out
+          if-no-files-found: error
+  pages:
+    # Installer page + every device folder in one Pages artifact.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: fw-*
+          merge-multiple: true
+          path: site
       - name: Assemble Pages site
         run: |
-          mkdir -p "site/$SITE_DIR"
           cp static/* site/
-          cp -r "${{ steps.esphome.outputs.name }}"/* "site/$SITE_DIR/"
           ls -R site
+          test -f site/firmware/manifest.json
+          test -f site/firmware/atom-lite-tail485/manifest.json
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
-      - name: Keep the firmware images for the release job
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v7
-        with:
-          name: firmware
-          path: ${{ steps.esphome.outputs.name }}
-          if-no-files-found: error
   deploy:
     # Publish the installer and the OTA manifest only for release tags (or a manual run).
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
-    needs: build
+    needs: pages
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -82,7 +105,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
-          name: firmware
+          pattern: fw-*
+          merge-multiple: true
           path: fw
       - name: Release notes from CHANGELOG.md
         run: |
@@ -105,9 +129,10 @@ jobs:
       - name: Prepare assets
         run: |
           mkdir assets
-          for f in fw/*.factory.bin fw/*.ota.bin; do
+          for f in $(find fw -name '*.factory.bin' -o -name '*.ota.bin' | sort); do
             b=$(basename "$f"); cp "$f" "assets/${b%%.*}-${TAG}.${b#*.}"
           done
+          test "$(ls assets | wc -l)" -ge 4   # factory + ota for every device
           (cd assets && sha256sum * > SHA256SUMS.txt)
           ls -l assets && cat assets/SHA256SUMS.txt
       - name: Create or update the release

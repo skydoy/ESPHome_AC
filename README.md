@@ -13,8 +13,8 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue" alt="License: PolyForm Noncommercial"></a>
 </p>
 
-Replace your **Hisense** AC's Wi-Fi module (AEH-W4x / **AEH-W41H1**) with an **M5StickC Plus2 +
-RS485 Hat** and control it locally from Home Assistant. No cloud, no app.
+Replace your **Hisense** AC's Wi-Fi module (AEH-W4x / **AEH-W41H1**) with a small M5Stack ESP32
+board and control it locally from Home Assistant. No cloud, no app.
 
 Free for personal and non-commercial use. Forks welcome. Commercial use is not permitted.
 
@@ -29,9 +29,19 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
 <!-- TODO: photo of the M5StickC Plus2 + RS485 Hat installed in the indoor unit (docs/img/installed.jpg) -->
 <!-- TODO: GIF of the status screen cycling through states (docs/img/screen.gif) -->
 
+## Hardware
+| Board | What you get | Approx. price |
+|---|---|---|
+| [M5Stack ATOM Lite](https://docs.m5stack.com/en/core/ATOM%20Lite) + [ATOM Tail485](https://docs.m5stack.com/en/atom/tail485) | Cheapest. RGB status LED, button for status / factory reset | ≈ US$15 ($7.50 + $6.95) |
+| [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) + [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) | Status screen, two buttons (the Plus2 is end-of-life at the M5Stack shop) | ≈ US$28 ($19.95 + ≈ $8) |
+
+Prices are M5Stack shop list prices, before shipping and tax. Wiring for both:
+[docs/wiring.md](docs/wiring.md).
+
 ## Install in 3 steps
-1. **Flash:** plug the Stick into your computer by USB and open the
-   **[web installer](https://skydoy.github.io/ESPHome_AC/)** (Chrome or Edge) → *Connect* → *Install*.
+1. **Flash:** plug the board into your computer by USB, open the
+   **[web installer](https://skydoy.github.io/ESPHome_AC/)** (Chrome or Edge), pick your board →
+   *Connect* → *Install*. (ATOM: flash before fitting the Tail485, it uses the USB-C port.)
 2. **Wire:** AC off at the breaker, measure the plug, connect it as shown below
    ([full guide](docs/wiring.md)).
 3. **Connect:** join the `Hisense-AC Setup` Wi-Fi hotspot (or use Improv in the installer or
@@ -43,7 +53,7 @@ without an API key; to add one (recommended), see
 
 [![Wiring diagram](docs/wiring.svg)](docs/wiring.md)
 
-> ⚠️ **G0 boot pin:** if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up from
+> ⚠️ **G0 boot pin (Stick only):** if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up from
 > G0 to 3.3 V. [Details](docs/wiring.md#3-boot-pin-g0-read-this-before-closing-the-ac)
 
 ## Features
@@ -53,7 +63,7 @@ without an API key; to add one (recommended), see
   power, current, energy today (when the unit reports them)
 - AEH-W41H1 link handshake and 82 / 150 / 160-byte status frames
 - Diagnostics: link state, fault codes, reset reason
-- Status screen with auto-off; OTA auto-update; `dashboard_import` adoption
+- Status screen (Stick) or RGB status LED (ATOM); OTA auto-update; `dashboard_import` adoption
 
 ## Links
 | What | Where |
@@ -65,7 +75,7 @@ without an API key; to add one (recommended), see
 | Hardware details | [brands/hisense/hardware.md](brands/hisense/hardware.md) |
 | Protocol | [brands/hisense/protocol.md](brands/hisense/protocol.md) |
 | Adapters and other brands | [adapters/README.md](adapters/README.md) |
-| Dashboard import / own build | [devices/hisense-m5stickc-plus2.yaml](devices/hisense-m5stickc-plus2.yaml), [examples/](examples/my-ac-livingroom.yaml) |
+| Dashboard import / own build | [Stick](devices/hisense-m5stickc-plus2.yaml) / [ATOM](devices/hisense-atom-lite-tail485.yaml) device configs, [examples/](examples/my-ac-livingroom.yaml) |
 | Contributing (new brands) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Compatible models and modules | [docs/compatibility.md](docs/compatibility.md) |
 | Changelog and releases | [CHANGELOG.md](CHANGELOG.md), [Releases](https://github.com/skydoy/ESPHome_AC/releases) |

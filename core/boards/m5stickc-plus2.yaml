@@ -7,6 +7,7 @@
 substitutions:
   ac_tx_pin: GPIO0
   ac_rx_pin: GPIO26
+  ac_tx_ignore_strapping: "true"   # G0 is a strapping pin, fixed by the Hat wiring
 
 esp32:
   board: esp32dev        # ESP32-PICO-V3-02; there is no dedicated PlatformIO board for the Plus2

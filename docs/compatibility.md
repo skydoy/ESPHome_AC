@@ -19,6 +19,10 @@ Status key:
 |---|---|---|---|---|---|
 | Hisense | maintainer's unit | AEH-W41H1 | 5 V | ✅ Working (maintainer-tested, v0.2.2) | [Details below](#aeh-w41h1-maintainers-unit) |
 
+Boards: the maintainer tested the M5StickC Plus2 + RS485 Hat. The ATOM Lite + Tail485 build
+(v0.2.7) uses the same protocol code but is not yet hardware-tested; reports
+welcome.
+
 ### AEH-W41H1 (maintainer's unit)
 Tested 2026-10-28 on an M5StickC Plus2 + RS485 Hat, powered from the 5 V (X) wire.
 

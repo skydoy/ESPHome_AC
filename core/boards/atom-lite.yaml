@@ -1,0 +1,142 @@
+# Board: M5Stack ATOM Lite (ESP32-PICO-D4, 4 MB flash) + ATOM Tail485 (SKU T002).
+#
+# Brand agnostic. "ac_tx_pin"/"ac_rx_pin" are the UART pins the brand package uses to talk to
+# the AC. Official M5Stack pin map for the Tail485 (it plugs into the ATOM's Grove port and
+# USB-C): G26 = TX, G32 = RX (M5Stack example: Serial2.begin(..., RX 32, TX 26)).
+# The ATOMIC RS485 Base uses G22 = RX, G19 = TX instead; override the two substitutions for it.
+#
+# No screen: the RGB LED (SK6812 on G27) shows the state and the button (G39) is a
+# screen-less status / factory-reset button.
+#
+#   LED blue   Wi-Fi not connected (setup hotspot / Improv active)
+#   LED red    Wi-Fi OK but no AC link (check A/B, power)
+#   LED green  AC link OK (turns off after ${status_led_timeout_ms} ms; problems stay lit)
+#   LED white  button held: keep holding for a factory reset (blinks fast just before it)
+#
+#   Short press: show the status for ${status_led_timeout_ms} ms.
+#   Hold 10 s:   factory reset (erases Wi-Fi and settings, then reboots into setup mode).
+#
+# Uses the generic ids "ac_link" and "ac_fault" from the brand package.
+substitutions:
+  ac_tx_pin: GPIO26
+  ac_rx_pin: GPIO32
+  ac_tx_ignore_strapping: "false"     # G26 is not a strapping pin
+  status_led_timeout_ms: "30000"      # "0" keeps the green LED on all the time
+  status_led_brightness: "0.4"      # 0.0-1.0
+
+esp32:
+  board: m5stack-atom
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+globals:
+  - id: led_awake_until
+    type: uint32_t
+    initial_value: "0"
+  - id: led_hold_stage        # 0 = normal, 1 = button held (white), 2 = reset imminent
+    type: uint8_t
+    initial_value: "0"
+  - id: led_last_color
+    type: uint32_t
+    initial_value: "0xFFFFFFFF"
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_rgb
+    name: "Status LED"
+    pin: GPIO27
+    chipset: SK6812
+    channel_colors: GRB
+    num_leds: 1
+    internal: true
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 0s
+
+switch:
+  - platform: template
+    id: status_led_enabled
+    name: "Status LED"
+    icon: mdi:led-on
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+button:
+  - platform: factory_reset
+    id: factory_reset_button
+    internal: true
+
+binary_sensor:
+  - platform: gpio
+    id: atom_button
+    name: "Button"
+    entity_category: diagnostic
+    pin:
+      number: GPIO39            # input only, external pull-up on the ATOM
+      inverted: true
+    filters:
+      - delayed_on_off: 20ms
+    on_press:
+      - script.execute: button_hold
+    on_release:
+      - script.stop: button_hold
+      - lambda: |-
+          id(led_hold_stage) = 0;
+          id(led_awake_until) = millis() + ${status_led_timeout_ms};
+
+script:
+  - id: button_hold
+    mode: restart
+    then:
+      - delay: 2s
+      - lambda: id(led_hold_stage) = 1;
+      - delay: 6s
+      - lambda: id(led_hold_stage) = 2;
+      - delay: 2s
+      - if:
+          condition:
+            binary_sensor.is_on: atom_button
+          then:
+            - logger.log:
+                level: WARN
+                format: "Button held for 10 s: factory reset"
+            - button.press: factory_reset_button
+
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          const uint32_t timeout = ${status_led_timeout_ms};
+          uint32_t color = 0;           // 0xRRGGBB, 0 = off
+          if (id(led_hold_stage) == 2) {
+            color = ((now / 125) % 2) ? 0xFFFFFF : 0;
+          } else if (id(led_hold_stage) == 1) {
+            color = 0xFFFFFF;
+          } else if (!id(status_led_enabled).state) {
+            color = 0;
+          } else if (!wifi::global_wifi_component->is_connected()) {
+            color = 0x0000FF;
+          } else if (!id(ac_link).state) {
+            color = 0xFF0000;
+          } else if (timeout == 0 || now < 300000 || (int32_t) (id(led_awake_until) - now) > 0) {
+            color = 0x00FF00;           // stays on during the first 5 min after boot
+          }
+          if (color == id(led_last_color)) return;
+          id(led_last_color) = color;
+          auto call = color ? id(status_rgb).turn_on() : id(status_rgb).turn_off();
+          if (color) {
+            call.set_rgb(((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f,
+                         (color & 0xFF) / 255.0f);
+            call.set_brightness(color == 0xFFFFFF ? 1.0f : ${status_led_brightness});
+          }
+          call.set_transition_length(0);
+          call.perform();
+
+# Notes:
+# - Flash over USB-C before fitting the Tail485: the Tail485 plugs into the ATOM's USB-C port
+#   (it powers the ATOM through it). Later updates go over the air.
+# - G12 drives the IR LED and is a strapping pin. It is intentionally unused.
+# - Power: see docs/wiring.md (X = 5 V goes to the ATOM's 5V header pin, never to the
+#   Tail485 "12V" terminal, which needs 9-24 V).

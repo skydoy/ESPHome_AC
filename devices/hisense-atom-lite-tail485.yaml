@@ -1,0 +1,38 @@
+# Device: Hisense AC (RS-485 F4F5 bus) on an M5Stack ATOM Lite + ATOM Tail485
+# (cheapest option, no screen: RGB status LED and a button, see core/boards/atom-lite.yaml).
+#
+# Factory configuration: built by GitHub Actions on every v* tag and published to the
+# ESP Web Tools installer at https://skydoy.github.io/ESPHome_AC/
+#
+# A device config only composes packages:  core (brand agnostic) + board + brand.
+substitutions:
+  name: hisense-ac-atom
+  friendly_name: Hisense AC
+  project_version: "0.2.7"
+  # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
+  # "main" means built from the github:// package (Device Builder adoption) or a checkout.
+  firmware_source: "main"
+  update_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: skydoy.esphome-ac
+    version: ${project_version}
+
+# Lets the ESPHome Dashboard / Home Assistant "adopt" a device flashed from the web installer.
+dashboard_import:
+  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-atom-lite-tail485.yaml@main
+  import_full_config: false
+
+packages:
+  # Hardware
+  board: !include ../core/boards/atom-lite.yaml      # includes the status LED and button
+  # Brand / protocol
+  brand: !include ../brands/hisense/hisense-ac.yaml
+  # Brand-agnostic services
+  provisioning: !include ../core/provisioning.yaml
+  diagnostics: !include ../core/diagnostics.yaml
+  auto_update: !include ../core/auto-update.yaml

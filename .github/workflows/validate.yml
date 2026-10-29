@@ -16,6 +16,7 @@ jobs:
       matrix:
         device:
           - devices/hisense-m5stickc-plus2.yaml
+          - devices/hisense-atom-lite-tail485.yaml
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

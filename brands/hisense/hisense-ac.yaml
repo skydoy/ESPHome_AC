@@ -2,7 +2,7 @@
 # Adapter: RS-485 transceiver (M5Stack Hat RS485), see brands/hisense/hardware.md.
 # The hisense_ac component lives in this repository (components/hisense_ac, PolyForm-Noncommercial-1.0.0).
 #
-# Needs from the board package: substitutions ac_tx_pin / ac_rx_pin.
+# Needs from the board package: substitutions ac_tx_pin / ac_rx_pin / ac_tx_ignore_strapping.
 # Needs from core/diagnostics.yaml: time id "ha_time" (daily energy).
 # Provides the generic ids used by core/screen/*: ac_climate, ac_link, ac_link_status,
 # ac_fault, ac_fault_codes, ac_outdoor_temperature.
@@ -19,7 +19,7 @@ uart:
   id: ac_uart
   tx_pin:
     number: ${ac_tx_pin}
-    ignore_strapping_warning: true   # G0 on the M5StickC Plus2 Hat header (fixed by the board)
+    ignore_strapping_warning: ${ac_tx_ignore_strapping}   # set by the board ("true" for G0 on the Plus2)
   rx_pin: ${ac_rx_pin}
   baud_rate: 9600
   data_bits: 8
