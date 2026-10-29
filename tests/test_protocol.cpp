@@ -157,7 +157,8 @@ static void test_assembler_resync() {
 }
 
 static std::vector<uint8_t> make_status(size_t len) {
-  std::vector<uint8_t> f(len, 0);
+  // Filled in a buffer of at least 46 bytes, then cut to len (short frames for the length checks).
+  std::vector<uint8_t> f(len < 46 ? 46 : len, 0);
   f[2] = 0x01;
   f[3] = 0x40;
   f[7] = 0xFE;
@@ -188,6 +189,7 @@ static std::vector<uint8_t> make_status(size_t len) {
     f[55] = 15;
     f[56] = 0x00;
   }
+  f.resize(len);
   seal(f.data(), f.size());
   return f;
 }
