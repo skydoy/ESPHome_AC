@@ -37,7 +37,9 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
 3. **Connect:** join the `Hisense-AC Setup` Wi-Fi hotspot (or use Improv in the installer or
    over Bluetooth), then adopt the device in Home Assistant → **Settings → Devices → ESPHome**.
 
-Updates then arrive over the air through the **Firmware Update** entity.
+Updates then arrive over the air through the **Firmware Update** entity. The firmware ships
+without an API key; to add one (recommended), see
+[API encryption](docs/configuration.md#api-encryption-and-ota-password-optional).
 
 [![Wiring diagram](docs/wiring.svg)](docs/wiring.md)
 

@@ -17,7 +17,9 @@ external_components:
 
 uart:
   id: ac_uart
-  tx_pin: ${ac_tx_pin}
+  tx_pin:
+    number: ${ac_tx_pin}
+    ignore_strapping_warning: true   # G0 on the M5StickC Plus2 Hat header (fixed by the board)
   rx_pin: ${ac_rx_pin}
   baud_rate: 9600
   data_bits: 8
