@@ -8,6 +8,22 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-10-29
+### Added
+- Second board: **M5Stack ATOM Lite + ATOM Tail485**, the cheapest option (≈ US$15). No screen:
+  the RGB LED shows blue (Wi-Fi setup), red (no AC link) or green (link OK, turns off after
+  30 s) and the button shows the status or, held for 10 s, does a factory reset. Optional
+  **Status LED** config switch. Pins from the M5Stack docs: TX = G26, RX = G32.
+  ([wiring](docs/wiring.md#atom-lite--tail485), [LED and button](docs/configuration.md#status-led-and-button-atom-lite))
+- Web installer: board selector with the matching wiring diagram; each board has its own
+  firmware and OTA manifest (`firmware/atom-lite-tail485/manifest.json` for the ATOM). The
+  M5StickC Plus2 keeps `firmware/manifest.json`, so existing devices update as before.
+- README hardware table with approximate prices.
+
+### Changed
+- The board package now sets `ac_tx_ignore_strapping` (only the Stick's G0 TX is a
+  strapping pin). Own configs that use the brand package with a custom board must set it.
+
 ## [0.2.6] - 2026-10-29
 ### Added
 - ConnectLife-style controls: **Eco**, **Super** (turbo) and **Fan Mute** (quiet) switches, a
@@ -94,7 +110,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.3...v0.2.4

@@ -32,8 +32,8 @@
   <form id="brand-form">
     <fieldset>
       <legend>1. Choose your AC brand</legend>
-      <label><input type="radio" name="device" value="firmware/manifest.json" checked>
-        Hisense (AEH-W4x / AEH-W41H1 module port) – M5StickC Plus2 + RS485 Hat</label>
+      <label><input type="radio" name="brand" value="hisense" checked>
+        Hisense (AEH-W4x / AEH-W41H1 module port)</label>
       <label class="disabled"><input type="radio" name="device" disabled> Mitsubishi Electric (CN105)<span class="soon">coming soon</span></label>
       <label class="disabled"><input type="radio" name="device" disabled> Daikin (S21 / P1P2)<span class="soon">coming soon</span></label>
       <label class="disabled"><input type="radio" name="device" disabled> Midea and OEMs<span class="soon">coming soon</span></label>
@@ -42,12 +42,22 @@
       <label class="disabled"><input type="radio" name="device" disabled> Any brand via infrared<span class="soon">coming soon</span></label>
     </fieldset>
   </form>
+  <form id="board-form">
+    <fieldset>
+      <legend>2. Choose your board</legend>
+      <label><input type="radio" name="device" value="firmware/atom-lite-tail485/manifest.json" data-wiring="atom">
+        M5Stack ATOM Lite + ATOM Tail485 – cheapest (≈ US$15), RGB status LED</label>
+      <label><input type="radio" name="device" value="firmware/manifest.json" data-wiring="stick" checked>
+        M5StickC Plus2 + RS485 Hat – status screen (≈ US$28)</label>
+    </fieldset>
+  </form>
   <p>Have one of the "coming soon" units and want to help test? See
      <a href="https://github.com/skydoy/ESPHome_AC/blob/main/adapters/README.md">adapters</a>.</p>
 
-  <h2>2. Install</h2>
+  <h2>3. Install</h2>
   <ol>
-    <li>Connect the board to this computer with a USB-C cable (Chrome or Edge on desktop).</li>
+    <li>Connect the board to this computer with a USB-C cable (Chrome or Edge on desktop).
+        ATOM Lite: flash it <b>before</b> fitting the Tail485, which uses the USB-C port.</li>
     <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.</li>
     <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).</li>
     <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.</li>
@@ -57,9 +67,10 @@
      and supports Improv over Bluetooth.</p>
 
   <section class="help" id="wiring">
-    <h2>3. Wire it to the AC</h2>
+    <h2>4. Wire it to the AC</h2>
     <p>Switch the AC off at the breaker. Measure the plug's <b>X</b> wire to <b>GND</b> with a
        multimeter, then follow the matching panel.</p>
+    <div data-board="stick">
     <a href="wiring.svg"><img src="wiring.svg" alt="Wiring diagram for the 5 V and 12 V cases"></a>
     <table>
       <tr><th>AC plug</th><th>X = 5 V</th><th>X = 12 V</th></tr>
@@ -70,7 +81,20 @@
     </table>
     <p><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up
        from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</p>
-    <h2>4. Add to Home Assistant</h2>
+    </div>
+    <div data-board="atom" hidden>
+    <a href="wiring-atom-lite.svg"><img src="wiring-atom-lite.svg" alt="ATOM Lite + Tail485 wiring for the 5 V and 12 V cases"></a>
+    <table>
+      <tr><th>AC plug</th><th>X = 5 V</th><th>X = 12 V</th></tr>
+      <tr><td>B (−)</td><td colspan="2">Tail485 B</td></tr>
+      <tr><td>A (+)</td><td colspan="2">Tail485 A</td></tr>
+      <tr><td>GND</td><td colspan="2">Tail485 GND</td></tr>
+      <tr><td>X</td><td>ATOM 5V header pin (Tail485 12V empty: it needs 9–24 V)</td><td>Tail485 12V</td></tr>
+    </table>
+    <p><b>LED:</b> blue = Wi-Fi setup, red = no AC link (swap A and B), green = OK (turns off
+       after 30 s; press the button to see it again). Hold the button 10 s for a factory reset.</p>
+    </div>
+    <h2>5. Add to Home Assistant</h2>
     <p>Once it is on Wi-Fi, Home Assistant finds it: <b>Settings → Devices &amp; services →
        ESPHome → Configure</b>. Updates install from the <b>Firmware Update</b> entity.
        Full guide: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>.</p>
@@ -84,9 +108,15 @@
 
   <script>
     const button = document.getElementById("install");
-    document.getElementById("brand-form").addEventListener("change", (e) => {
-      if (e.target.name === "device" && e.target.value) button.setAttribute("manifest", e.target.value);
-    });
+    function selectBoard() {
+      const board = document.querySelector('input[name="device"]:checked');
+      button.setAttribute("manifest", board.value);
+      document.querySelectorAll("[data-board]").forEach((el) => {
+        el.hidden = el.dataset.board !== board.dataset.wiring;
+      });
+    }
+    document.getElementById("board-form").addEventListener("change", selectBoard);
+    selectBoard();
   </script>
 </body>
 </html>

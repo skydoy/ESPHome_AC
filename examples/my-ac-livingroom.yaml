@@ -14,7 +14,7 @@ packages:
     ref: main
     refresh: 1d
     files:
-      - core/boards/m5stickc-plus2.yaml
+      - core/boards/m5stickc-plus2.yaml   # or core/boards/atom-lite.yaml (then drop the screen)
       - core/screen/m5stickc-plus2.yaml   # optional status screen
       - core/diagnostics.yaml             # provides the time source used by "Energy Today"
       - brands/hisense/hisense-ac.yaml
