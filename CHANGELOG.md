@@ -8,6 +8,43 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-10-29
+### Fixed
+- **Adopted devices were replaced by the generic firmware.** The `Firmware Update` entity was
+  part of the device config that the ESPHome Device Builder adopts, so pressing *Install* on it in
+  Home Assistant flashed the generic web-installer firmware over an adopted config. That firmware
+  has no API encryption key, so Home Assistant (still using the old key) could not reconnect and
+  the update looked like it had done nothing. Each board now has a **base** config
+  (`devices/<board>.yaml`, the one that is adopted, no update entity) and a **factory** config
+  (`devices/<board>.factory.yaml` = base + `core/auto-update.yaml`, built by CI for the web
+  installer). Adopted devices update with *Install* in the Device Builder
+  ([details](docs/configuration.md#updates)).
+
+### Added
+- OTA feedback: the Stick's screen turns on and shows a progress bar during any OTA update
+  (Device Builder or `Firmware Update`), and *Update failed* if it fails. Clear log lines for
+  the start, end and errors of each update.
+- CI checks that only the factory configs contain the update entity.
+- Unit tests for the command queue (coalescing, special-command spacing, `millis()` wrap).
+
+### Changed
+- Faster, smoother control:
+  - a command from Home Assistant starts a bus cycle at once when the bus is idle, and a command
+    that arrives mid-cycle starts the next cycle right away (was: up to 1 s wait);
+  - quick repeated changes (set point clicks, fan steps) are merged while they wait, so the AC
+    gets one frame with the final value; swing axes and special modes keep their own frames;
+  - the Eco / Turbo / Quiet switches and the Sleep select follow a climate change immediately
+    instead of 3 s later.
+- No blocking in the main loop: UART writes no longer wait for the transmission to finish
+  (up to ~50 ms per command at 9600 baud); the reply timeout starts after the last byte instead.
+  UART reads are done in chunks instead of byte by byte.
+- Fewer updates: fault binary sensors and the fault text are only published when the fault bytes
+  change (the fault text string is no longer rebuilt on every status frame).
+- Status screen: drawn only when something it shows changes (checked every 0.5 s) instead of a
+  full redraw every 2 s, and never while the backlight is off.
+- After an AC link outage, capabilities are re-queried if they never arrived and every entity is
+  refreshed with the first status frame.
+
 ## [0.2.8] - 2026-10-29
 ### Added
 - **Web server** on both boards (`core/web-server.yaml`): open `http://<device-ip>/` on the LAN
@@ -117,7 +154,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...v0.2.6

@@ -17,10 +17,24 @@ jobs:
         device:
           - devices/hisense-m5stickc-plus2.yaml
           - devices/hisense-atom-lite-tail485.yaml
+          - devices/hisense-m5stickc-plus2.factory.yaml
+          - devices/hisense-atom-lite-tail485.factory.yaml
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with: { python-version: "3.13" }
       - run: pip install esphome==2026.10.1
       - name: Validate the device config against the local components
-        run: esphome -s hisense_component_source ../components config ${{ matrix.device }}
+        run: |
+          set -o pipefail
+          esphome -s hisense_component_source ../components config ${{ matrix.device }} | tee config.txt
+      - name: Only the factory firmware has the "Firmware Update" entity
+        run: |
+          if [[ "${{ matrix.device }}" == *.factory.yaml ]]; then
+            grep -q "id: firmware_update" config.txt
+          else
+            if grep -q "platform: http_request" config.txt; then
+              echo "::error::Base configs (adopted in the Device Builder) must not include auto-update"
+              exit 1
+            fi
+          fi

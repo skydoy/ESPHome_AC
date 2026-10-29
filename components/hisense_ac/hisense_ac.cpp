@@ -153,6 +153,43 @@ void HisenseAC::sync_controls_(const proto::Status &s) {
   (void) s;
 }
 
+void HisenseAC::sync_controls_from_climate_() {
+  // Optimistic: reflect a climate change on the companion switches and select immediately,
+  // instead of waiting for the AC to confirm it (COMMAND_SETTLE_MS later).
+  const bool on = this->mode != climate::CLIMATE_MODE_OFF;
+  const bool has_preset = this->preset.has_value() && !this->has_custom_preset();
+#ifdef USE_SWITCH
+  for (auto *sw : this->feature_switches_) {
+    bool v = false;
+    switch (sw->get_feature()) {
+      case Feature::ECO:
+        v = has_preset && *this->preset == climate::CLIMATE_PRESET_ECO;
+        break;
+      case Feature::TURBO:
+        v = has_preset && *this->preset == climate::CLIMATE_PRESET_BOOST;
+        break;
+      case Feature::QUIET:
+        v = this->fan_mode.has_value() && *this->fan_mode == climate::CLIMATE_FAN_QUIET;
+        break;
+    }
+    v = v && on;
+    if (!sw->has_state() || sw->state != v)
+      sw->publish_state(v);
+  }
+#endif
+#ifdef USE_SELECT
+  if (this->sleep_select_ != nullptr) {
+    const bool sleeping = on && has_preset && *this->preset == climate::CLIMATE_PRESET_SLEEP;
+    const size_t idx = sleeping ? this->sleep_profile_ : 0;
+    auto cur = this->sleep_select_->active_index();
+    if (!cur.has_value() || *cur != idx)
+      this->sleep_select_->publish_state(idx);
+  }
+#endif
+  (void) on;
+  (void) has_preset;
+}
+
 // ---- Raw frame logging ------------------------------------------------------------------------
 void HisenseAC::set_debug_frames_runtime(bool on) {
   if (on && !this->debug_frames_)
@@ -226,6 +263,13 @@ const char *HisenseAC::get_link_state_text() const {
 
 void HisenseAC::set_link_(LinkState s) {
   const bool changed = s != this->link_;
+  if (changed && this->link_ == LinkState::LOST && s == LinkState::CONNECTED) {
+    // Back from an outage: ask for capabilities again if they never arrived and refresh every
+    // entity with the first status frame.
+    this->product_tries_ = 0;
+    this->faults_published_ = false;
+    this->last_sensor_force_ = millis() - SENSOR_REFRESH_MS;
+  }
   this->link_ = s;
 #ifdef USE_BINARY_SENSOR
   if (this->connected_ != nullptr && (changed || !this->connected_->has_state()))
@@ -244,7 +288,7 @@ void HisenseAC::loop() {
   this->read_uart_();
   const uint32_t now = millis();
   if (this->waiting_) {
-    if (now - this->sent_at_ < this->reply_timeout_ms_)
+    if (!reached(now, this->sent_at_ + this->reply_timeout_ms_))
       return;
     this->transaction_done_(false, now);
     return;
@@ -255,13 +299,25 @@ void HisenseAC::loop() {
 }
 
 void HisenseAC::read_uart_() {
-  uint8_t b;
-  // Bounded so a noisy line cannot starve the main loop.
-  for (int i = 0; i < 256 && this->available(); i++) {
-    if (!this->read_byte(&b))
+  // Bulk reads (one driver call per chunk instead of per byte), bounded so a noisy line cannot
+  // starve the main loop.
+  uint8_t buf[64];
+  size_t budget = 512;
+  while (budget > 0) {
+    size_t n = this->available();
+    if (n == 0)
       break;
-    if (this->rx_.feed(b))
-      this->handle_frame_(this->rx_.frame(), this->rx_.size());
+    if (n > sizeof(buf))
+      n = sizeof(buf);
+    if (n > budget)
+      n = budget;
+    if (!this->read_array(buf, n))
+      break;
+    budget -= n;
+    for (size_t i = 0; i < n; i++) {
+      if (this->rx_.feed(buf[i]))
+        this->handle_frame_(this->rx_.frame(), this->rx_.size());
+    }
   }
 }
 
@@ -326,12 +382,16 @@ void HisenseAC::send_(const uint8_t *frame, size_t len, uint8_t expect_class, ui
   const size_t n = proto::stuff(frame, len, wire, sizeof(wire));
   if (n == 0)
     return;
+  // The frame fits the UART hardware FIFO, so write_array() returns at once. No flush(): it would
+  // block the main loop for the whole transmission (~50 ms for a command at 9600 baud). The reply
+  // timeout starts when the last byte has left the wire instead (10 bits per byte).
   this->write_array(wire, n);
-  this->flush();
   this->waiting_ = true;
   this->expect_class_ = expect_class;
-  this->sent_at_ = millis();
-  (void) now;
+  uint32_t baud = this->parent_->get_baud_rate();
+  if (baud == 0)
+    baud = 9600;
+  this->sent_at_ = now + static_cast<uint32_t>((n * 10000UL + baud - 1) / baud);
 }
 
 void HisenseAC::run_step_(uint32_t now) {
@@ -371,31 +431,15 @@ void HisenseAC::run_step_(uint32_t now) {
       this->send_(f, n, 0, now);
       return;
     case Step::COMMAND: {
-      size_t pick = QUEUE_SIZE;
-      if (this->cycle_commands_ < MAX_COMMANDS_PER_CYCLE) {
-        for (size_t i = 0; i < this->queue_len_; i++) {
-          if (reached(now, this->queue_[i].not_before)) {
-            pick = i;
-            break;
-          }
-        }
-      }
-      if (pick == QUEUE_SIZE) {
+      proto::CommandQueue::Item q;
+      if (this->cycle_commands_ >= MAX_COMMANDS_PER_CYCLE || !this->queue_.pop_ready(now, &q)) {
         this->step_ = Step::STATUS;
         this->run_step_(now);
         return;
       }
-      const Queued q = this->queue_[pick];
-      for (size_t i = pick + 1; i < this->queue_len_; i++)
-        this->queue_[i - 1] = this->queue_[i];
-      this->queue_len_--;
       this->cycle_commands_++;
-      if (q.special) {
-        this->last_special_at_ = now;
-        this->any_special_sent_ = true;
-      }
       proto::build_command(q.cmd, this->type_hi_, this->type_lo_, f);
-      ESP_LOGD(TAG, "TX command%s (%u queued)", q.special ? " (special)" : "", (unsigned) this->queue_len_);
+      ESP_LOGD(TAG, "TX command%s (%u queued)", q.special ? " (special)" : "", (unsigned) this->queue_.size());
       if (this->debug_frames_) {
         this->log_frame_("TX command", f, proto::COMMAND_LEN);
         this->status_dumped_ = false;  // show the AC's answer to this command too
@@ -421,7 +465,8 @@ void HisenseAC::run_step_(uint32_t now) {
     case Step::PACE:
       this->step_ = Step::CYCLE_BEGIN;
       this->next_at_ = this->cycle_start_ + this->cycle_ms_;
-      if (reached(now, this->next_at_))
+      // A command that arrived during this cycle starts the next one right away.
+      if (reached(now, this->next_at_) || this->queue_.has_ready(now))
         this->next_at_ = now;
       return;
   }
@@ -430,6 +475,7 @@ void HisenseAC::run_step_(uint32_t now) {
 void HisenseAC::transaction_done_(bool replied, uint32_t now) {
   this->waiting_ = false;
   this->next_at_ = now + INTER_FRAME_GAP_MS;
+  this->bus_free_at_ = this->next_at_;
   switch (this->step_) {
     case Step::BOOT_DEVTYPE:
       if (replied && this->handshake_ok_) {
@@ -476,28 +522,23 @@ void HisenseAC::transaction_done_(bool replied, uint32_t now) {
 }
 
 bool HisenseAC::enqueue_(const proto::Command &cmd, bool special) {
-  if (this->queue_len_ >= QUEUE_SIZE) {
-    ESP_LOGW(TAG, "Command queue full, dropping command");
-    return false;
-  }
   const uint32_t now = millis();
-  Queued q;
-  q.cmd = cmd;
-  q.special = special;
-  q.not_before = now;
-  if (special) {
-    // Special modes (sleep, quiet, eco/turbo, 8C) are ignored if they arrive too close together.
-    if (this->any_special_sent_ && !reached(now, this->last_special_at_ + this->special_gap_ms_))
-      q.not_before = this->last_special_at_ + this->special_gap_ms_;
-    for (size_t i = 0; i < this->queue_len_; i++) {
-      if (this->queue_[i].special) {
-        const uint32_t t = this->queue_[i].not_before + this->special_gap_ms_;
-        if (!reached(q.not_before, t))
-          q.not_before = t;
-      }
-    }
+  // Special modes (sleep, quiet, eco/turbo, 8C) are spaced special_gap apart by the queue because
+  // the AC ignores them if they arrive too close together. Plain commands of one kind coalesce.
+  switch (this->queue_.push(cmd, special, now, this->special_gap_ms_)) {
+    case proto::CommandQueue::Push::FULL:
+      ESP_LOGW(TAG, "Command queue full, dropping command");
+      return false;
+    case proto::CommandQueue::Push::MERGED:
+      ESP_LOGV(TAG, "Command merged into the queued one");
+      break;
+    case proto::CommandQueue::Push::ADDED:
+      break;
   }
-  this->queue_[this->queue_len_++] = q;
+  // Fast path: when the bus is idle between polling cycles, start the next cycle now instead of
+  // waiting up to cycle_ms for it, so a tap in Home Assistant reaches the AC within ~100 ms.
+  if (!this->waiting_ && this->step_ == Step::CYCLE_BEGIN && this->queue_.has_ready(now))
+    this->next_at_ = reached(now, this->bus_free_at_) ? now : this->bus_free_at_;
   return true;
 }
 
@@ -741,6 +782,7 @@ void HisenseAC::control(const climate::ClimateCall &call) {
 
   this->hold_until_ = now + COMMAND_SETTLE_MS;
   this->publish_state();
+  this->sync_controls_from_climate_();
 }
 
 void HisenseAC::apply_status_(const proto::Status &s) {
@@ -753,14 +795,14 @@ void HisenseAC::apply_status_(const proto::Status &s) {
   this->publish_sensors_(s);
 
 #ifdef USE_SWITCH
-  if (this->display_switch_ != nullptr && this->queue_len_ == 0 &&
+  if (this->display_switch_ != nullptr && this->queue_.empty() &&
       (!this->display_switch_->state != !s.display || !this->display_switch_->has_state()))
     if (reached(millis(), this->hold_until_))
       this->display_switch_->publish_state(s.display);
 #endif
 
   const uint32_t now = millis();
-  if (this->queue_len_ != 0 || !reached(now, this->hold_until_))
+  if (!this->queue_.empty() || !reached(now, this->hold_until_))
     return;
 
   this->sync_controls_(s);
@@ -898,7 +940,12 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
   const bool force = reached(now, this->last_sensor_force_ + SENSOR_REFRESH_MS);
   if (force)
     this->last_sensor_force_ = now;
+  // Faults change rarely: binary and text entities are only touched when the fault bytes change.
+  const bool faults_changed = !this->faults_published_ || s.faults != this->last_faults_;
+  this->last_faults_ = s.faults;
+  this->faults_published_ = true;
   (void) force;
+  (void) faults_changed;
 #ifdef USE_SENSOR
   auto pub = [force](sensor::Sensor *sn, float v) {
     if (sn == nullptr)
@@ -931,12 +978,13 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
   pub(this->power_, watts_ok ? watts : NAN);
 #endif
 #ifdef USE_BINARY_SENSOR
-  if (this->fault_ != nullptr && (force || !this->fault_->has_state() || this->fault_->state != s.faults.any()))
+  if (this->fault_ != nullptr && (!this->fault_->has_state() || this->fault_->state != s.faults.any()))
     this->fault_->publish_state(s.faults.any());
-  if (this->aux_heater_ != nullptr &&
-      (force || !this->aux_heater_->has_state() || this->aux_heater_->state != s.aux_heater))
+  if (this->aux_heater_ != nullptr && (!this->aux_heater_->has_state() || this->aux_heater_->state != s.aux_heater))
     this->aux_heater_->publish_state(s.aux_heater);
   for (auto &fs : this->fault_sensors_) {
+    if (!faults_changed && fs.sensor->has_state())
+      continue;
     uint8_t b = 0;
     switch (fs.group) {
       case FaultGroup::INDOOR:
@@ -953,16 +1001,17 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
         break;
     }
     const bool on = (b & fs.mask) != 0;
-    if (force || !fs.sensor->has_state() || fs.sensor->state != on)
+    if (!fs.sensor->has_state() || fs.sensor->state != on)
       fs.sensor->publish_state(on);
   }
 #endif
 #ifdef USE_TEXT_SENSOR
-  if (this->fault_text_ != nullptr) {
+  // describe_faults() builds a string: only do it when the fault bytes actually changed.
+  if (this->fault_text_ != nullptr && (faults_changed || !this->fault_text_->has_state())) {
     std::string d = proto::describe_faults(s.faults);
     if (d.empty())
       d = "OK";
-    if (force || !this->fault_text_->has_state() || this->fault_text_->state != d)
+    if (!this->fault_text_->has_state() || this->fault_text_->state != d)
       this->fault_text_->publish_state(d);
   }
 #endif

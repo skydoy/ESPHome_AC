@@ -124,6 +124,51 @@ static constexpr size_t COMMAND_LEN = 50;
 /// Builds a decoded, sealed command frame into out[COMMAND_LEN].
 void build_command(const Command &cmd, uint8_t t_hi, uint8_t t_lo, uint8_t *out);
 
+/// Which groups of settings a command carries (bit mask). Commands of one single group can be
+/// merged while they wait in the queue; swing axes and special modes stay in frames of their own.
+enum CommandGroup : uint8_t {
+  GROUP_NONE = 0,
+  GROUP_BASIC = 1 << 0,    // power, mode, set point, fan
+  GROUP_VSWING = 1 << 1,
+  GROUP_HSWING = 1 << 2,
+  GROUP_DISPLAY = 1 << 3,
+  GROUP_SPECIAL = 1 << 4,  // eco, turbo, quiet, heat 8C, sleep (need spacing on the AC)
+};
+uint8_t command_groups(const Command &c);
+/// Copies every field set in `from` into `into` (the newer value wins); beep follows `from`.
+void merge_command(Command &into, const Command &from);
+
+/// Wrap-safe "now >= t" for millisecond timestamps.
+inline bool time_reached(uint32_t now, uint32_t t) { return static_cast<int32_t>(now - t) >= 0; }
+
+/// Fixed-size command queue (no heap). Plain commands of the same group are coalesced, so a burst
+/// of set-point clicks costs one bus frame; special commands are spaced `special_gap` ms apart
+/// because the AC ignores special modes that arrive too close together.
+class CommandQueue {
+ public:
+  static constexpr size_t CAPACITY = 12;
+  enum class Push : uint8_t { ADDED, MERGED, FULL };
+  struct Item {
+    Command cmd;
+    uint32_t not_before{0};
+    bool special{false};
+  };
+
+  Push push(const Command &cmd, bool special, uint32_t now, uint32_t special_gap);
+  /// Removes and returns the first command whose time has come.
+  bool pop_ready(uint32_t now, Item *out);
+  bool has_ready(uint32_t now) const;
+  size_t size() const { return this->len_; }
+  bool empty() const { return this->len_ == 0; }
+  void clear() { this->len_ = 0; }
+
+ protected:
+  Item items_[CAPACITY];
+  size_t len_{0};
+  uint32_t last_special_at_{0};
+  bool any_special_sent_{false};
+};
+
 // ---- Status frame decoding -----------------------------------------------------------------
 struct Faults {
   uint8_t indoor{0};    // byte 39
@@ -131,6 +176,10 @@ struct Faults {
   uint8_t outdoor{0};   // byte 64
   uint8_t protect{0};   // byte 66 without bit 7 (bit 7 is the +8 C mode flag)
   bool any() const { return indoor || module || outdoor || protect; }
+  bool operator==(const Faults &o) const {
+    return indoor == o.indoor && module == o.module && outdoor == o.outdoor && protect == o.protect;
+  }
+  bool operator!=(const Faults &o) const { return !(*this == o); }
 };
 
 struct Status {

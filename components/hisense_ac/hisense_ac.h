@@ -173,13 +173,6 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
     PRODUCT,
     PACE,
   };
-  struct Queued {
-    proto::Command cmd;
-    uint32_t not_before{0};
-    bool special{false};
-  };
-  static constexpr size_t QUEUE_SIZE = 12;
-
   void read_uart_();
   void handle_frame_(const uint8_t *f, size_t len);
   void run_step_(uint32_t now);
@@ -194,6 +187,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   float from_panel_temp_(int16_t v) const;
   void log_frame_(const char *what, const uint8_t *f, size_t len);
   void sync_controls_(const proto::Status &s);
+  void sync_controls_from_climate_();
 
   // Bus state
   proto::FrameAssembler rx_;
@@ -213,10 +207,8 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   bool heard_ac_{false};
   bool handshake_ok_{false};
   LinkState link_{LinkState::SEARCHING};
-  Queued queue_[QUEUE_SIZE];
-  size_t queue_len_{0};
-  uint32_t last_special_at_{0};
-  bool any_special_sent_{false};
+  proto::CommandQueue queue_;
+  uint32_t bus_free_at_{0};
   uint32_t hold_until_{0};
   uint32_t frames_ok_{0};
 
@@ -238,6 +230,8 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   bool have_status_{false};
   proto::Capabilities caps_;
   uint32_t last_sensor_force_{0};
+  proto::Faults last_faults_;
+  bool faults_published_{false};
   // Optional readings some units never report: stay "unknown" until a real value arrives.
   bool seen_humidity_{false};
   bool seen_voltage_{false};
