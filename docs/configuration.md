@@ -13,7 +13,7 @@ The `hisense_ac` component (in [`components/hisense_ac`](../components/hisense_a
 | Select | Sleep Mode: Off, Sleep 1–4 |
 | Buttons | Light On, Light Off |
 | Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, power, current, energy today |
-| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below) |
+| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below); from `core/diagnostics.yaml`: Firmware Version, ESPHome Version, Reset Reason, Uptime, Wi-Fi Signal |
 
 Eco, Super, Fan Mute and Sleep Mode drive the same commands as the climate presets and the Quiet
 fan mode, and follow the AC's reported state, so both views stay in sync. Eco, Super and Sleep
@@ -122,6 +122,14 @@ ota:
 
 After flashing, Home Assistant asks for the new key when it reconnects. The Device Builder usually
 adds an API key for you when it adopts the device.
+
+### Firmware Version sensor
+Shows `esphome: project: version` plus the build source in brackets: `0.2.6 (release)` for the
+web-installer/OTA firmware, `0.2.6 (main)` when the Device Builder builds the adopted
+`github://` package (or you build a checkout), `main @abc1234` for CI builds of a branch.
+Override the `firmware_source` substitution in your own config to label your build
+(e.g. `firmware_source: "my fork @1a2b3c4"`, or `""` for the version only). Configs without
+`esphome: project:` show `unknown`.
 
 ### Time zone
 `core/diagnostics.yaml` takes the time from Home Assistant (`platform: homeassistant`) and sets

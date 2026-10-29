@@ -15,6 +15,9 @@ section below, with the factory and OTA images attached.
   sync with the climate presets and fan mode.
 - One diagnostic problem binary sensor per fault bit (19 in total, e.g. indoor coil sensor,
   outdoor EEPROM, exhaust sensor, WiFi/indoor communication). The fault codes text sensor stays.
+- **Firmware Version** diagnostic text sensor: the project version plus the build source, e.g.
+  `0.2.6 (release)` or `0.2.6 (main)` for Device Builder builds of the adopted package
+  (`firmware_source` substitution, set by CI).
 - Docs: how to add an optional API encryption key and OTA password
   ([configuration](docs/configuration.md#api-encryption-and-ota-password-optional)). The
   firmware still ships without them, so existing devices keep working.
