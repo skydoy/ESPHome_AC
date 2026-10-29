@@ -199,6 +199,9 @@ std::string describe_faults(const Faults &f);
 /// 150-byte frames: big endian b55:b56 (W4G1 bench). Returns < 0 when unknown.
 float power_watts(const Status &s);
 
+/// "XX XX XX" for bytes [off, off + n) of a frame, clamped to len. Used by the frame logger.
+std::string hex_bytes(const uint8_t *frame, size_t len, size_t off, size_t n);
+
 inline float f_to_c(float f) { return (f - 32.0f) * 5.0f / 9.0f; }
 inline float c_to_f(float c) { return c * 9.0f / 5.0f + 32.0f; }
 

@@ -43,6 +43,12 @@ class HisenseBeepSwitch : public switch_::Switch, public Component, public Paren
  protected:
   void write_state(bool state) override;
 };
+class HisenseFrameLogSwitch : public switch_::Switch, public Component, public Parented<HisenseAC> {
+ public:
+  void setup() override;
+ protected:
+  void write_state(bool state) override;
+};
 #endif
 
 class HisenseAC : public Component, public climate::Climate, public uart::UARTDevice {
@@ -60,6 +66,8 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_reply_timeout(uint32_t v) { this->reply_timeout_ms_ = v; }
   void set_cycle_interval(uint32_t v) { this->cycle_ms_ = v; }
   void set_special_command_gap(uint32_t v) { this->special_gap_ms_ = v; }
+  void set_debug_frames(bool v) { this->debug_frames_ = v; }
+  void set_debug_frames_interval(uint32_t v) { this->debug_interval_ms_ = v; }
 #ifdef USE_SENSOR
   void set_outdoor_temperature_sensor(sensor::Sensor *s) { this->outdoor_temp_ = s; }
   void set_indoor_coil_temperature_sensor(sensor::Sensor *s) { this->indoor_coil_temp_ = s; }
@@ -83,12 +91,16 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
 #ifdef USE_SWITCH
   void set_display_switch(HisenseDisplaySwitch *s) { this->display_switch_ = s; }
   void set_beep_switch(HisenseBeepSwitch *s) { this->beep_switch_ = s; }
+  void set_frame_log_switch(HisenseFrameLogSwitch *s) { this->frame_log_switch_ = s; }
 #endif
 
   // ---- Runtime API (also handy from YAML lambdas, e.g. the status screen) ----
   void set_display(bool on);
   bool get_beep() const { return this->beep_; }
   void set_beep_runtime(bool on) { this->beep_ = on; }
+  /// Raw frame logging (DEBUG level): status replies rate limited, commands always.
+  bool get_debug_frames() const { return this->debug_frames_; }
+  void set_debug_frames_runtime(bool on);
   bool is_connected() const { return this->link_ == LinkState::CONNECTED; }
   LinkState get_link_state() const { return this->link_; }
   const char *get_link_state_text() const;
@@ -134,6 +146,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void publish_sensors_(const proto::Status &s);
   uint8_t to_panel_temp_(float c) const;
   float from_panel_temp_(int16_t v) const;
+  void log_frame_(const char *what, const uint8_t *f, size_t len);
 
   // Bus state
   proto::FrameAssembler rx_;
@@ -168,12 +181,19 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint32_t reply_timeout_ms_{1000};
   uint32_t cycle_ms_{1000};
   uint32_t special_gap_ms_{8000};
+  bool debug_frames_{false};
+  uint32_t debug_interval_ms_{10000};
+  uint32_t last_status_dump_{0};
+  bool status_dumped_{false};
 
   // Last known AC state
   proto::Status status_;
   bool have_status_{false};
   proto::Capabilities caps_;
   uint32_t last_sensor_force_{0};
+  // Optional readings some units never report: stay "unknown" until a real value arrives.
+  bool seen_humidity_{false};
+  bool seen_voltage_{false};
 
 #ifdef USE_SENSOR
   sensor::Sensor *outdoor_temp_{nullptr};
@@ -198,6 +218,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
 #ifdef USE_SWITCH
   HisenseDisplaySwitch *display_switch_{nullptr};
   HisenseBeepSwitch *beep_switch_{nullptr};
+  HisenseFrameLogSwitch *frame_log_switch_{nullptr};
 #endif
 };
 

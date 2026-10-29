@@ -17,9 +17,25 @@ Status key:
 
 | Brand | Indoor unit | Wi-Fi module | Supply | Status | Notes |
 |---|---|---|---|---|---|
-| Hisense | maintainer's unit | AEH-W41H1 | 5 V | 🧪 In testing (maintainer) | Uses the W41H1 link handshake |
+| Hisense | maintainer's unit | AEH-W41H1 | 5 V | ✅ Working (maintainer-tested, v0.2.2) | [Details below](#aeh-w41h1-maintainers-unit) |
 
-No ✅ entries yet. Yours could be the first.
+### AEH-W41H1 (maintainer's unit)
+Tested 2026-10-28 on an M5StickC Plus2 + RS485 Hat, powered from the 5 V (X) wire.
+
+Confirmed (reported state and physically):
+- Link handshake: AC Link connected, fault codes OK, 160-byte status frames.
+- Modes Off / Cool / Heat / Fan only / Dry / Auto offered; Cool at 24 °C and 22 °C.
+- Fan Auto → Low → High → Auto; vertical swing on/off; power off.
+- Compressor frequency (28–30 Hz running, 0 off), outdoor temperature, outdoor coil
+  temperature and room temperature all plausible.
+
+Pending calibration (help welcome, see [debug logging](configuration.md#raw-frame-logging)):
+- **Power:** decodes as `4.15 × b55²` like the reference, so at low load it moves in coarse
+  steps (b55 = 4 → 66.4 W, 5 → 103.75 W). Not yet compared with a meter.
+- **Indoor coil temperature** (byte 21): stayed at room temperature (27–28 °C) during about
+  2 minutes of Cool, so the byte may mean something else on this unit.
+- **Supply voltage, current, humidity:** this unit has not reported them so far; they are
+  hidden by default and stay "unknown".
 
 ## Reported working with other firmware (untested here)
 

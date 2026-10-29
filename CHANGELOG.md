@@ -8,6 +8,21 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-10-29
+### Added
+- Raw frame logging: `debug_frames` / `debug_frames_interval` options and an
+  **AC Frame Logging** switch to toggle it at runtime. Logs TX commands and rate-limited RX status
+  frames as hex at DEBUG level, plus the bytes still being calibrated.
+  See [configuration](docs/configuration.md#raw-frame-logging).
+
+### Changed
+- AEH-W41H1 marked ✅ working (maintainer-tested) in the
+  [compatibility table](docs/compatibility.md), with what is confirmed and what still needs
+  calibration (power steps, indoor coil, voltage/current/humidity).
+- Humidity, supply voltage and current are no longer published as NaN when the AC never reports
+  them: they stay "unknown" until a real value arrives, and are disabled by default in the
+  bundled config. Humidity also follows the AC's capability reply when it has one.
+
 ## [0.2.4] - 2026-10-28
 ### Added
 - [Compatibility table](docs/compatibility.md) of AC models and Wi-Fi modules.
@@ -58,7 +73,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.1...v0.2.2

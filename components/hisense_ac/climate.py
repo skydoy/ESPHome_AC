@@ -39,6 +39,7 @@ AUTO_LOAD = ["sensor", "binary_sensor", "text_sensor", "switch"]
 HisenseAC = hisense_ac_ns.class_("HisenseAC", climate.Climate, cg.Component, uart.UARTDevice)
 HisenseDisplaySwitch = hisense_ac_ns.class_("HisenseDisplaySwitch", switch.Switch)
 HisenseBeepSwitch = hisense_ac_ns.class_("HisenseBeepSwitch", switch.Switch, cg.Component)
+HisenseFrameLogSwitch = hisense_ac_ns.class_("HisenseFrameLogSwitch", switch.Switch, cg.Component)
 
 CONF_HORIZONTAL_SWING = "horizontal_swing"
 CONF_SLEEP_PROFILE = "sleep_profile"
@@ -47,6 +48,8 @@ CONF_BEEP = "beep"
 CONF_REPLY_TIMEOUT = "reply_timeout"
 CONF_CYCLE_INTERVAL = "cycle_interval"
 CONF_SPECIAL_COMMAND_GAP = "special_command_gap"
+CONF_DEBUG_FRAMES = "debug_frames"
+CONF_DEBUG_FRAMES_INTERVAL = "debug_frames_interval"
 
 CONF_OUTDOOR_TEMPERATURE = "outdoor_temperature"
 CONF_INDOOR_COIL_TEMPERATURE = "indoor_coil_temperature"
@@ -60,6 +63,7 @@ CONF_FAULT_CODES = "fault_codes"
 CONF_LINK_STATUS = "link_status"
 CONF_DISPLAY = "display"
 CONF_BEEP_SWITCH = "beep_switch"
+CONF_FRAME_LOG_SWITCH = "frame_log_switch"
 
 
 def _temp(icon):
@@ -102,6 +106,11 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_SPECIAL_COMMAND_GAP, default="8s"): cv.All(
                 cv.positive_time_period_milliseconds,
                 cv.Range(min=cv.TimePeriod(milliseconds=1000), max=cv.TimePeriod(milliseconds=30000)),
+            ),
+            cv.Optional(CONF_DEBUG_FRAMES, default=False): cv.boolean,
+            cv.Optional(CONF_DEBUG_FRAMES_INTERVAL, default="10s"): cv.All(
+                cv.positive_time_period_milliseconds,
+                cv.Range(min=cv.TimePeriod(seconds=1), max=cv.TimePeriod(seconds=600)),
             ),
             # Sensors
             cv.Optional(CONF_OUTDOOR_TEMPERATURE): _temp("mdi:home-thermometer-outline"),
@@ -166,6 +175,12 @@ CONFIG_SCHEMA = (
                 entity_category=ENTITY_CATEGORY_CONFIG,
                 default_restore_mode="RESTORE_DEFAULT_ON",
             ).extend(cv.COMPONENT_SCHEMA),
+            cv.Optional(CONF_FRAME_LOG_SWITCH): switch.switch_schema(
+                HisenseFrameLogSwitch,
+                icon="mdi:bug-outline",
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+                default_restore_mode="RESTORE_DEFAULT_OFF",
+            ).extend(cv.COMPONENT_SCHEMA),
         }
     )
     .extend(uart.UART_DEVICE_SCHEMA)
@@ -210,6 +225,8 @@ async def to_code(config):
     cg.add(var.set_reply_timeout(config[CONF_REPLY_TIMEOUT].total_milliseconds))
     cg.add(var.set_cycle_interval(config[CONF_CYCLE_INTERVAL].total_milliseconds))
     cg.add(var.set_special_command_gap(config[CONF_SPECIAL_COMMAND_GAP].total_milliseconds))
+    cg.add(var.set_debug_frames(config[CONF_DEBUG_FRAMES]))
+    cg.add(var.set_debug_frames_interval(config[CONF_DEBUG_FRAMES_INTERVAL].total_milliseconds))
 
     for key, setter in _SENSORS.items():
         if key in config:
@@ -232,3 +249,8 @@ async def to_code(config):
         await cg.register_component(s, config[CONF_BEEP_SWITCH])
         await cg.register_parented(s, var)
         cg.add(var.set_beep_switch(s))
+    if CONF_FRAME_LOG_SWITCH in config:
+        s = await switch.new_switch(config[CONF_FRAME_LOG_SWITCH])
+        await cg.register_component(s, config[CONF_FRAME_LOG_SWITCH])
+        await cg.register_parented(s, var)
+        cg.add(var.set_frame_log_switch(s))

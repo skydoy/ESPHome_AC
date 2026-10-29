@@ -9,12 +9,13 @@ The `hisense_ac` component (in [`components/hisense_ac`](../components/hisense_a
 | Fan modes | Auto, Quiet, Low, Medium-Low, Medium, Medium-High, High |
 | Swing | Vertical; horizontal and both when `horizontal_swing: true` |
 | Presets | Eco, Boost (turbo), Sleep, Heat 8C (+8 °C frost protection) |
-| Switches | AC display LED, beep on command |
+| Switches | AC display LED, beep on command, AC frame logging (diagnostic) |
 | Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, power, current, energy today |
 | Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater |
 
 Units without an electrical block, humidity sensor or outdoor block simply leave those sensors
-unavailable. "Quiet" is a fan mode because Home Assistant has no quiet preset.
+unavailable. Humidity, supply voltage and current are not published at all until the AC sends a
+real value, and the bundled config adds them disabled by default. "Quiet" is a fan mode because Home Assistant has no quiet preset.
 
 ## Link bring-up and the AEH-W41H1
 The stock W41H1 module performs a bring-up sequence (device type, version, heartbeat) before
@@ -36,7 +37,32 @@ climate:
     reply_timeout: 1000ms
     cycle_interval: 1000ms
     special_command_gap: 8s     # spacing between eco/turbo/sleep/quiet/8C frames
+    debug_frames: false         # log raw frames at DEBUG level (see below)
+    debug_frames_interval: 10s  # at most one status frame per interval
     # Every sub-entity is optional, see [brands/hisense/hisense-ac.yaml](../brands/hisense/hisense-ac.yaml) for the full list.
+```
+
+## Raw frame logging
+For decoding and calibration work. When on, the component logs at DEBUG level:
+
+- every command it sends (`TX command frame`) and the next status reply;
+- one status reply (`RX status frame`) per `debug_frames_interval` (default 10 s);
+- capability replies (`RX capabilities frame`);
+- a `key:` line with the bytes still being calibrated in decimal (room, indoor coil, humidity,
+  compressor, outdoor, voltage, power).
+
+Each frame is printed as hex, 16 bytes per line with the byte offset in front.
+
+Turn it on with `debug_frames: true`, or at runtime with the **AC Frame Logging** switch
+(diagnostic, off after every boot) that the bundled config includes, so prebuilt firmware can
+use it without reflashing. The logger must be at `DEBUG` or lower (the default).
+
+To read the log without the ESPHome dashboard, use the native API from any computer on the
+same network:
+
+```bash
+pip install aioesphomeapi
+aioesphomeapi-logs --no-states <device-ip>   # prebuilt firmware has no API encryption key
 ```
 
 ## Status screen
