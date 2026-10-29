@@ -14,6 +14,7 @@ substitutions:
 external_components:
   - source: ${hisense_component_source}
     components: [hisense_ac]
+    refresh: 0s   # always fetch the latest component code (Device Builder caches git sources for 1 day otherwise)
 
 uart:
   id: ac_uart
