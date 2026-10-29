@@ -3,7 +3,8 @@
 # Reads the board's GitHub Pages manifest (JSON "version") at boot and every 6 h, or now with
 # the "Check for Update" button, and compares it with this firmware's project version.
 # It only REPORTS: nothing is downloaded or installed, so an adopted config (API key, name,
-# extras) is never replaced. Update with "Install" in the Device Builder after bumping the tag.
+# extras) is never replaced. Update with "Install" in the Device Builder (adopted configs
+# follow the "stable" branch, so no YAML edit is needed).
 # The factory firmware removes these entities: its "Firmware Update" entity already does this.
 #
 # Needs the substitution update_manifest_url (set by each base device file).

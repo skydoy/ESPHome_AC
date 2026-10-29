@@ -8,6 +8,15 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.12] - 2026-10-29
+### Changed
+- **Adopted devices update with just *Install*, no YAML edits.** Adoption (`dashboard_import`)
+  now imports `@stable`, a branch CI moves to each release tag after the release is published.
+  The `hisense_ac` component stays pinned to `v<project_version>` inside the package, so YAML
+  and component always come from the same release. The Device Builder may take up to 1 day to
+  see a new release (git cache); *Clean Build Files* forces it. Existing `@vX.Y.Z` lines keep
+  working; switch them to `@stable` once.
+
 ## [0.2.11] - 2026-10-29
 ### Added
 - **Update check for adopted / Device Builder builds** (`core/update-check.yaml`, in both base
@@ -184,7 +193,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...HEAD
+[0.2.12]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...v0.2.9
