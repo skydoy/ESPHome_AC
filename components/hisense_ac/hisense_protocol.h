@@ -241,6 +241,23 @@ bool parse_capabilities(const uint8_t *frame, size_t len, Capabilities *out);
 /// Decodes a 0x0A device-type reply: the type pair at bytes 16 and 17.
 bool parse_devtype(const uint8_t *frame, size_t len, uint8_t *t_hi, uint8_t *t_lo);
 
+/// Human readable list of the supported features, comma separated ("None" when no flag is set).
+std::string describe_capabilities(const Capabilities &c);
+
+/// Class 0x07 version reply. Layout UNCONFIRMED (no capture yet): the stock W41H1 firmware reads a
+/// 16-bit word from bytes 16/17 and the mainboard protocol version (big endian) from bytes 18/19.
+struct Version {
+  bool valid{false};
+  bool has_protocol{false};   // the reply is long enough for bytes 18/19
+  uint16_t protocol{0};       // bytes 18/19, big endian
+  bool ascii{false};          // the payload was printable text
+  std::string text;           // the text, or "Protocol 0xXXXX (raw ..)" / "Raw .."
+};
+/// Max payload bytes shown in Version::text when the reply is not text.
+static constexpr size_t VERSION_RAW_MAX = 16;
+/// Decodes a validated 0x07 version reply (best effort, see Version). Returns false if it is not one.
+bool parse_version(const uint8_t *frame, size_t len, Version *out);
+
 /// Human readable list of active faults, "" when none. Comma separated.
 std::string describe_faults(const Faults &f);
 

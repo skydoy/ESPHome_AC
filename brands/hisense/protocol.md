@@ -23,7 +23,7 @@ F4 F5 | dir | 40 | LEN | ... | class (13) | sub (14) | payload ... | CK_HI CK_LO
 
 ## Link bring-up (stock AEH-W41H1 behaviour, `handshake: true`)
 1. `0A` device-type request (type pair 00 00) -> reply gives the type pair.
-2. `07` version request.
+2. `07` version request (reply: see below).
 3. Every cycle (default 1 s): `1E` heartbeat (byte 16 = `F0` until the AC answered once,
    then `B0`), queued commands, `66` status poll, and once a `66/40` ProductType
    (capabilities) poll. If the link is lost the cycle restarts with `0A`.
@@ -64,8 +64,8 @@ Short units send 82 bytes, W4G1-type units 150 bytes, the W41H1 160 bytes. Field
 | 19 | Set point |
 | 20 | Room temperature (signed) |
 | 21 | Indoor coil temperature (signed; unconfirmed on the W41H1, read room temperature in Cool) |
-| 22 / 23 | Humidity set point / indoor humidity (0 or > 100 = not available) |
-| 26 | bit 1: panel is in °F |
+| 22 / 23 | Humidity set point / indoor humidity (0 or > 100 = not available); `Humidity Set Point` sensor |
+| 26 | bit 1: panel is in °F (`AC Panel Unit` text sensor) |
 | 35 | bit 7 vertical swing, bit 6 horizontal swing, bit 4 aux heater, bit 2 eco, bit 1 turbo |
 | 36 | bit 2 quiet |
 | 37 | bit 7 display LED |
@@ -79,6 +79,27 @@ Short units send 82 bytes, W4G1-type units 150 bytes, the W41H1 160 bytes. Field
 | 77 | bit 0: +8 °C mode (alternative location) |
 
 Current is estimated as `P / (V * 0.95)`.
+
+The `66/40` ProductType reply (capabilities) is published as the `AC Capabilities` text sensor,
+and the `0A` type pair as `AC Device Type` (`XX XX`).
+
+## Version reply (class `07`, unconfirmed)
+No reply has been captured yet. The stock W41H1 firmware (reverse engineered) reads a 16-bit
+word of unknown meaning from bytes 16/17 and the mainboard protocol version, big endian, from
+bytes 18/19 (it enables newer features from `0x0214`). The `AC Firmware Version` text sensor is
+best effort:
+
+- bytes 16.. are printable ASCII (trailing `00` ignored): that text;
+- otherwise `Protocol 0xXXXX (raw ..)` with bytes 18/19 and up to 16 payload bytes in hex from
+  byte 16, or `Raw ..` (from byte 14) if the reply is shorter.
+
+The raw reply frame is always logged at DEBUG (`RX version frame`) and the decoded text at INFO.
+Please attach that log to an issue so the layout can be confirmed.
+
+## Bus error counters
+`AC Bus Checksum Errors` counts complete frames with a bad checksum, `AC Bus Framing Errors`
+frames dropped for a bad length, an overflow, a bad `F4` escape or a new header in the middle
+of a frame. Both count since boot (total increasing).
 
 ## Not on the bus
 - **iFeel** (room temperature measured at the remote) is only sent over infrared

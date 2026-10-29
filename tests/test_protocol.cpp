@@ -279,6 +279,42 @@ static void test_capabilities() {
   CHECK(c.cool_heat && c.fan_mute && c.heat8 && c.humidity && !c.purify);
   Status s;
   CHECK(!parse_status(f.data(), f.size(), &s));
+  CHECK(describe_capabilities(c) == "Heat/Cool, Fan Mute, 8C Heat, Humidity Sensor");
+  CHECK(describe_capabilities(Capabilities()) == "None");
+}
+
+// Version replies (class 07). No real capture yet: synthetic frames for the three decodings.
+static std::vector<uint8_t> make_version(const std::vector<uint8_t> &body) {
+  std::vector<uint8_t> f = {0xF4, 0xF5, 0x01, 0x40, 0x00, 0x01, 0x00, 0xFE,
+                            0x01, 0x00, 0x00, 0x01, 0x00, 0x07, 0x01, 0x00};
+  f.insert(f.end(), body.begin(), body.end());
+  f.insert(f.end(), {0x00, 0x00, 0xF4, 0xFB});
+  f[4] = static_cast<uint8_t>(f.size() - 9);
+  seal(f.data(), f.size());
+  return f;
+}
+
+static void test_version_reply() {
+  Version v;
+  std::vector<uint8_t> f = make_version({0x00, 0x01, 0x02, 0x15});
+  CHECK(parse_version(f.data(), f.size(), &v));
+  CHECK(v.valid && v.has_protocol && v.protocol == 0x0215 && !v.ascii);
+  CHECK(v.text == "Protocol 0x0215 (raw 00 01 02 15)");
+
+  f = make_version({'V', '1', '.', '2', 0x00});
+  CHECK(parse_version(f.data(), f.size(), &v));
+  CHECK(v.ascii && v.text == "V1.2");
+
+  f = make_version({});  // as short as the request
+  CHECK(parse_version(f.data(), f.size(), &v));
+  CHECK(!v.has_protocol && v.text == "Raw 01 00");
+
+  // Our own request echoed back, other classes and corrupted frames are rejected.
+  CHECK(!parse_version(VERSION_REQ.data(), VERSION_REQ.size(), &v));
+  CHECK(!parse_version(DEVTYPE_REPLY.data(), DEVTYPE_REPLY.size(), &v));
+  f = make_version({0x00, 0x01, 0x02, 0x15});
+  f[18] ^= 0xFF;
+  CHECK(!parse_version(f.data(), f.size(), &v));
 }
 
 static void test_commands() {
@@ -470,6 +506,7 @@ int main() {
   test_status_160();
   test_status_82_and_150();
   test_capabilities();
+  test_version_reply();
   test_commands();
   test_hex_bytes();
   test_power_steps();

@@ -85,6 +85,26 @@ climate:
     link_status:
       name: "AC Link Status"
       id: ac_link_status
+    # AC firmware version (class 07 reply, best-effort decoding) and RS-485 bus error counters.
+    ac_firmware_version:
+      name: "AC Firmware Version"
+    bus_checksum_errors:
+      name: "AC Bus Checksum Errors"
+    bus_framing_errors:
+      name: "AC Bus Framing Errors"
+    # Less useful diagnostics: hidden by default, enable them in Home Assistant if needed.
+    humidity_setpoint:
+      name: "Humidity Set Point"
+      disabled_by_default: true
+    panel_unit:
+      name: "AC Panel Unit"
+      disabled_by_default: true
+    capabilities:
+      name: "AC Capabilities"
+      disabled_by_default: true
+    device_type:
+      name: "AC Device Type"
+      disabled_by_default: true
     aux_heater:
       name: "Auxiliary Heater"
     display:

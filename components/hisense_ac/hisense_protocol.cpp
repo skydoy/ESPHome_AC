@@ -335,6 +335,70 @@ bool parse_devtype(const uint8_t *f, size_t len, uint8_t *t_hi, uint8_t *t_lo) {
   return true;
 }
 
+std::string describe_capabilities(const Capabilities &c) {
+  struct Flag {
+    bool on;
+    const char *name;
+  };
+  const Flag flags[] = {
+      {c.cool_heat, "Heat/Cool"}, {c.power_save, "Power Save"},       {c.purify, "Purify"},
+      {c.fan_mute, "Fan Mute"},   {c.infinite_fan, "Continuous Fan"}, {c.heat8, "8C Heat"},
+      {c.humidity, "Humidity Sensor"},
+  };
+  std::string out;
+  for (const Flag &f : flags) {
+    if (!f.on)
+      continue;
+    if (!out.empty())
+      out += ", ";
+    out += f.name;
+  }
+  if (out.empty())
+    out = "None";
+  return out;
+}
+
+bool parse_version(const uint8_t *f, size_t len, Version *v) {
+  if (v == nullptr || !frame_valid(f, len) || len < 20)
+    return false;
+  if (f[OFF_DIR] != DIR_FROM_AC || f[OFF_CLASS] != CLASS_VERSION)
+    return false;
+  Version r;
+  r.valid = true;
+  const size_t payload_end = len - 4;  // checksum follows
+  // Printable text in bytes 16.. (trailing NULs ignored), in case a unit reports a version string.
+  size_t end = payload_end;
+  while (end > 16 && f[end - 1] == 0x00)
+    end--;
+  bool printable = end >= 16 + 2;
+  for (size_t i = 16; printable && i < end; i++)
+    printable = f[i] >= 0x20 && f[i] <= 0x7E;
+  if (printable) {
+    r.ascii = true;
+    r.text.assign(reinterpret_cast<const char *>(f + 16), end - 16);
+  }
+  if (payload_end >= 20) {
+    r.has_protocol = true;
+    r.protocol = static_cast<uint16_t>((f[18] << 8) | f[19]);
+  }
+  if (!r.ascii) {
+    // Not text: the protocol word plus the raw payload (from byte 14 if there is nothing after it).
+    const size_t off = payload_end > 16 ? 16 : OFF_SUB;
+    const std::string raw = hex_bytes(f, payload_end, off, VERSION_RAW_MAX);
+    if (r.has_protocol) {
+      static const char HEX[] = "0123456789ABCDEF";
+      r.text = "Protocol 0x";
+      for (int sh = 12; sh >= 0; sh -= 4)
+        r.text += HEX[(r.protocol >> sh) & 0x0F];
+      r.text += " (raw " + raw + ")";
+    } else {
+      r.text = "Raw " + raw;
+    }
+  }
+  *v = r;
+  return true;
+}
+
 // ---- Faults ----------------------------------------------------------------------------------
 struct BitName {
   uint8_t mask;

@@ -13,7 +13,7 @@ The `hisense_ac` component (in [`components/hisense_ac`](../components/hisense_a
 | Select | Sleep Mode: Off, Sleep 1–4 |
 | Buttons | Light On, Light Off |
 | Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, power, current, energy today |
-| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below); from `core/diagnostics.yaml`: Firmware Version, ESPHome Version, Reset Reason, Uptime, Wi-Fi Signal |
+| Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below), AC Firmware Version, AC Bus Checksum Errors / AC Bus Framing Errors (counters since boot); hidden by default: Humidity Set Point, AC Panel Unit (Celsius/Fahrenheit), AC Capabilities, AC Device Type; from `core/diagnostics.yaml`: Firmware Version, ESPHome Version, Reset Reason, Uptime, Wi-Fi Signal |
 
 Eco, Super, Fan Mute and Sleep Mode drive the same commands as the climate presets and the Quiet
 fan mode, and follow the AC's reported state, so both views stay in sync. Eco, Super and Sleep
@@ -34,7 +34,10 @@ Daily energy is the "Energy Today" sensor (integrated from power) and current is
 
 Units without an electrical block, humidity sensor or outdoor block simply leave those sensors
 unavailable. Humidity, supply voltage and current are not published at all until the AC sends a
-real value, and the bundled config adds them disabled by default. "Quiet" is a fan mode because Home Assistant has no quiet preset.
+real value, and the bundled config adds them disabled by default.
+"AC Firmware Version" comes from the AC's reply to the `07` version request sent once at boot
+(`handshake: true`); its layout is not confirmed yet, see [protocol.md](../brands/hisense/protocol.md#version-reply-class-07-unconfirmed).
+The bus error counters are checked every 10 s and only published when they change. "Quiet" is a fan mode because Home Assistant has no quiet preset.
 
 ## Link bring-up and the AEH-W41H1
 The stock W41H1 module performs a bring-up sequence (device type, version, heartbeat) before

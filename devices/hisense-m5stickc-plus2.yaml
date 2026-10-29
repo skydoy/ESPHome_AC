@@ -11,7 +11,7 @@
 substitutions:
   name: hisense-ac
   friendly_name: Hisense AC
-  project_version: "0.2.12"
+  project_version: "0.2.13"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "self-built"
