@@ -1,5 +1,11 @@
 # Common diagnostics for every device (brand agnostic).
 # Also provides the time source "ha_time" that brand packages may use (e.g. daily energy).
+substitutions:
+  # Where this firmware was built from, shown next to the version in "Firmware Version".
+  # The device config / CI override it: "release" for tagged builds, "main" for Device Builder
+  # builds from the github:// package. Set it to anything ("" for none) in your own config.
+  firmware_source: "custom"
+
 time:
   - platform: homeassistant
     id: ha_time
@@ -32,6 +38,22 @@ text_sensor:
               - logger.log:
                   level: WARN
                   format: "Brownout reset: the 5 V supply dipped. Check the X/GND wires (5 V or 12 V input, see docs/wiring.md)."
+  # Project version (esphome: project: version) plus the build source, e.g. "0.2.6 (release)".
+  - platform: template
+    name: "Firmware Version"
+    id: firmware_version
+    icon: mdi:tag-outline
+    entity_category: diagnostic
+    update_interval: 1h
+    lambda: |-
+      #ifdef ESPHOME_PROJECT_VERSION
+      std::string v = ESPHOME_PROJECT_VERSION;
+      #else
+      std::string v = "unknown";
+      #endif
+      std::string src = "${firmware_source}";
+      if (!src.empty()) v += " (" + src + ")";
+      return v;
   - platform: version
     name: "ESPHome Version"
     hide_timestamp: true

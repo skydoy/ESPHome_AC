@@ -26,6 +26,11 @@ jobs:
       - name: Use the tag as firmware version
         if: startsWith(github.ref, 'refs/tags/v')
         run: sed -i "s|^\(\s*project_version:\).*|\1 \"${GITHUB_REF_NAME#v}\"|" "$DEVICE_YAML"
+      - name: Record the build source (shown in the "Firmware Version" sensor)
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then src="release"; else src="${GITHUB_REF_NAME} @${GITHUB_SHA::7}"; fi
+          sed -i "s|^\(\s*firmware_source:\).*|\1 \"$src\"|" "$DEVICE_YAML"
+          grep -n "firmware_source:" "$DEVICE_YAML"
       - id: esphome
         uses: esphome/build-action@v8.1.0   # consider pinning to the release commit SHA
         with:
