@@ -12,7 +12,7 @@
 substitutions:
   name: hisense-ac-atom
   friendly_name: Hisense AC
-  project_version: "0.2.11"
+  project_version: "0.2.12"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "self-built"
@@ -28,11 +28,12 @@ esphome:
     version: ${project_version}
 
 # Lets the ESPHome Device Builder "adopt" a device flashed from the web installer. The adopted
-# YAML imports this file pinned to the release tag of the running firmware (immutable, so the
-# Device Builder's git cache can never serve an old copy, and it matches the component tag).
-# To update an adopted device, change the tag in its packages: line and press Install.
+# YAML imports this file from the "stable" branch, which CI moves to every release tag, so
+# pressing "Install" builds the latest release with no YAML edits. The component is still
+# pinned to v${project_version} (brands/hisense/hisense-ac.yaml), so packages and component
+# always come from the same release, even from a stale Device Builder git cache.
 dashboard_import:
-  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-atom-lite-tail485.yaml@v${project_version}
+  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-atom-lite-tail485.yaml@stable
   import_full_config: false
 
 packages:

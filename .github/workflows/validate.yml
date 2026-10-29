@@ -42,7 +42,7 @@ jobs:
             grep -q "id: check_for_update" config.txt
           fi
   pinned-refs:
-    # Adopted configs and the external component must always point at the same release tag.
+    # Adoption follows @stable; the component is pinned to v<project_version> inside the package.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -55,7 +55,8 @@ jobs:
           test "$v1" = "$v2"
           grep -q 'hisense_component_source: github://skydoy/ESPHome_AC@v${project_version}$' brands/hisense/hisense-ac.yaml
           for f in devices/hisense-m5stickc-plus2.yaml devices/hisense-atom-lite-tail485.yaml; do
-            grep -q "package_import_url: github://skydoy/ESPHome_AC/$f@v\${project_version}$" "$f"
+            # Adoption follows the "stable" branch (CI moves it to each release tag).
+            grep -q "package_import_url: github://skydoy/ESPHome_AC/$f@stable$" "$f"
           done
           if grep -rn "github://skydoy/ESPHome_AC[^ ]*@main" devices brands core; then
             echo "::error::Shipped configs must not reference @main"; exit 1; fi

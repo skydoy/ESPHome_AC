@@ -47,10 +47,8 @@ Prices are M5Stack shop list prices, before shipping and tax. Wiring for both:
 3. **Connect:** join the `Hisense-AC Setup` Wi-Fi hotspot (or use Improv in the installer or
    over Bluetooth), then adopt the device in Home Assistant → **Settings → Devices → ESPHome**.
 
-Updates then arrive over the air through the **Firmware Update** entity. If you adopt the device
-in the ESPHome Device Builder, update it from there instead (the adopted config
-has no update entity, so your settings are never replaced): change the release tag in its
-`packages:` line, then press Install ([details](docs/configuration.md#esphome-device-builder)).
+Updates: not adopted in the Device Builder → one click on **Firmware Update** in Home Assistant;
+adopted → just press **Install** (it follows `@stable`, [details](docs/configuration.md#esphome-device-builder)).
 The firmware ships without an API key; to add one (recommended), see
 [API encryption](docs/configuration.md#api-encryption-and-ota-password-optional).
 Open `http://<device-ip>/` to see states and live logs (no password, LAN only;

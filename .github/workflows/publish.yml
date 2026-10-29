@@ -150,12 +150,32 @@ jobs:
           else
             gh release create "$TAG" assets/* --title "$TAG" --notes-file notes.md --verify-tag
           fi
-  verify-adoption:
-    # After the release exists, resolve the exact YAML that the ESPHome Device Builder generates
-    # when it adopts a device (dashboard_import shorthand pinned to this tag), with NO local
-    # overrides: proves the remote packages and the remote component resolve to the same tag.
+  stable:
+    # Move the "stable" branch to this release tag. Adopted Device Builder configs import
+    # devices/<board>.yaml@stable, so "Install" builds the latest release with no YAML edits.
     if: startsWith(github.ref, 'refs/tags/v')
     needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Point refs/heads/stable at the tag commit
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/stable" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/stable" -f sha="$GITHUB_SHA" -F force=true
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/heads/stable -f sha="$GITHUB_SHA"
+          fi
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/stable" --jq .object.sha)" = "$GITHUB_SHA"
+          echo "stable -> $GITHUB_REF_NAME ($GITHUB_SHA)"
+  verify-adoption:
+    # After "stable" moved, resolve the exact YAML that the ESPHome Device Builder generates
+    # when it adopts a device (dashboard_import shorthand @stable), with NO local overrides:
+    # proves @stable serves this release and its component resolves to the same tag.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: stable
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -172,7 +192,7 @@ jobs:
           substitutions:
             name: adopted-test
           packages:
-            skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@${GITHUB_REF_NAME}
+            skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@stable
           esphome:
             name: \${name}
             name_add_mac_suffix: false
@@ -183,4 +203,5 @@ jobs:
           cat adopted.yaml
           esphome config adopted.yaml | tee config.txt
           grep -q "source: github://skydoy/ESPHome_AC@${GITHUB_REF_NAME}" config.txt
-          grep -q "package_import_url: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@${GITHUB_REF_NAME}" config.txt
+          grep -q "package_import_url: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@stable" config.txt
+          grep -qE "^\s+version: ['\"]?${GITHUB_REF_NAME#v}['\"]?$" config.txt

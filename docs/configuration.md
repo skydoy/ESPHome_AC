@@ -121,16 +121,15 @@ There are two kinds of firmware, built from two files per board:
 - **Factory firmware:** the `Firmware Update` entity installs new releases from the board's manifest:
   `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json` (Stick) or
   `https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json` (ATOM).
-- **Adopted devices:** the device announces `dashboard_import`, so the ESPHome Device Builder can
-  adopt it. Adoption imports the **base** file, which has no `Firmware Update` entity on purpose:
-  installing the generic factory firmware over an adopted device would replace your config and
-  drop your API encryption key, so Home Assistant could no longer connect. Update it from the
-  Device Builder instead, see [ESPHome Device Builder](#esphome-device-builder).
-- **Is there a new release?** Adopted/base builds have **Update Available** and
-  **Latest Version** (diagnostic), read from the board's manifest at boot and every 6 h, and a
-  **Check for Update** button (configuration) to check now. They only report; nothing is
-  installed. To update, bump the tag and press **Install**. Factory firmware uses its
-  `Firmware Update` entity instead (`core/update-check.yaml`).
+There are two ways to update, and neither needs a YAML edit:
+1. **Not adopted** (factory firmware from the installer): press **Install** on the
+   **Firmware Update** entity in Home Assistant. One click.
+2. **Adopted in the ESPHome Device Builder:** your YAML imports `@stable`; just press
+   **Install** → *Wirelessly*. The adopted build has no `Firmware Update` entity on purpose
+   (the generic firmware would replace your config and drop your API key).
+- **Is there a new release?** Adopted builds have **Update Available** and **Latest Version**
+  (diagnostic), read from the board's manifest at boot and every 6 h, plus a **Check for Update**
+  button. They only report; nothing is installed (`core/update-check.yaml`).
 - Adopted before v0.2.9? Those builds still include the update entity. Do not press *Install* on
   it; press **Install** in the Device Builder once and the entity disappears.
 - Progress: an update takes about 1-2 minutes. The download blocks the device's main loop, so
@@ -144,38 +143,25 @@ There are two kinds of firmware, built from two files per board:
 API key, Wi-Fi) that *references* this repository. The repository never edits that file, so
 your key and extras are safe; what changes is the code that the reference points to.
 
-**Pin it to a release tag.** Each release tag is immutable, and the packages and the
-`hisense_ac` component of a release always come from that same tag (the component source is
-`github://skydoy/ESPHome_AC@v${project_version}`). Since v0.2.10, adoption already writes this:
+**Follow `@stable`.** Adoption writes this (since v0.2.12):
 
 ```yaml
 packages:
-  skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@v0.2.11
+  skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@stable
   # ATOM Lite: devices/hisense-atom-lite-tail485.yaml
 ```
 
-To update, change the tag to the [latest release](https://github.com/skydoy/ESPHome_AC/releases)
-(e.g. `@v0.2.10` → `@v0.2.11`; **Update Available** tells you when) and press **Install** → *Wirelessly*.
+The `stable` branch is moved by CI to every release, so **Install** always builds the latest
+release. The `hisense_ac` component is pinned inside the package to that release's tag
+(`github://skydoy/ESPHome_AC@v${project_version}`), so YAML and component always match.
 
-**Why not `@main`?** ESPHome caches git sources for one day (`refresh: 1d`, and the one-line
-`github://` form cannot change that). With `@main`, *Install* can rebuild an old version, or mix
-new YAML with an old cached component (errors like *`debug_frames` is an invalid option*).
-A tag never changes, so its cache can never be stale. If you still want to follow `main`
-(development only), use the long form with `refresh: 0s` and point the component at `main` too:
+**New release not picked up yet?** The Device Builder caches git sources for up to 1 day. Open
+the device's ⋮ menu → **Clean Build Files**, then *Install* again to fetch it now.
 
-```yaml
-substitutions:
-  hisense_component_source: github://skydoy/ESPHome_AC@main
-  hisense_component_refresh: 0s
-packages:
-  skydoy.esphome-ac:
-    url: https://github.com/skydoy/ESPHome_AC
-    ref: main
-    refresh: 0s
-    files: [devices/hisense-m5stickc-plus2.yaml]
-```
+Want a fixed version instead? Replace `@stable` with a tag such as `@v0.2.12`. Avoid `@main`
+(development only, and it can mix new YAML with an old cached component).
 
-**Errors after changing the reference?** Open the device's ⋮ menu → **Clean Build Files**, then
+**Errors after an update?** Open the device's ⋮ menu → **Clean Build Files**, then
 *Install* again.
 
 ### API encryption and OTA password (optional)
@@ -221,8 +207,8 @@ To remove the page, use `web_server: !remove` in your config (or drop
 `core/web-server.yaml` from its packages). The captive portal for Wi-Fi setup is unaffected.
 
 ### Firmware Version sensor
-Shows `esphome: project: version` plus the build source in brackets: `0.2.11 (release)` for the
-web-installer/OTA firmware, `0.2.11 (self-built)` when the Device Builder builds the adopted
+Shows `esphome: project: version` plus the build source in brackets: `0.2.12 (release)` for the
+web-installer/OTA firmware, `0.2.12 (self-built)` when the Device Builder builds the adopted
 `github://` package (or you build a checkout), `main @abc1234` for CI builds of a branch.
 Override the `firmware_source` substitution in your own config to label your build
 (e.g. `firmware_source: "my fork @1a2b3c4"`, or `""` for the version only). Configs without
@@ -259,9 +245,9 @@ Bump `project_version` in both `devices/<board>.yaml` (and the tag in the exampl
 matching tag `vX.Y.Z`: GitHub Actions builds the firmware with ESPHome 2026.10.1, then publishes
 the installer page and `firmware/manifest.json` to GitHub Pages (Settings → Pages → Source:
 **GitHub Actions**). Devices running the factory firmware pick up the new version through the
-`Firmware Update` entity; adopted devices get it by changing the tag in their `packages:` line
-and pressing **Install** in the Device Builder. After the release, CI validates the exact YAML
-the Device Builder generates on adoption, straight from GitHub.
+`Firmware Update` entity. After the release, CI moves the `stable` branch to the tag (adopted
+devices then just press **Install**) and validates the exact YAML the Device Builder generates
+on adoption (`@stable`), straight from GitHub.
 
 ## Safety
 - Indoor units have **mains voltage (230 V AC)** next to the Wi-Fi module port. Switch the AC
