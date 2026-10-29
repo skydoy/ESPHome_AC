@@ -1,0 +1,9 @@
+# Local web page at http://<device-ip>/ : entity states, controls and live logs.
+# Version 3 UI; the JS/CSS is served from the ESPHome CDN (local: false, the default),
+# so it costs little flash. NO authentication: anyone on the LAN can view and control the
+# device. To add a login, set `auth:` in your own config; to remove the page, override the
+# package with `web_server: !remove`. See docs/configuration.md#web-server.
+web_server:
+  port: 80
+  version: 3
+  log: true

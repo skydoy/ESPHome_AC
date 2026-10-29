@@ -8,6 +8,13 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-10-29
+### Added
+- **Web server** on both boards (`core/web-server.yaml`): open `http://<device-ip>/` on the LAN
+  for entity states, controls and the live log (ESPHome web server v3, port 80, JS/CSS from the
+  ESPHome CDN). It has **no authentication**; add `auth:` or remove it with
+  `web_server: !remove` in your own config ([details](docs/configuration.md#web-server)).
+
 ## [0.2.7] - 2026-10-29
 ### Added
 - Second board: **M5Stack ATOM Lite + ATOM Tail485**, the cheapest option (≈ US$15). No screen:
@@ -110,7 +117,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.4...v0.2.5

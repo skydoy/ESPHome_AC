@@ -50,6 +50,8 @@ Prices are M5Stack shop list prices, before shipping and tax. Wiring for both:
 Updates then arrive over the air through the **Firmware Update** entity. The firmware ships
 without an API key; to add one (recommended), see
 [API encryption](docs/configuration.md#api-encryption-and-ota-password-optional).
+Open `http://<device-ip>/` to see states and live logs (no password, LAN only;
+[how to add one or turn it off](docs/configuration.md#web-server)).
 
 [![Wiring diagram](docs/wiring.svg)](docs/wiring.md)
 
