@@ -126,6 +126,11 @@ There are two kinds of firmware, built from two files per board:
   installing the generic factory firmware over an adopted device would replace your config and
   drop your API encryption key, so Home Assistant could no longer connect. Update it from the
   Device Builder instead, see [ESPHome Device Builder](#esphome-device-builder).
+- **Is there a new release?** Adopted/base builds have **Update Available** and
+  **Latest Version** (diagnostic), read from the board's manifest at boot and every 6 h, and a
+  **Check for Update** button (configuration) to check now. They only report; nothing is
+  installed. To update, bump the tag and press **Install**. Factory firmware uses its
+  `Firmware Update` entity instead (`core/update-check.yaml`).
 - Adopted before v0.2.9? Those builds still include the update entity. Do not press *Install* on
   it; press **Install** in the Device Builder once and the entity disappears.
 - Progress: an update takes about 1-2 minutes. The download blocks the device's main loop, so
@@ -145,12 +150,12 @@ your key and extras are safe; what changes is the code that the reference points
 
 ```yaml
 packages:
-  skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@v0.2.10
+  skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@v0.2.11
   # ATOM Lite: devices/hisense-atom-lite-tail485.yaml
 ```
 
 To update, change the tag to the [latest release](https://github.com/skydoy/ESPHome_AC/releases)
-(e.g. `@v0.2.10` → `@v0.2.11`) and press **Install** → *Wirelessly*.
+(e.g. `@v0.2.10` → `@v0.2.11`; **Update Available** tells you when) and press **Install** → *Wirelessly*.
 
 **Why not `@main`?** ESPHome caches git sources for one day (`refresh: 1d`, and the one-line
 `github://` form cannot change that). With `@main`, *Install* can rebuild an old version, or mix
@@ -216,8 +221,8 @@ To remove the page, use `web_server: !remove` in your config (or drop
 `core/web-server.yaml` from its packages). The captive portal for Wi-Fi setup is unaffected.
 
 ### Firmware Version sensor
-Shows `esphome: project: version` plus the build source in brackets: `0.2.10 (release)` for the
-web-installer/OTA firmware, `0.2.10 (self-built)` when the Device Builder builds the adopted
+Shows `esphome: project: version` plus the build source in brackets: `0.2.11 (release)` for the
+web-installer/OTA firmware, `0.2.11 (self-built)` when the Device Builder builds the adopted
 `github://` package (or you build a checkout), `main @abc1234` for CI builds of a branch.
 Override the `firmware_source` substitution in your own config to label your build
 (e.g. `firmware_source: "my fork @1a2b3c4"`, or `""` for the version only). Configs without
@@ -233,7 +238,7 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 |---|---|
 | `devices/hisense-m5stickc-plus2.yaml`, `devices/hisense-atom-lite-tail485.yaml` | Base device configs (core + board + brand); what the Device Builder adopts |
 | `devices/*.factory.yaml` | Base config + `core/auto-update.yaml`; built by CI and offered by the web installer |
-| `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update, web server |
+| `core/` | Brand-agnostic packages: `boards/`, `screen/`, provisioning, diagnostics, auto-update, update check, web server |
 | `brands/hisense/` | Hisense package, wiring, W41H1/W4xx notes and protocol notes |
 | `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |
 | `components/hisense_ac/` | The ESPHome external component (ESP-IDF; Arduino untested) |

@@ -7,9 +7,6 @@
 # Do not adopt or include this file in your own config: the update entity would replace your
 # config with the generic firmware (and drop your API encryption key). Adopting a device in the
 # ESPHome Device Builder imports the base file instead (see dashboard_import there).
-substitutions:
-  update_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/manifest.json
-
 packages:
   device: !include hisense-m5stickc-plus2.yaml
   auto_update: !include ../core/auto-update.yaml

@@ -3,7 +3,8 @@
 #
 # BASE configuration: this is the file the ESPHome Device Builder adopts (dashboard_import
 # below), so an adopted device keeps its own config (API key, name, extras) and is updated with
-# "Install" in the Device Builder. It has no "Firmware Update" entity on purpose.
+# "Install" in the Device Builder. It has no "Firmware Update" entity on purpose;
+# "Update Available" / "Latest Version" report new releases (core/update-check.yaml).
 # The firmware published to the web installer is built from hisense-atom-lite-tail485.factory.yaml, which
 # includes this file and adds core/auto-update.yaml (update entity + OTA over HTTPS).
 #
@@ -11,10 +12,12 @@
 substitutions:
   name: hisense-ac-atom
   friendly_name: Hisense AC
-  project_version: "0.2.10"
+  project_version: "0.2.11"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "self-built"
+  # Release manifest of this board on GitHub Pages ("Latest Version" / "Update Available").
+  update_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json
 
 esphome:
   name: ${name}
@@ -41,3 +44,4 @@ packages:
   provisioning: !include ../core/provisioning.yaml
   diagnostics: !include ../core/diagnostics.yaml
   web_server: !include ../core/web-server.yaml
+  update_check: !include ../core/update-check.yaml   # reports new releases, never installs
