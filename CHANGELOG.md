@@ -8,6 +8,17 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.11] - 2026-10-29
+### Added
+- **Update check for adopted / Device Builder builds** (`core/update-check.yaml`, in both base
+  configs): `Update Available` (diagnostic, update class) and `Latest Version` (diagnostic),
+  read from the board's GitHub Pages manifest at boot and every 6 h, plus a `Check for Update`
+  button (configuration) to check now. Report only: nothing is installed, so the adopted config
+  and API key stay intact. The factory firmware keeps its `Firmware Update` entity instead.
+
+### Changed
+- `update_manifest_url` now lives in the base device files (one place per board).
+
 ## [0.2.10] - 2026-10-29
 ### Fixed
 - **Device Builder rebuilt an old version, or failed with 28 errors after an update.** Adopted
@@ -173,7 +184,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...HEAD
+[0.2.11]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.7...v0.2.8

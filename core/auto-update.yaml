@@ -32,3 +32,16 @@ update:
     name: "Firmware Update"
     source: ${update_manifest_url}
     update_interval: 6h
+
+# The update entity above already shows the latest version and checks GitHub, so drop the
+# report-only entities of core/update-check.yaml (included by the base config) here.
+text_sensor:
+  - id: !remove latest_version
+binary_sensor:
+  - id: !remove update_available
+button:
+  - id: !remove check_for_update
+interval:
+  - id: !remove update_check_interval
+script:
+  - id: !remove update_check

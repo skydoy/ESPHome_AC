@@ -1,0 +1,101 @@
+# "Is there a newer release?" for adopted / Device Builder builds (base configs).
+#
+# Reads the board's GitHub Pages manifest (JSON "version") at boot and every 6 h, or now with
+# the "Check for Update" button, and compares it with this firmware's project version.
+# It only REPORTS: nothing is downloaded or installed, so an adopted config (API key, name,
+# extras) is never replaced. Update with "Install" in the Device Builder after bumping the tag.
+# The factory firmware removes these entities: its "Firmware Update" entity already does this.
+#
+# Needs the substitution update_manifest_url (set by each base device file).
+http_request:
+  verify_ssl: true
+  timeout: 5s
+
+text_sensor:
+  - platform: template
+    id: latest_version
+    name: "Latest Version"
+    icon: mdi:cloud-download-outline
+    entity_category: diagnostic
+    update_interval: never
+
+binary_sensor:
+  - platform: template
+    id: update_available
+    name: "Update Available"
+    device_class: update
+    entity_category: diagnostic
+
+button:
+  - platform: template
+    id: check_for_update
+    name: "Check for Update"
+    icon: mdi:update
+    entity_category: config
+    on_press:
+      - script.execute: update_check
+
+interval:
+  - id: update_check_interval
+    interval: 6h
+    startup_delay: 60s
+    then:
+      - script.execute: update_check
+
+script:
+  - id: update_check
+    mode: single
+    then:
+      - wait_until:
+          condition: wifi.connected
+          timeout: 30s
+      - if:
+          condition: wifi.connected
+          then:
+            - http_request.get:
+                url: ${update_manifest_url}
+                capture_response: true
+                max_response_buffer_size: 2kB
+                on_response:
+                  then:
+                    - lambda: |-
+                        if (response->status_code != 200) {
+                          ESP_LOGW("update_check", "Manifest HTTP %d", response->status_code);
+                          return;
+                        }
+                        std::string latest;
+                        json::parse_json(body, [&latest](JsonObject root) -> bool {
+                          if (!root["version"].is<const char *>()) return false;
+                          latest = root["version"].as<std::string>();
+                          return true;
+                        });
+                        if (latest.empty()) {
+                          ESP_LOGW("update_check", "Manifest has no version");
+                          return;
+                        }
+                        // Numeric semver compare (major.minor.patch, any suffix ignored).
+                        auto parse = [](const std::string &s, int out[3]) {
+                          out[0] = out[1] = out[2] = 0;
+                          sscanf(s.c_str(), "%d.%d.%d", &out[0], &out[1], &out[2]);
+                        };
+                        #ifdef ESPHOME_PROJECT_VERSION
+                        const std::string current = ESPHOME_PROJECT_VERSION;
+                        #else
+                        const std::string current = "0.0.0";
+                        #endif
+                        int a[3], b[3];
+                        parse(latest, a);
+                        parse(current, b);
+                        bool newer = false;
+                        for (int i = 0; i < 3; i++) {
+                          if (a[i] != b[i]) { newer = a[i] > b[i]; break; }
+                        }
+                        ESP_LOGI("update_check", "Latest %s, running %s%s", latest.c_str(),
+                                 current.c_str(), newer ? " -> update available" : "");
+                        id(latest_version).publish_state(latest);
+                        id(update_available).publish_state(newer);
+                on_error:
+                  then:
+                    - logger.log:
+                        level: WARN
+                        format: "Update check failed (no internet or GitHub Pages unreachable)"

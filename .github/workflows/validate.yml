@@ -32,11 +32,14 @@ jobs:
         run: |
           if [[ "${{ matrix.device }}" == *.factory.yaml ]]; then
             grep -q "id: firmware_update" config.txt
+            if grep -q "id: update_check$" config.txt; then
+              echo "::error::Factory configs must drop core/update-check.yaml (duplicate of Firmware Update)"; exit 1; fi
           else
-            if grep -q "platform: http_request" config.txt; then
+            if grep -qE "id: (firmware_update|ota_http)$" config.txt; then
               echo "::error::Base configs (adopted in the Device Builder) must not include auto-update"
               exit 1
             fi
+            grep -q "id: check_for_update" config.txt
           fi
   pinned-refs:
     # Adopted configs and the external component must always point at the same release tag.
