@@ -38,3 +38,21 @@ jobs:
               exit 1
             fi
           fi
+  pinned-refs:
+    # Adopted configs and the external component must always point at the same release tag.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Same version in both boards; dashboard_import and component follow it
+        run: |
+          set -e
+          v1=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-m5stickc-plus2.yaml)
+          v2=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-atom-lite-tail485.yaml)
+          echo "m5stickc-plus2=$v1 atom-lite=$v2"
+          test "$v1" = "$v2"
+          grep -q 'hisense_component_source: github://skydoy/ESPHome_AC@v${project_version}$' brands/hisense/hisense-ac.yaml
+          for f in devices/hisense-m5stickc-plus2.yaml devices/hisense-atom-lite-tail485.yaml; do
+            grep -q "package_import_url: github://skydoy/ESPHome_AC/$f@v\${project_version}$" "$f"
+          done
+          if grep -rn "github://skydoy/ESPHome_AC[^ ]*@main" devices brands core; then
+            echo "::error::Shipped configs must not reference @main"; exit 1; fi

@@ -10,10 +10,10 @@
 substitutions:
   name: hisense-ac
   friendly_name: Hisense AC
-  project_version: "0.2.9"
+  project_version: "0.2.10"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
-  # "main" means built from the github:// package (Device Builder adoption) or a checkout.
-  firmware_source: "main"
+  # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
+  firmware_source: "self-built"
 
 esphome:
   name: ${name}
@@ -23,9 +23,12 @@ esphome:
     name: skydoy.esphome-ac
     version: ${project_version}
 
-# Lets the ESPHome Dashboard / Home Assistant "adopt" a device flashed from the web installer.
+# Lets the ESPHome Device Builder "adopt" a device flashed from the web installer. The adopted
+# YAML imports this file pinned to the release tag of the running firmware (immutable, so the
+# Device Builder's git cache can never serve an old copy, and it matches the component tag).
+# To update an adopted device, change the tag in its packages: line and press Install.
 dashboard_import:
-  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@main
+  package_import_url: github://skydoy/ESPHome_AC/devices/hisense-m5stickc-plus2.yaml@v${project_version}
   import_full_config: false
 
 packages:

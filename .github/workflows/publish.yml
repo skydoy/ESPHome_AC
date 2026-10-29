@@ -37,9 +37,11 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build the components from this checkout (not from @main)
         run: sed -i 's|^\(\s*hisense_component_source:\).*|\1 ../components|' brands/hisense/hisense-ac.yaml
-      - name: Use the tag as firmware version
+      - name: The tag must match project_version (adopted configs fetch the component at v<project_version>)
         if: startsWith(github.ref, 'refs/tags/v')
-        run: sed -i "s|^\(\s*project_version:\).*|\1 \"${GITHUB_REF_NAME#v}\"|" "$BASE_YAML"
+        run: |
+          grep -q "^\s*project_version: \"${GITHUB_REF_NAME#v}\"$" "$BASE_YAML" || {
+            echo "::error::$BASE_YAML project_version does not match tag $GITHUB_REF_NAME"; exit 1; }
       - name: Record the build source (shown in the "Firmware Version" sensor)
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then src="release"; else src="${GITHUB_REF_NAME} @${GITHUB_SHA::7}"; fi
@@ -148,3 +150,37 @@ jobs:
           else
             gh release create "$TAG" assets/* --title "$TAG" --notes-file notes.md --verify-tag
           fi
+  verify-adoption:
+    # After the release exists, resolve the exact YAML that the ESPHome Device Builder generates
+    # when it adopts a device (dashboard_import shorthand pinned to this tag), with NO local
+    # overrides: proves the remote packages and the remote component resolve to the same tag.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [hisense-m5stickc-plus2, hisense-atom-lite-tail485]
+    steps:
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.13" }
+      - run: pip install esphome==2026.10.1
+      - name: Validate the adopted config from GitHub
+        run: |
+          set -o pipefail
+          cat > adopted.yaml <<EOF
+          substitutions:
+            name: adopted-test
+          packages:
+            skydoy.esphome-ac: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@${GITHUB_REF_NAME}
+          esphome:
+            name: \${name}
+            name_add_mac_suffix: false
+          wifi:
+            ssid: test
+            password: test12345
+          EOF
+          cat adopted.yaml
+          esphome config adopted.yaml | tee config.txt
+          grep -q "source: github://skydoy/ESPHome_AC@${GITHUB_REF_NAME}" config.txt
+          grep -q "package_import_url: github://skydoy/ESPHome_AC/devices/${{ matrix.device }}.yaml@${GITHUB_REF_NAME}" config.txt
