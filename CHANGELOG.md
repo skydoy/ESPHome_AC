@@ -15,6 +15,16 @@ section below, with the factory and OTA images attached.
   sync with the climate presets and fan mode.
 - One diagnostic problem binary sensor per fault bit (19 in total, e.g. indoor coil sensor,
   outdoor EEPROM, exhaust sensor, WiFi/indoor communication). The fault codes text sensor stays.
+- Docs: how to add an optional API encryption key and OTA password
+  ([configuration](docs/configuration.md#api-encryption-and-ota-password-optional)). The
+  firmware still ships without them, so existing devices keep working.
+
+### Fixed
+- Device Builder compile warnings:
+  - the splash image uses the `platform: file` image syntax;
+  - the splash PNG is loaded by URL, so remote and bundled builds no longer skip it
+    ("skipping file outside config directory");
+  - the fixed strapping pins (G0 UART TX, LCD GPIO5/12/15) set `ignore_strapping_warning`.
 
 ## [0.2.5] - 2026-10-29
 ### Added

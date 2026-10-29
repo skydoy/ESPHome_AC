@@ -22,6 +22,9 @@ packages:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+# Optional but recommended: encrypt the API and protect OTA. The packages set neither,
+# so the pre-built firmware keeps working without a key. Generate a key with:
+#   openssl rand -base64 32
 api:
   encryption:
     key: !secret api_key

@@ -106,6 +106,28 @@ the screen stays on while Wi-Fi or the AC link is down.
   it and build your own copy from [`devices/hisense-m5stickc-plus2.yaml`](../devices/hisense-m5stickc-plus2.yaml).
 - Build it yourself from remote packages: [`examples/my-ac-livingroom.yaml`](../examples/my-ac-livingroom.yaml).
 
+### API encryption and OTA password (optional)
+The packages deliberately set no API key and no OTA password, so the pre-built firmware and
+every existing device keep working; this is why ESPHome warns that API/OTA traffic is plaintext.
+To secure your own build, add this to your device YAML (it merges with the package):
+
+```yaml
+api:
+  encryption:
+    key: !secret api_key        # openssl rand -base64 32
+ota:
+  - platform: esphome
+    password: !secret ota_password
+```
+
+After flashing, Home Assistant asks for the new key when it reconnects. The Device Builder usually
+adds an API key for you when it adopts the device.
+
+### Time zone
+`core/diagnostics.yaml` takes the time from Home Assistant (`platform: homeassistant`) and sets
+no time zone, so the device follows the zone configured in Home Assistant. Only set
+`timezone:` yourself if you build without Home Assistant time.
+
 ## Repository layout
 | Path | What |
 |---|---|

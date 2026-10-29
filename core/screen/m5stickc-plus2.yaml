@@ -35,7 +35,9 @@ substitutions:
 spi:
   id: lcd_spi
   clk_pin: GPIO13
-  mosi_pin: GPIO15
+  mosi_pin:
+    number: GPIO15
+    ignore_strapping_warning: true   # fixed LCD wiring on the Plus2
 
 globals:
   - id: screen_awake_until
@@ -67,7 +69,10 @@ font:
     size: 14
 
 image:
-  - file: splash_badge.png   # 110x110 project badge (docs/icon.png) on the splash background
+  # 110x110 project badge (docs/icon.png) on the splash background. Fetched by URL so that
+  # github:// packages, remote builds and the Device Builder bundle all find it.
+  - platform: file
+    file: https://raw.githubusercontent.com/skydoy/ESPHome_AC/main/core/screen/splash_badge.png
     id: splash_badge
     type: RGB565
     resize: 110x110
@@ -155,9 +160,13 @@ display:
     id: lcd
     spi_id: lcd_spi
     model: ST7789V
-    cs_pin: GPIO5
+    cs_pin:
+      number: GPIO5
+      ignore_strapping_warning: true
     dc_pin: GPIO14
-    reset_pin: GPIO12
+    reset_pin:
+      number: GPIO12
+      ignore_strapping_warning: true
     dimensions:
       width: 135
       height: 240
