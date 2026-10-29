@@ -4,7 +4,7 @@ SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 """
 
 import esphome.codegen as cg
-from esphome.components import binary_sensor, climate, sensor, switch, text_sensor, uart
+from esphome.components import binary_sensor, button, climate, select, sensor, switch, text_sensor, uart
 import esphome.config_validation as cv
 from esphome.const import (
     CONF_HUMIDITY,
@@ -34,12 +34,51 @@ from esphome.const import (
 from . import hisense_ac_ns
 
 DEPENDENCIES = ["uart"]
-AUTO_LOAD = ["sensor", "binary_sensor", "text_sensor", "switch"]
+AUTO_LOAD = ["sensor", "binary_sensor", "text_sensor", "switch", "select", "button"]
 
 HisenseAC = hisense_ac_ns.class_("HisenseAC", climate.Climate, cg.Component, uart.UARTDevice)
 HisenseDisplaySwitch = hisense_ac_ns.class_("HisenseDisplaySwitch", switch.Switch)
 HisenseBeepSwitch = hisense_ac_ns.class_("HisenseBeepSwitch", switch.Switch, cg.Component)
 HisenseFrameLogSwitch = hisense_ac_ns.class_("HisenseFrameLogSwitch", switch.Switch, cg.Component)
+HisenseFeatureSwitch = hisense_ac_ns.class_("HisenseFeatureSwitch", switch.Switch)
+HisenseSleepSelect = hisense_ac_ns.class_("HisenseSleepSelect", select.Select)
+HisenseLightButton = hisense_ac_ns.class_("HisenseLightButton", button.Button)
+Feature = hisense_ac_ns.enum("Feature", is_class=True)
+FaultGroup = hisense_ac_ns.enum("FaultGroup", is_class=True)
+
+SLEEP_OPTIONS = ["Off", "Sleep 1", "Sleep 2", "Sleep 3", "Sleep 4"]
+
+# Dedicated switches for the special features (kept in sync with presets / fan mode).
+_FEATURE_SWITCHES = {
+    "eco_switch": ("ECO", "mdi:leaf"),
+    "super_switch": ("TURBO", "mdi:rocket-launch"),
+    "fan_mute_switch": ("QUIET", "mdi:fan-off"),
+}
+_LIGHT_BUTTONS = {"light_on_button": (True, "mdi:lightbulb-on"), "light_off_button": (False, "mdi:lightbulb-off")}
+CONF_SLEEP_MODE = "sleep_mode"
+
+# One problem binary sensor per fault bit: key -> (group, mask).
+_FAULT_SENSORS = {
+    "fault_indoor_temperature_sensor": ("INDOOR", 0x80),
+    "fault_indoor_coil_sensor": ("INDOOR", 0x40),
+    "fault_indoor_humidity_sensor": ("INDOOR", 0x20),
+    "fault_water_tank_full": ("INDOOR", 0x10),
+    "fault_indoor_fan_motor": ("INDOOR", 0x08),
+    "fault_grille_protection": ("INDOOR", 0x04),
+    "fault_zero_crossing": ("INDOOR", 0x02),
+    "fault_indoor_outdoor_communication": ("INDOOR", 0x01),
+    "fault_display_communication": ("MODULE", 0x80),
+    "fault_keypad_communication": ("MODULE", 0x40),
+    "fault_wifi_communication": ("MODULE", 0x20),
+    "fault_electrical": ("MODULE", 0x10),
+    "fault_indoor_eeprom": ("MODULE", 0x08),
+    "fault_outdoor_eeprom": ("OUTDOOR", 0x40),
+    "fault_outdoor_coil_sensor": ("OUTDOOR", 0x20),
+    "fault_discharge_sensor": ("OUTDOOR", 0x10),
+    "fault_outdoor_temperature_sensor": ("OUTDOOR", 0x08),
+    "fault_overheat_protection": ("PROTECT", 0x10),
+    "fault_high_discharge_temperature": ("PROTECT", 0x02),
+}
 
 CONF_HORIZONTAL_SWING = "horizontal_swing"
 CONF_SLEEP_PROFILE = "sleep_profile"
@@ -142,6 +181,22 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_CURRENT,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
+            **{
+                cv.Optional(k): binary_sensor.binary_sensor_schema(
+                    device_class=DEVICE_CLASS_PROBLEM,
+                    entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+                )
+                for k in _FAULT_SENSORS
+            },
+            **{
+                cv.Optional(k): switch.switch_schema(HisenseFeatureSwitch, icon=icon)
+                for k, (_, icon) in _FEATURE_SWITCHES.items()
+            },
+            **{
+                cv.Optional(k): button.button_schema(HisenseLightButton, icon=icon)
+                for k, (_, icon) in _LIGHT_BUTTONS.items()
+            },
+            cv.Optional(CONF_SLEEP_MODE): select.select_schema(HisenseSleepSelect, icon="mdi:sleep"),
             # Binary sensors
             cv.Optional(CONF_CONNECTED): binary_sensor.binary_sensor_schema(
                 device_class=DEVICE_CLASS_CONNECTIVITY,
@@ -254,3 +309,22 @@ async def to_code(config):
         await cg.register_component(s, config[CONF_FRAME_LOG_SWITCH])
         await cg.register_parented(s, var)
         cg.add(var.set_frame_log_switch(s))
+    for key, (group, mask) in _FAULT_SENSORS.items():
+        if key in config:
+            s = await binary_sensor.new_binary_sensor(config[key])
+            cg.add(var.add_fault_binary_sensor(s, getattr(FaultGroup, group), mask))
+    for key, (feature, _) in _FEATURE_SWITCHES.items():
+        if key in config:
+            s = await switch.new_switch(config[key])
+            await cg.register_parented(s, var)
+            cg.add(s.set_feature(getattr(Feature, feature)))
+            cg.add(var.add_feature_switch(s))
+    for key, (on, _) in _LIGHT_BUTTONS.items():
+        if key in config:
+            b = await button.new_button(config[key])
+            await cg.register_parented(b, var)
+            cg.add(b.set_on(on))
+    if CONF_SLEEP_MODE in config:
+        sel = await select.new_select(config[CONF_SLEEP_MODE], options=SLEEP_OPTIONS)
+        await cg.register_parented(sel, var)
+        cg.add(var.set_sleep_select(sel))

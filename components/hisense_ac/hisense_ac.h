@@ -18,6 +18,13 @@
 #ifdef USE_SWITCH
 #include "esphome/components/switch/switch.h"
 #endif
+#ifdef USE_SELECT
+#include "esphome/components/select/select.h"
+#endif
+#ifdef USE_BUTTON
+#include "esphome/components/button/button.h"
+#endif
+#include <vector>
 
 #include "hisense_protocol.h"
 
@@ -29,6 +36,10 @@ static const char *const FAN_MEDIUM_HIGH = "Medium-High";
 static const char *const PRESET_HEAT_8C = "Heat 8C";
 
 enum class LinkState : uint8_t { SEARCHING, HANDSHAKE, CONNECTED, LOST };
+/// Special features with their own switch (kept in sync with the climate preset / fan mode).
+enum class Feature : uint8_t { ECO, TURBO, QUIET };
+/// Fault byte groups for the per-fault binary sensors.
+enum class FaultGroup : uint8_t { INDOOR, MODULE, OUTDOOR, PROTECT };
 
 class HisenseAC;
 
@@ -48,6 +59,30 @@ class HisenseFrameLogSwitch : public switch_::Switch, public Component, public P
   void setup() override;
  protected:
   void write_state(bool state) override;
+};
+class HisenseFeatureSwitch : public switch_::Switch, public Parented<HisenseAC> {
+ public:
+  void set_feature(Feature f) { this->feature_ = f; }
+  Feature get_feature() const { return this->feature_; }
+ protected:
+  void write_state(bool state) override;
+  Feature feature_{Feature::ECO};
+};
+#endif
+#ifdef USE_SELECT
+/// Options: "Off", "Sleep 1" .. "Sleep 4".
+class HisenseSleepSelect : public select::Select, public Parented<HisenseAC> {
+ protected:
+  void control(size_t index) override;
+};
+#endif
+#ifdef USE_BUTTON
+class HisenseLightButton : public button::Button, public Parented<HisenseAC> {
+ public:
+  void set_on(bool on) { this->on_ = on; }
+ protected:
+  void press_action() override;
+  bool on_{true};
 };
 #endif
 
@@ -83,6 +118,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_connected_binary_sensor(binary_sensor::BinarySensor *s) { this->connected_ = s; }
   void set_fault_binary_sensor(binary_sensor::BinarySensor *s) { this->fault_ = s; }
   void set_aux_heater_binary_sensor(binary_sensor::BinarySensor *s) { this->aux_heater_ = s; }
+  void add_fault_binary_sensor(binary_sensor::BinarySensor *s, FaultGroup g, uint8_t mask) {
+    this->fault_sensors_.push_back({s, g, mask});
+  }
 #endif
 #ifdef USE_TEXT_SENSOR
   void set_fault_text_sensor(text_sensor::TextSensor *s) { this->fault_text_ = s; }
@@ -92,6 +130,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_display_switch(HisenseDisplaySwitch *s) { this->display_switch_ = s; }
   void set_beep_switch(HisenseBeepSwitch *s) { this->beep_switch_ = s; }
   void set_frame_log_switch(HisenseFrameLogSwitch *s) { this->frame_log_switch_ = s; }
+  void add_feature_switch(HisenseFeatureSwitch *s) { this->feature_switches_.push_back(s); }
+#endif
+#ifdef USE_SELECT
+  void set_sleep_select(HisenseSleepSelect *s) { this->sleep_select_ = s; }
 #endif
 
   // ---- Runtime API (also handy from YAML lambdas, e.g. the status screen) ----
@@ -101,6 +143,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   /// Raw frame logging (DEBUG level): status replies rate limited, commands always.
   bool get_debug_frames() const { return this->debug_frames_; }
   void set_debug_frames_runtime(bool on);
+  /// Turns eco / turbo / quiet on or off through the climate entity, so presets stay in sync.
+  void set_feature(Feature f, bool on);
+  /// 0 = sleep off, 1..4 = sleep profile.
+  void set_sleep_option(uint8_t profile);
   bool is_connected() const { return this->link_ == LinkState::CONNECTED; }
   LinkState get_link_state() const { return this->link_; }
   const char *get_link_state_text() const;
@@ -147,6 +193,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint8_t to_panel_temp_(float c) const;
   float from_panel_temp_(int16_t v) const;
   void log_frame_(const char *what, const uint8_t *f, size_t len);
+  void sync_controls_(const proto::Status &s);
 
   // Bus state
   proto::FrameAssembler rx_;
@@ -210,6 +257,12 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   binary_sensor::BinarySensor *connected_{nullptr};
   binary_sensor::BinarySensor *fault_{nullptr};
   binary_sensor::BinarySensor *aux_heater_{nullptr};
+  struct FaultSensor {
+    binary_sensor::BinarySensor *sensor;
+    FaultGroup group;
+    uint8_t mask;
+  };
+  std::vector<FaultSensor> fault_sensors_;
 #endif
 #ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *fault_text_{nullptr};
@@ -219,6 +272,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   HisenseDisplaySwitch *display_switch_{nullptr};
   HisenseBeepSwitch *beep_switch_{nullptr};
   HisenseFrameLogSwitch *frame_log_switch_{nullptr};
+  std::vector<HisenseFeatureSwitch *> feature_switches_;
+#endif
+#ifdef USE_SELECT
+  HisenseSleepSelect *sleep_select_{nullptr};
 #endif
 };
 

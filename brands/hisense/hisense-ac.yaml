@@ -85,6 +85,58 @@ climate:
       name: "AC Beep"
     frame_log_switch:
       name: "AC Frame Logging"
+    # Dedicated controls (ConnectLife-style), kept in sync with the climate presets / fan mode.
+    eco_switch:
+      name: "Eco"
+    super_switch:
+      name: "Super"
+    fan_mute_switch:
+      name: "Fan Mute"
+    sleep_mode:
+      name: "Sleep Mode"
+    light_on_button:
+      name: "Light On"
+    light_off_button:
+      name: "Light Off"
+    # One problem sensor per fault bit (diagnostic). "AC Fault Codes" above lists them as text.
+    fault_indoor_temperature_sensor:
+      name: "Indoor Temperature Sensor Failure"
+    fault_indoor_coil_sensor:
+      name: "Indoor Coil Temperature Sensor Failure"
+    fault_indoor_humidity_sensor:
+      name: "Indoor Humidity Sensor Failure"
+    fault_water_tank_full:
+      name: "Water Tank Full"
+    fault_indoor_fan_motor:
+      name: "Indoor Fan Motor Failure"
+    fault_grille_protection:
+      name: "Cabinet Grille Protection Alarm"
+    fault_zero_crossing:
+      name: "Indoor Voltage Zero-Crossing Fault"
+    fault_indoor_outdoor_communication:
+      name: "Indoor-Outdoor Communication Failure"
+    fault_display_communication:
+      name: "Indoor Board-Display Communication Failure"
+    fault_keypad_communication:
+      name: "Indoor Board-Keypad Communication Failure"
+    fault_wifi_communication:
+      name: "WiFi-Indoor Communication Failure"
+    fault_electrical:
+      name: "Electrical Fault"
+    fault_indoor_eeprom:
+      name: "Indoor Control Board EEPROM Error"
+    fault_outdoor_eeprom:
+      name: "Outdoor EEPROM Error"
+    fault_outdoor_coil_sensor:
+      name: "Outdoor Coil Temperature Sensor Failure"
+    fault_discharge_sensor:
+      name: "Exhaust Temperature Sensor Failure"
+    fault_outdoor_temperature_sensor:
+      name: "Outdoor Ambient Temperature Sensor Failure"
+    fault_overheat_protection:
+      name: "Overheat or Overcool Protection"
+    fault_high_discharge_temperature:
+      name: "High Discharge Temperature Protection"
 
 sensor:
   - platform: total_daily_energy
