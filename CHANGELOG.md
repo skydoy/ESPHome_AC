@@ -7,6 +7,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 section below, with the factory and OTA images attached.
 
 ## [Unreleased]
+### Added
+- Light / dark mode button on the web installer (follows the OS by default, remembered).
 
 ## [0.2.16] - 2026-11-02
 ### Added
@@ -15,7 +17,6 @@ section below, with the factory and OTA images attached.
 - [Compatibilidade](docs/compatibilidade.md): the compatibility list in Portuguese.
 - Compatibility list: "Board tested" and "Reported by" columns, ❔ Untested status, ATOM row.
 - Compatibility report form: board dropdown and a log ("RX" lines) field.
-- Light / dark mode button on the web installer (follows the OS by default, remembered).
 
 No firmware changes: 0.2.16 behaves exactly like 0.2.15.
 
