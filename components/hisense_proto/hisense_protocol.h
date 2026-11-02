@@ -1,6 +1,12 @@
 // Hisense / Hisense-OEM "XM" RS-485 bus protocol (the F4 F5 protocol spoken between the
 // indoor unit and the AEH-W4x Wi-Fi modules: W4A1, W4B1, W4E1, W4G2, W41H1, ...).
 //
+// READ-ONLY part of the protocol: framing, the receiver, the query frames (0x0A device type,
+// 0x07 version, 0x66 status / capabilities) and the reply decoders. Nothing in this library
+// can change the AC state; the command (0x65) and heartbeat (0x1E) frames live in
+// components/hisense_ac/hisense_command.h. Shared by hisense_ac (the climate component) and
+// ac_setup (the detection firmware, which must never write to the AC).
+//
 // This file is platform independent (no ESPHome includes) so it can be unit tested on a
 // host compiler. See brands/hisense/protocol.md for the byte map and the sources of every fact.
 //
@@ -50,6 +56,8 @@ uint16_t checksum(const uint8_t *frame, size_t len);
 bool frame_valid(const uint8_t *frame, size_t len);
 /// Writes the checksum into bytes n-4/n-3 and the F4 FB tail into n-2/n-1.
 void seal(uint8_t *frame, size_t len);
+/// Seals the decoded template f[n] (see seal()) and copies it to out. Returns n, 0 if cap < n.
+size_t finish_frame(uint8_t *f, size_t n, uint8_t *out, size_t cap);
 /// Byte stuffing for the wire. Returns the wire length, 0 if it does not fit.
 size_t stuff(const uint8_t *frame, size_t len, uint8_t *out, size_t out_cap);
 
@@ -76,98 +84,17 @@ class FrameAssembler {
   uint32_t framing_errors_{0};
 };
 
-// ---- Fixed module -> AC frames (decoded, unsealed templates are sealed at build time) ----------
+// ---- Read-only module -> AC queries (decoded templates, sealed when built) ------------------
 /// 0x0A device-type request (link bring-up, step 1). Always uses type 00 00.
 size_t build_devtype_request(uint8_t *out, size_t cap);
 /// 0x07 version request (link bring-up, step 2).
 size_t build_version_request(uint8_t t_hi, uint8_t t_lo, uint8_t *out, size_t cap);
-/// 0x1E heartbeat. heard_ac: we already received a 0x1E reply from the AC.
-size_t build_heartbeat(uint8_t t_hi, uint8_t t_lo, bool heard_ac, uint8_t *out, size_t cap);
 /// 0x66 status poll (sub 0x00) or ProductType/capability poll (sub 0x40).
 size_t build_status_request(uint8_t t_hi, uint8_t t_lo, uint8_t sub, uint8_t *out, size_t cap);
 
-// ---- Command frame (class 0x65, 50 bytes decoded) --------------------------------------------
-// A zero payload byte means "leave this setting unchanged"; most fields are (value << 1) | 1.
+// ---- Operating mode / fan enums (shared by status decoding and commands) -----------------
 enum class Mode : uint8_t { FAN = 0, HEAT = 1, COOL = 2, DRY = 3, AUTO = 4 };
 enum class Fan : uint8_t { AUTO = 0, LOW = 1, MEDIUM_LOW = 2, MEDIUM = 3, MEDIUM_HIGH = 4, HIGH = 5 };
-
-struct Command {
-  // Every field is optional: has_x == false leaves it untouched on the AC.
-  bool has_power{false};
-  bool power{false};
-  bool has_mode{false};
-  Mode mode{Mode::COOL};
-  bool has_setpoint{false};
-  uint8_t setpoint{24};  // in the unit the AC panel uses (C or F)
-  bool has_fan{false};
-  Fan fan{Fan::AUTO};
-  bool has_vswing{false};
-  bool vswing{false};
-  bool has_hswing{false};
-  bool hswing{false};
-  bool has_eco{false};
-  bool eco{false};
-  bool has_turbo{false};
-  bool turbo{false};
-  bool has_quiet{false};
-  bool quiet{false};
-  bool has_display{false};
-  bool display{false};
-  bool has_heat8{false};
-  bool heat8{false};
-  bool has_sleep{false};
-  uint8_t sleep{0};  // 0 = off, 1..4 = sleep profile
-  bool beep{true};
-};
-
-static constexpr size_t COMMAND_LEN = 50;
-/// Builds a decoded, sealed command frame into out[COMMAND_LEN].
-void build_command(const Command &cmd, uint8_t t_hi, uint8_t t_lo, uint8_t *out);
-
-/// Which groups of settings a command carries (bit mask). Commands of one single group can be
-/// merged while they wait in the queue; swing axes and special modes stay in frames of their own.
-enum CommandGroup : uint8_t {
-  GROUP_NONE = 0,
-  GROUP_BASIC = 1 << 0,    // power, mode, set point, fan
-  GROUP_VSWING = 1 << 1,
-  GROUP_HSWING = 1 << 2,
-  GROUP_DISPLAY = 1 << 3,
-  GROUP_SPECIAL = 1 << 4,  // eco, turbo, quiet, heat 8C, sleep (need spacing on the AC)
-};
-uint8_t command_groups(const Command &c);
-/// Copies every field set in `from` into `into` (the newer value wins); beep follows `from`.
-void merge_command(Command &into, const Command &from);
-
-/// Wrap-safe "now >= t" for millisecond timestamps.
-inline bool time_reached(uint32_t now, uint32_t t) { return static_cast<int32_t>(now - t) >= 0; }
-
-/// Fixed-size command queue (no heap). Plain commands of the same group are coalesced, so a burst
-/// of set-point clicks costs one bus frame; special commands are spaced `special_gap` ms apart
-/// because the AC ignores special modes that arrive too close together.
-class CommandQueue {
- public:
-  static constexpr size_t CAPACITY = 12;
-  enum class Push : uint8_t { ADDED, MERGED, FULL };
-  struct Item {
-    Command cmd;
-    uint32_t not_before{0};
-    bool special{false};
-  };
-
-  Push push(const Command &cmd, bool special, uint32_t now, uint32_t special_gap);
-  /// Removes and returns the first command whose time has come.
-  bool pop_ready(uint32_t now, Item *out);
-  bool has_ready(uint32_t now) const;
-  size_t size() const { return this->len_; }
-  bool empty() const { return this->len_ == 0; }
-  void clear() { this->len_ = 0; }
-
- protected:
-  Item items_[CAPACITY];
-  size_t len_{0};
-  uint32_t last_special_at_{0};
-  bool any_special_sent_{false};
-};
 
 // ---- Status frame decoding -----------------------------------------------------------------
 struct Faults {
