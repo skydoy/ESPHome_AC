@@ -8,6 +8,31 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+### Changed
+- **New installs get brand-neutral names.** Boards flashed from the web installer are now called
+  `esphome-ac-xxxxxx` (M5StickC Plus2) or `esphome-ac-atom-xxxxxx` (ATOM), with the friendly
+  name **Air Conditioner**, so their Home Assistant entities are
+  `climate.air_conditioner_xxxxxx_air_conditioner` and so on. Release files follow
+  (`esphome-ac-esp32-*.bin`, `esphome-ac-atom-esp32-*.bin`).
+
+**Existing devices keep their names and entity IDs.**
+- Boards flashed before 0.3.0 keep updating from the same `firmware/...` manifests, which keep
+  serving builds named `hisense-ac` / **Hisense AC** (`hisense-ac-*-v0.3.0.bin` on the release).
+  An update never renames a device.
+- Configs adopted in the ESPHome Device Builder set `name` and `friendly_name` themselves, and the
+  base configs still default to `hisense-ac` / `Hisense AC`, so pressing **Install** changes nothing.
+
+### Added
+- `devices/esphome-ac-m5stickc-plus2.factory.yaml` and `devices/esphome-ac-atom-lite-tail485.factory.yaml`
+  (new-install builds, OTA from `install/<board>/manifest.json` on GitHub Pages).
+- CI builds both the legacy and the new-install images and checks that the legacy manifests
+  still point to hisense-ac builds.
+
+### Docs
+- Installer, READMEs, quick start guides and the Home Assistant card name both the new
+  (*Air Conditioner*) and the old (*Hisense AC*) names.
+
 ## [0.2.18] - 2026-11-02
 ### Changed
 - The Wi-Fi setup hotspot is now called **`ESPHome_AC Setup`** (was `Hisense-AC Setup`; the beta
@@ -287,7 +312,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.18...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.18...v0.3.0
 [0.2.18]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.17...v0.2.18
 [0.2.17]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.16...v0.2.17
 [0.2.16]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...v0.2.16

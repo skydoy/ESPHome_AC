@@ -29,6 +29,17 @@ jobs:
             base: devices/hisense-atom-lite-tail485.yaml
             factory: devices/hisense-atom-lite-tail485.factory.yaml
             site_dir: firmware/atom-lite-tail485
+          # New installs (v0.3.0+): brand-neutral names (esphome-ac / "Air Conditioner") and their
+          # own OTA manifests under install/. The two builds above are LEGACY: devices flashed
+          # before v0.3.0 keep updating from firmware/... and keep their hisense-ac names.
+          - key: new-m5stickc-plus2
+            base: devices/hisense-m5stickc-plus2.yaml
+            factory: devices/esphome-ac-m5stickc-plus2.factory.yaml
+            site_dir: install/m5stickc-plus2
+          - key: new-atom-lite-tail485
+            base: devices/hisense-atom-lite-tail485.yaml
+            factory: devices/esphome-ac-atom-lite-tail485.factory.yaml
+            site_dir: install/atom-lite-tail485
     env:
       BASE_YAML: ${{ matrix.base }}
       DEVICE_YAML: ${{ matrix.factory }}
@@ -81,6 +92,13 @@ jobs:
           ls -R site
           test -f site/firmware/manifest.json
           test -f site/firmware/atom-lite-tail485/manifest.json
+          test -f site/install/m5stickc-plus2/manifest.json
+          test -f site/install/atom-lite-tail485/manifest.json
+          # Legacy manifests must keep serving hisense-ac builds (no silent rename over OTA).
+          grep -q '"hisense-ac-esp32.ota.bin"' site/firmware/manifest.json
+          grep -q '"hisense-ac-atom-esp32.ota.bin"' site/firmware/atom-lite-tail485/manifest.json
+          grep -q '"esphome-ac-esp32.ota.bin"' site/install/m5stickc-plus2/manifest.json
+          grep -q '"esphome-ac-atom-esp32.ota.bin"' site/install/atom-lite-tail485/manifest.json
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
@@ -139,7 +157,7 @@ jobs:
           for f in $(find fw -name '*.factory.bin' -o -name '*.ota.bin' | sort); do
             b=$(basename "$f"); cp "$f" "assets/${b%%.*}-${TAG}.${b#*.}"
           done
-          test "$(ls assets | wc -l)" -ge 4   # factory + ota for every device
+          test "$(ls assets | wc -l)" -ge 8   # factory + ota for every build (2 legacy + 2 new)
           (cd assets && sha256sum * > SHA256SUMS.txt)
           ls -l assets && cat assets/SHA256SUMS.txt
       - name: Create or update the release

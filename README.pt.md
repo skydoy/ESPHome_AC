@@ -34,7 +34,7 @@ Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comerci
    (ATOM: instale antes de encaixar o Tail485, que ocupa a porta USB-C.)
 2. **Wi-Fi.** Escreva o seu Wi-Fi na mesma janela. (Ou mais tarde: ligue-se à rede `ESPHome_AC Setup` com o telemóvel.)
 3. **Ligar e adicionar.** Desligue o ar condicionado no disjuntor, ligue a ficha de 4 fios do módulo Wi-Fi antigo à placa
-   ([ligações](docs/wiring.md)) e volte a ligar o disjuntor. O Home Assistant mostra *Hisense AC* em
+   ([ligações](docs/wiring.md)) e volte a ligar o disjuntor. O Home Assistant mostra *Air Conditioner* (*Hisense AC* em placas instaladas antes da v0.3.0) em
    **Definições → Dispositivos e serviços** → **Configurar**.
 
 Passo a passo com imagens: **[Guia rápido](docs/guia-rapido.md)** · **[Quick start (EN)](docs/quick-start.md)**

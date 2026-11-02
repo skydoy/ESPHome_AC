@@ -8,7 +8,10 @@ Open your dashboard → **✏️ Edit** → **+ Add card** → **Manual**, paste
 
 Before saving, replace every `hisense_ac_b04d18` with your device's ID. To find it, open
 **Settings → Devices & services → ESPHome**, open your AC and click its **Air Conditioner**
-entity → ⚙️: the entity ID looks like `climate.hisense_ac_xxxxxx_air_conditioner`.
+entity → ⚙️: the entity ID looks like `climate.air_conditioner_xxxxxx_air_conditioner`
+(boards installed since v0.3.0, so replace with `air_conditioner_xxxxxx`) or
+`climate.hisense_ac_xxxxxx_air_conditioner` (boards installed before v0.3.0, or adopted in the
+Device Builder before then).
 
 ```yaml
 type: vertical-stack

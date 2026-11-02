@@ -33,7 +33,7 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
    (ATOM: flash before fitting the Tail485, it uses the USB-C port.)
 2. **Wi-Fi.** Type your Wi-Fi in the same window. (Or later: join the `ESPHome_AC Setup` hotspot from your phone.)
 3. **Wire and add.** AC off at the breaker, connect the 4-wire plug of the old Wi-Fi module to the board
-   ([wiring](docs/wiring.md)), breaker back on. Home Assistant shows *Hisense AC* under
+   ([wiring](docs/wiring.md)), breaker back on. Home Assistant shows *Air Conditioner* (*Hisense AC* on boards installed before v0.3.0) under
    **Settings → Devices & services** → **Configure**.
 
 Step by step with pictures: **[Quick start](docs/quick-start.md)** · **[Guia rápido (PT)](docs/guia-rapido.md)**
