@@ -8,6 +8,27 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.15] - 2026-11-02
+### Changed
+- **New web installer page**: one card per step (board → install → Wi-Fi → wiring → Home
+  Assistant) with a "You should see" check after each, a board picker with pictures of both
+  boards, per-board wiring diagrams and tables, a troubleshooting card and a **Português /
+  English** toggle (remembered in the browser). Everything from 0.2.14 is kept: USB driver help,
+  the 5 V / 12 V check, photo slots, help-us-test link and the auto-update notes.
+- **README** rewritten to be shorter: install in 3 steps, what you get in Home Assistant, boards
+  and status at a glance.
+
+### Added
+- [README.pt.md](README.pt.md): the README in Portuguese.
+- [Quick start](docs/quick-start.md) and [Guia rápido](docs/guia-rapido.md): illustrated
+  step-by-step guides in English and Portuguese.
+- [Problemas](docs/problemas.md): the troubleshooting guide in Portuguese.
+- Board illustrations (`static/board-atom.svg`, `static/board-stick.svg`). They are drawings, not
+  photos; real installation photos still go in the slots listed in
+  [docs/photos/README.md](docs/photos/README.md).
+
+No firmware changes: 0.2.15 behaves exactly like 0.2.14.
+
 ## [0.2.14] - 2026-11-02
 ### Added
 - **Auto Update** (web-installer firmware only): a configuration switch, on by default and kept
@@ -225,7 +246,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...HEAD
+[0.2.15]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...v0.2.15
 [0.2.14]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...v0.2.12

@@ -237,7 +237,7 @@ no time zone, so the device follows the zone configured in Home Assistant. Only 
 | `adapters/` | Physical-layer adapters table (RS-485, TTL UART, P1/P2, IR) |
 | `components/hisense_ac/` | The ESPHome external component (ESP-IDF; Arduino untested) |
 | `tests/` | Host unit tests for the protocol layer (`make -C tests`) |
-| `static/index.html` | ESP Web Tools installer page with brand selector |
+| `static/index.html` | ESP Web Tools installer page (board picker, PT/EN, board illustrations) |
 | `examples/` | Config for building in your own ESPHome Device Builder |
 
 ### Building locally

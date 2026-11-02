@@ -19,4 +19,6 @@ readable. Switch the AC off at the breaker before opening the unit for the photo
 | `photo-atom-installed.jpg` | The ATOM Lite + Tail485 fitted inside the indoor unit, LED green | 4. Wire it to the AC (ATOM) |
 
 Wiring diagrams (`wiring.svg`, `wiring-atom-lite.svg`) are already on the page; the photos
-complement them, they do not replace them.
+complement them, they do not replace them. The [quick start](../quick-start.md) and
+[guia rápido](../guia-rapido.md) have a hidden marker where each photo goes; replace it with the
+image once the file exists.

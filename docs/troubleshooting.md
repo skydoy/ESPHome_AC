@@ -1,6 +1,6 @@
 # Troubleshooting & FAQ
 
-Quick fixes for the most common problems. Still stuck?
+Quick fixes for the most common problems. *Português: [problemas.md](problemas.md).* Still stuck?
 [Open an issue](https://github.com/skydoy/ESPHome_AC/issues/new/choose) and paste the log
 (see [Reading the logs](#reading-the-logs)).
 

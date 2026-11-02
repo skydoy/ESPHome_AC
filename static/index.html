@@ -1,170 +1,335 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ESPHome AC · Web installer</title>
+  <meta name="description" content="Install the ESPHome AC firmware from your browser: your Hisense air conditioner in Home Assistant, local, no YAML.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <title>ESPHome AC bridge – web installer</title>
+  <meta property="og:title" content="ESPHome AC">
+  <meta property="og:description" content="Your Hisense air conditioner in Home Assistant. Plug in, click Install, done. No cloud, no app.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/skydoy/ESPHome_AC/main/docs/social-preview.png">
+  <meta name="theme-color" content="#1784F7">
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
-    code { background: #f2f2f2; padding: 0 .25rem; }
-    fieldset { border: 1px solid #ccc; border-radius: .5rem; padding: .75rem 1rem; }
-    label { display: block; padding: .2rem 0; }
-    label.disabled { color: #888; }
-    .help img { width: 100%; height: auto; border: 1px solid #ddd; border-radius: .5rem; }
-    .help table { border-collapse: collapse; margin: .5rem 0; }
-    .help td, .help th { border: 1px solid #ccc; padding: .2rem .5rem; text-align: left; }
-    .brand { text-align: center; }
-    .brand img { width: 96px; height: 96px; }
-    .see { color: #2a6a2a; font-size: .95em; }
-    .see::before { content: "You should see: "; font-weight: 600; }
-    details { margin: .5rem 0; }
-    summary { cursor: pointer; font-weight: 600; }
-    figure.photo { margin: .75rem 0; }
-    figure.photo figcaption { font-size: .9em; color: #555; }
-    .warn { background: #fff4e5; border-left: 4px solid #f0a020; padding: .5rem .75rem; }
+    :root { --bg:#f4f8fc; --card:#fff; --text:#0b1b3f; --muted:#52647a; --line:#dce5ef; --g1:#0FE3FA; --g2:#1784F7; --accent:#1784F7; --warn-bg:#fff6e5; --warn:#e69500; --ok-bg:#e8f4fe; --ok:#1784F7; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0b1220; --card:#131c2e; --text:#e6edf3; --muted:#9aa9bd; --line:#26334a; --accent:#4fb3ff; --warn-bg:#2b2111; --ok-bg:#0f2238; --ok:#4fb3ff; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.55; }
+    a { color: var(--accent); }
+    html[data-lang=pt] .en, html[data-lang=en] .pt { display:none !important; }
+    [hidden] { display:none !important; }
+    header { background: linear-gradient(135deg, var(--g1), var(--g2)); color:#fff; padding: 1.25rem 1rem 3.5rem; }
+    .wrap { max-width: 52rem; margin: 0 auto; padding: 0 1rem; }
+    .top { display:flex; align-items:center; gap:.9rem; }
+    .top img { width:56px; height:56px; border-radius:14px; box-shadow: 0 2px 10px rgba(0,0,0,.2); outline:2px solid #fff6; }
+    .top h1 { font-size:1.6rem; margin:0; line-height:1.1; }
+    .top small { opacity:.92; font-size:.95rem; }
+    .lang { margin-left:auto; display:flex; gap:.25rem; }
+    .lang button { border:1px solid #fff8; background:transparent; color:#fff; border-radius:999px; padding:.25rem .7rem; cursor:pointer; font-weight:600; }
+    .lang button[aria-pressed=true] { background:#fff; color:#0f63c4; }
+    .pitch { font-size:1.15rem; margin:1rem 0 0; max-width:40rem; }
+    main { margin-top:-2.5rem; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:1.25rem 1.25rem 1rem; margin-bottom:1rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .card h2 { margin:0 0 .6rem; font-size:1.2rem; display:flex; align-items:center; gap:.6rem; }
+    .card h3 { font-size:1rem; margin:1rem 0 .3rem; }
+    .num { flex:none; width:2rem; height:2rem; border-radius:50%; display:inline-grid; place-items:center; color:#fff; font-size:1rem; background: linear-gradient(135deg, var(--g1), var(--g2)); }
+    .boards { display:grid; grid-template-columns: 1fr 1fr; gap:.8rem; }
+    .boards label { display:block; border:2px solid var(--line); border-radius:12px; padding:.6rem; cursor:pointer; transition: border-color .15s; }
+    .boards label:hover { border-color: var(--accent); }
+    .boards label:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+    .boards input { accent-color: var(--accent); }
+    .boards img { width:100%; height:auto; border-radius:8px; margin-top:.4rem; display:block; }
+    .boards .t { font-weight:700; font-size:1.05rem; }
+    .boards .d { color:var(--muted); font-size:.92rem; }
+    .brandline { color:var(--muted); font-size:.92rem; margin:.8rem 0 .2rem; }
+    .install { text-align:center; padding:.5rem 0 .25rem; }
+    .btn { font: inherit; font-size:1.15rem; font-weight:700; color:#fff; border:0; border-radius:12px; padding:.85rem 2.2rem; cursor:pointer; background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 4px 14px rgba(23,132,247,.35); }
+    .btn:hover { filter: brightness(1.05); }
+    .ver { color:var(--muted); font-size:.9rem; margin-top:.4rem; }
+    .note { border-radius:10px; padding:.6rem .85rem; margin:.7rem 0; }
+    .warn { background:var(--warn-bg); border-left:4px solid var(--warn); }
+    .ok { background:var(--ok-bg); border-left:4px solid var(--ok); }
+    ol, ul { padding-left:1.25rem; } li { margin:.25rem 0; }
+    code { background: color-mix(in srgb, var(--text) 8%, transparent); padding:.05rem .35rem; border-radius:5px; }
+    .diagram { display:block; background:#fff; border:1px solid var(--line); border-radius:10px; padding:.3rem; margin:.6rem 0; }
+    .diagram img { width:100%; height:auto; display:block; }
+    figure.photo { margin:.7rem 0; }
+    figure.photo img { width:100%; border-radius:10px; display:block; }
+    figure.photo figcaption { color:var(--muted); font-size:.88rem; margin-top:.25rem; }
+    table { width:100%; border-collapse:collapse; font-size:.95rem; }
+    td, th { border-top:1px solid var(--line); padding:.45rem .3rem; vertical-align:top; text-align:left; }
+    table.ents td:first-child, table.wire td:first-child { font-weight:600; white-space:nowrap; padding-right:.8rem; }
+    details { border-top:1px solid var(--line); padding:.55rem 0; }
+    summary { cursor:pointer; font-weight:600; }
+    details p, details li { color:var(--muted); }
+    details p { margin:.4rem 0 0; }
+    footer { color:var(--muted); font-size:.88rem; padding: 1rem 0 2.5rem; }
+    #nosupport { display:none; }
+    @media (max-width: 38rem) { .boards { grid-template-columns:1fr; } .top h1 { font-size:1.3rem; } }
   </style>
 </head>
 <body>
-  <div class="brand"><img src="icon.png" alt="ESPHome AC logo"></div>
-  <h1>ESPHome AC bridge – web installer</h1>
-  <p>Firmware that replaces your air conditioner's Wi-Fi module with an ESP32 board and talks to
-     Home Assistant locally.</p>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <img src="icon.png" alt="ESPHome AC logo">
+      <div>
+        <h1>ESPHome AC</h1>
+        <small><span class="pt">Instalador web</span><span class="en">Web installer</span> · Hisense</small>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-set="pt">PT</button>
+        <button type="button" data-set="en">EN</button>
+      </div>
+    </div>
+    <p class="pitch">
+      <span class="pt">O seu ar condicionado Hisense no Home Assistant. Ligue por USB, carregue em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
+      <span class="en">Your Hisense air conditioner in Home Assistant. Plug in by USB, click Install, done. No YAML, no cloud, no app.</span>
+    </p>
+  </div>
+</header>
 
-  <form id="brand-form">
-    <fieldset>
-      <legend>1. Choose your AC brand</legend>
-      <label><input type="radio" name="brand" value="hisense" checked>
-        Hisense (AEH-W4x / AEH-W41H1 module port)</label>
-      <label class="disabled">Other brands – <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml">help us test</a></label>
-    </fieldset>
-  </form>
-  <form id="board-form">
-    <fieldset>
-      <legend>2. Choose your board</legend>
+<main class="wrap">
+  <div id="nosupport" class="card note warn">
+    <span class="pt"><b>Este browser não consegue instalar.</b> Abra esta página no <b>Chrome</b> ou <b>Edge</b> num computador (não funciona no telemóvel, Safari nem Firefox).</span>
+    <span class="en"><b>This browser can't install.</b> Open this page in <b>Chrome</b> or <b>Edge</b> on a computer (phones, Safari and Firefox don't work).</span>
+  </div>
+
+  <section class="card">
+    <h2><span class="num">1</span><span class="pt">Qual é a sua placa?</span><span class="en">Which board do you have?</span></h2>
+    <form id="board-form" class="boards">
       <label><input type="radio" name="device" value="firmware/atom-lite-tail485/manifest.json" data-wiring="atom">
-        M5Stack ATOM Lite + ATOM Tail485 – cheapest (≈ US$15), RGB status LED</label>
+        <span class="t">ATOM Lite + ATOM Tail485</span>
+        <div class="d"><span class="pt">A mais barata (≈ 15 US$) · LED de estado RGB · botão</span><span class="en">Cheapest (≈ US$15) · RGB status LED · button</span></div>
+        <img src="board-atom.svg" alt="Illustration of the M5Stack ATOM Lite and ATOM Tail485" loading="lazy"></label>
       <label><input type="radio" name="device" value="firmware/manifest.json" data-wiring="stick" checked>
-        M5StickC Plus2 + RS485 Hat – status screen (≈ US$28)</label>
-    </fieldset>
-  </form>
+        <span class="t">M5StickC Plus2 + RS485 Hat</span>
+        <div class="d"><span class="pt">Ecrã de estado · dois botões (≈ 28 US$)</span><span class="en">Status screen · two buttons (≈ US$28)</span></div>
+        <img src="board-stick.svg" alt="Illustration of the M5StickC Plus2 and RS485 Hat" loading="lazy"></label>
+    </form>
+    <p class="brandline">
+      <span class="pt">Marca: <b>Hisense</b> (ficha do módulo Wi-Fi AEH-W4x / AEH-W41H1).</span>
+      <span class="en">Brand: <b>Hisense</b> (AEH-W4x / AEH-W41H1 Wi-Fi module port).</span>
+      <span class="pt">Outras marcas:</span><span class="en">Other brands:</span>
+      <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml"><span class="pt">ajude-nos a testar</span><span class="en">help us test</span></a>.
+    </p>
+  </section>
 
-  <h2>3. Install</h2>
-  <ol>
-    <li>Connect the board to this computer with a USB-C cable (Chrome or Edge on desktop).
-        ATOM Lite: flash it <b>before</b> fitting the Tail485, which uses the USB-C port.
-        <div class="see">a new serial port in the list when you click <b>Connect</b>.</div></li>
-    <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.
-        <div class="see">a progress bar, then <i>Installation complete</i>.</div></li>
-    <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).
-        <div class="see" data-board="stick">the bottom line of the screen stops saying
-          <i>Wi-Fi: join "Hisense-AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</div>
-        <div class="see" data-board="atom" hidden>the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK,
-          AC not connected yet).</div></li>
-    <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.
-        <div class="see">a <i>New devices discovered</i> notification in Home Assistant.</div></li>
-  </ol>
-  <esp-web-install-button id="install" manifest="firmware/manifest.json"></esp-web-install-button>
-  <details>
-    <summary>Board not showing up?</summary>
-    <p>Install the USB driver, then reconnect the board:</p>
-    <ul>
-      <li data-board="stick">M5StickC Plus2 (CH9102 chip):
-        <a href="https://docs.m5stack.com/en/core/M5StickC%20PLUS2">driver on the M5Stack page</a>
-        (section <i>USB Driver</i>).</li>
-      <li data-board="atom" hidden>ATOM Lite (FTDI driver):
-        <a href="https://ftdichip.com/drivers/vcp-drivers/">FTDI VCP driver</a>
-        (also on the <a href="https://docs.m5stack.com/en/core/ATOM%20Lite">M5Stack page</a>).</li>
+  <section class="card">
+    <h2><span class="num">2</span><span class="pt">Instalar o firmware</span><span class="en">Install the firmware</span></h2>
+    <ol class="pt">
+      <li>Ligue a placa a este computador com um cabo USB-C <b>de dados</b>.
+        <span data-board="atom">Faça isto <b>antes</b> de encaixar o Tail485, que tapa a porta USB-C.</span></li>
+      <li>Carregue em <b>Instalar</b>, escolha a porta série e depois <b>Install</b>.</li>
+    </ol>
+    <ol class="en">
+      <li>Connect the board to this computer with a USB-C <b>data</b> cable.
+        <span data-board="atom">Do this <b>before</b> fitting the Tail485, which covers the USB-C port.</span></li>
+      <li>Press <b>Install</b>, pick the serial port, then <b>Install</b>.</li>
+    </ol>
+    <div class="install">
+      <esp-web-install-button id="install" manifest="firmware/manifest.json">
+        <button slot="activate" class="btn"><span class="pt">⚡ Instalar</span><span class="en">⚡ Install</span></button>
+        <span slot="unsupported"><span class="pt">Use o Chrome ou Edge num computador.</span><span class="en">Use Chrome or Edge on a computer.</span></span>
+        <span slot="not-allowed"><span class="pt">A página tem de abrir em https.</span><span class="en">The page must be opened over https.</span></span>
+      </esp-web-install-button>
+      <div class="ver" id="ver"></div>
+    </div>
+    <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> uma nova porta série na lista, depois uma barra de progresso (cerca de 1 minuto) e <i>Installation complete</i>.</span><span class="en"><b>You should see:</b> a new serial port in the list, then a progress bar (about 1 minute) and <i>Installation complete</i>.</span></p>
+    <details><summary><span class="pt">A placa não aparece na lista?</span><span class="en">Board not showing up?</span></summary>
+      <p class="pt">Instale o driver USB e volte a ligar a placa:</p>
+      <p class="en">Install the USB driver, then reconnect the board:</p>
+      <ul>
+        <li data-board="stick"><span class="pt">M5StickC Plus2 (chip CH9102):</span><span class="en">M5StickC Plus2 (CH9102 chip):</span>
+          <a href="https://docs.m5stack.com/en/core/M5StickC%20PLUS2"><span class="pt">driver na página da M5Stack</span><span class="en">driver on the M5Stack page</span></a>
+          (<span class="pt">secção</span><span class="en">section</span> <i>USB Driver</i>).</li>
+        <li data-board="atom"><span class="pt">ATOM Lite (driver FTDI):</span><span class="en">ATOM Lite (FTDI driver):</span>
+          <a href="https://ftdichip.com/drivers/vcp-drivers/">FTDI VCP driver</a>
+          (<span class="pt">também na</span><span class="en">also on the</span> <a href="https://docs.m5stack.com/en/core/ATOM%20Lite"><span class="pt">página da M5Stack</span><span class="en">M5Stack page</span></a>).</li>
+      </ul>
+      <p class="pt">Continua sem nada? Experimente outro cabo USB-C: muitos só carregam.</p>
+      <p class="en">Still nothing? Try another USB-C cable: some cables only charge.</p>
+      <p class="pt">Reinstalar mantém o seu Wi-Fi: numa placa que já tem este firmware o instalador oferece <b>Update</b>, que não apaga nada. A primeira instalação apaga a placa.</p>
+      <p class="en">Reinstalling keeps your Wi-Fi settings: on a board that already runs this firmware the installer offers <b>Update</b>, which does not erase it. A first install erases the board.</p>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">3</span>Wi-Fi</h2>
+    <ul class="pt">
+      <li>Na mesma janela escolha a sua rede, escreva a palavra-passe e carregue em <b>Connect</b>. Tem de ser uma rede de <b>2,4 GHz</b>.</li>
+      <li>Saltou este passo? No telemóvel ligue-se à rede <code>Hisense-AC Setup</code>: abre-se uma página para escolher o Wi-Fi. Volta a aparecer sempre que a placa não encontra o Wi-Fi.</li>
+      <li>Também pode configurar o Wi-Fi por <b>Bluetooth</b> (Improv) na app do Home Assistant.</li>
     </ul>
-    <p>Still nothing? Try another USB-C cable: some cables only charge.</p>
-    <p>Reinstalling keeps your Wi-Fi settings: on a board that already runs this firmware the
-       installer offers <b>Update</b>, which does not erase it. A first install erases the board.</p>
-  </details>
-  <p>No USB? The device also opens a <code>Hisense-AC Setup</code> hotspot with a captive portal
-     and supports Improv over Bluetooth.</p>
+    <ul class="en">
+      <li>In the same window pick your network, type the password and press <b>Connect</b>. It must be a <b>2.4 GHz</b> network.</li>
+      <li>Skipped it? From your phone join the <code>Hisense-AC Setup</code> hotspot: a page opens to pick your Wi-Fi. It comes back whenever the board can't reach its Wi-Fi.</li>
+      <li>You can also set Wi-Fi over <b>Bluetooth</b> (Improv) from the Home Assistant app.</li>
+    </ul>
+    <p class="note ok" data-board="stick">✅ <span class="pt"><b>Deve ver:</b> a linha de baixo do ecrã deixa de dizer <i>Wi-Fi: join "Hisense-AC Setup"</i> e mostra o endereço IP (<i>No AC</i> é normal até ligar ao ar condicionado).</span><span class="en"><b>You should see:</b> the bottom line of the screen stops saying <i>Wi-Fi: join "Hisense-AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</span></p>
+    <p class="note ok" data-board="atom">✅ <span class="pt"><b>Deve ver:</b> o LED passa de azul (configurar Wi-Fi) a vermelho (Wi-Fi OK, ar condicionado ainda não ligado).</span><span class="en"><b>You should see:</b> the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK, AC not connected yet).</span></p>
+  </section>
 
-  <section class="help" id="wiring">
-    <h2>4. Wire it to the AC</h2>
-    <p>Switch the AC off at the breaker, unplug the original Wi-Fi module and connect the four
-       wires of its plug as shown.</p>
+  <section class="card" id="wiring">
+    <h2><span class="num">4</span><span class="pt">Ligar ao ar condicionado</span><span class="en">Wire it to the AC</span></h2>
+    <p class="note warn">⚠️ <span class="pt"><b>Desligue primeiro o ar condicionado no disjuntor.</b> A unidade interior tem tensão da rede lá dentro.</span><span class="en"><b>Switch the AC off at the breaker first.</b> The indoor unit has mains voltage inside.</span></p>
+    <ol class="pt">
+      <li>Abra a tampa da unidade interior e desligue o módulo Wi-Fi original. Fica uma ficha de 4 fios: <b>A</b>, <b>B</b>, <b>GND</b> e <b>X</b> (alimentação).</li>
+      <li>Ligue os 4 fios à placa como no esquema e na tabela abaixo.</li>
+      <li>Volte a ligar o disjuntor.</li>
+    </ol>
+    <ol class="en">
+      <li>Open the indoor unit's cover and unplug the original Wi-Fi module. You are left with a 4-wire plug: <b>A</b>, <b>B</b>, <b>GND</b> and <b>X</b> (power).</li>
+      <li>Connect the 4 wires to the board as in the diagram and table below.</li>
+      <li>Switch the breaker back on.</li>
+    </ol>
     <figure class="photo" hidden><img src="photo-ac-plug.jpg" alt="The AC's module plug with its four wires"
-      onload="this.parentElement.hidden=false"><figcaption>The AC's module plug.</figcaption></figure>
+      onload="this.parentElement.hidden=false"><figcaption><span class="pt">A ficha do módulo do ar condicionado.</span><span class="en">The AC's module plug.</span></figcaption></figure>
     <details>
-      <summary>Not sure if your plug is 5 V or 12 V?</summary>
-      <p>Measure it once with a multimeter (DC volts):</p>
-      <ol>
+      <summary><span class="pt">Não sabe se a sua ficha é de 5 V ou 12 V?</span><span class="en">Not sure if your plug is 5 V or 12 V?</span></summary>
+      <p class="pt">Meça uma vez com um multímetro (volts DC):</p>
+      <p class="en">Measure it once with a multimeter (DC volts):</p>
+      <ol class="pt">
+        <li>Desligue o ar condicionado no disjuntor e desligue o módulo Wi-Fi original.</li>
+        <li>Encoste as pontas do multímetro aos fios <b>X</b> e <b>GND</b> da ficha, com as mãos longe de tudo o resto, e ligue o disjuntor.</li>
+        <li>Cerca de 5 V ou cerca de 12 V diz-lhe que coluna da tabela usar.</li>
+        <li>Volte a desligar o disjuntor antes de ligar a placa.</li>
+      </ol>
+      <ol class="en">
         <li>Switch the AC off at the breaker and unplug the original Wi-Fi module.</li>
-        <li>Put the multimeter probes on the plug's <b>X</b> and <b>GND</b> wires, keeping your
-            hands away from everything else, then switch the breaker on.</li>
+        <li>Put the multimeter probes on the plug's <b>X</b> and <b>GND</b> wires, keeping your hands away from everything else, then switch the breaker on.</li>
         <li>About 5 V or about 12 V tells you which column below to use.</li>
         <li>Switch the breaker off again before connecting the board.</li>
       </ol>
-      <p>Pin order varies by model; <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>
-         explains how to find each wire.</p>
+      <p><span class="pt">A ordem dos fios varia com o modelo;</span><span class="en">Pin order varies by model;</span>
+        <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>
+        <span class="pt">explica como encontrar cada fio.</span><span class="en">explains how to find each wire.</span></p>
     </details>
+
     <div data-board="stick">
-    <a href="wiring.svg"><img src="wiring.svg" alt="Wiring diagram for the 5 V and 12 V cases"></a>
-    <table>
-      <tr><th>AC plug</th><th>X = 5 V</th><th>X = 12 V</th></tr>
-      <tr><td>A (+)</td><td colspan="2">Hat terminal 2</td></tr>
-      <tr><td>B (−)</td><td colspan="2">Hat terminal 1</td></tr>
-      <tr><td>GND</td><td colspan="2">Hat terminal 4</td></tr>
-      <tr><td>X</td><td>Stick 5V header pin (terminal 3 empty)</td><td>Hat terminal 3 (12V)</td></tr>
-    </table>
-    <figure class="photo" hidden><img src="photo-stick-wiring.jpg" alt="RS485 Hat terminals with the four AC wires"
-      onload="this.parentElement.hidden=false"><figcaption>RS485 Hat wiring.</figcaption></figure>
-    <figure class="photo" hidden><img src="photo-stick-installed.jpg" alt="M5StickC Plus2 fitted in the indoor unit"
-      onload="this.parentElement.hidden=false"><figcaption>The Stick fitted in the indoor unit.</figcaption></figure>
-    <p class="see">green <i>OK</i> at the top right of the screen and the room temperature, within a minute.</p>
-    <p><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up
-       from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</p>
+      <a class="diagram" href="wiring.svg"><img src="wiring.svg" alt="Wiring diagram for the 5 V and 12 V cases" loading="lazy"></a>
+      <table class="wire">
+        <tr><th><span class="pt">Ficha do AC</span><span class="en">AC plug</span></th><th>X = 5 V</th><th>X = 12 V</th></tr>
+        <tr><td>A (+)</td><td colspan="2">Hat terminal 2</td></tr>
+        <tr><td>B (−)</td><td colspan="2">Hat terminal 1</td></tr>
+        <tr><td>GND</td><td colspan="2">Hat terminal 4</td></tr>
+        <tr><td>X</td><td><span class="pt">Pino 5V do Stick (terminal 3 vazio)</span><span class="en">Stick 5V header pin (terminal 3 empty)</span></td><td>Hat terminal 3 (12V)</td></tr>
+      </table>
+      <figure class="photo" hidden><img src="photo-stick-wiring.jpg" alt="RS485 Hat terminals with the four AC wires"
+        onload="this.parentElement.hidden=false"><figcaption><span class="pt">Ligações no RS485 Hat.</span><span class="en">RS485 Hat wiring.</span></figcaption></figure>
+      <figure class="photo" hidden><img src="photo-stick-installed.jpg" alt="M5StickC Plus2 fitted in the indoor unit"
+        onload="this.parentElement.hidden=false"><figcaption><span class="pt">O Stick montado na unidade interior.</span><span class="en">The Stick fitted in the indoor unit.</span></figcaption></figure>
+      <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> <i>OK</i> verde no canto superior direito do ecrã e a temperatura da sala, em menos de um minuto.</span><span class="en"><b>You should see:</b> green <i>OK</i> at the top right of the screen and the room temperature, within a minute.</span></p>
+      <p><span class="pt"><b>Pino de arranque G0:</b> se o Stick arranca por USB mas não pelo ar condicionado, ponha uma resistência de 10 kΩ entre o G0 e os 3,3 V. Se o ecrã mostrar <i>No AC</i>, troque o A com o B.</span>
+        <span class="en"><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</span></p>
     </div>
-    <div data-board="atom" hidden>
-    <a href="wiring-atom-lite.svg"><img src="wiring-atom-lite.svg" alt="ATOM Lite + Tail485 wiring for the 5 V and 12 V cases"></a>
-    <table>
-      <tr><th>AC plug</th><th>X = 5 V</th><th>X = 12 V</th></tr>
-      <tr><td>B (−)</td><td colspan="2">Tail485 B</td></tr>
-      <tr><td>A (+)</td><td colspan="2">Tail485 A</td></tr>
-      <tr><td>GND</td><td colspan="2">Tail485 GND</td></tr>
-      <tr><td>X</td><td>ATOM 5V header pin (Tail485 12V empty: it needs 9–24 V)</td><td>Tail485 12V</td></tr>
-    </table>
-    <figure class="photo" hidden><img src="photo-atom-wiring.jpg" alt="ATOM Tail485 terminals with the four AC wires"
-      onload="this.parentElement.hidden=false"><figcaption>Tail485 wiring.</figcaption></figure>
-    <figure class="photo" hidden><img src="photo-atom-installed.jpg" alt="ATOM Lite fitted in the indoor unit"
-      onload="this.parentElement.hidden=false"><figcaption>The ATOM fitted in the indoor unit.</figcaption></figure>
-    <p class="see">the LED turns green within a minute.</p>
-    <p><b>LED:</b> blue = Wi-Fi setup, red = no AC link (swap A and B), green = OK (turns off
-       after 30 s; press the button to see it again). Hold the button 10 s for a factory reset.</p>
+    <div data-board="atom">
+      <a class="diagram" href="wiring-atom-lite.svg"><img src="wiring-atom-lite.svg" alt="ATOM Lite + Tail485 wiring for the 5 V and 12 V cases" loading="lazy"></a>
+      <table class="wire">
+        <tr><th><span class="pt">Ficha do AC</span><span class="en">AC plug</span></th><th>X = 5 V</th><th>X = 12 V</th></tr>
+        <tr><td>B (−)</td><td colspan="2">Tail485 B</td></tr>
+        <tr><td>A (+)</td><td colspan="2">Tail485 A</td></tr>
+        <tr><td>GND</td><td colspan="2">Tail485 GND</td></tr>
+        <tr><td>X</td><td><span class="pt">Pino 5V do ATOM (12V do Tail485 vazio: precisa de 9–24 V)</span><span class="en">ATOM 5V header pin (Tail485 12V empty: it needs 9–24 V)</span></td><td>Tail485 12V</td></tr>
+      </table>
+      <figure class="photo" hidden><img src="photo-atom-wiring.jpg" alt="ATOM Tail485 terminals with the four AC wires"
+        onload="this.parentElement.hidden=false"><figcaption><span class="pt">Ligações no Tail485.</span><span class="en">Tail485 wiring.</span></figcaption></figure>
+      <figure class="photo" hidden><img src="photo-atom-installed.jpg" alt="ATOM Lite fitted in the indoor unit"
+        onload="this.parentElement.hidden=false"><figcaption><span class="pt">O ATOM montado na unidade interior.</span><span class="en">The ATOM fitted in the indoor unit.</span></figcaption></figure>
+      <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> o LED fica verde em menos de um minuto.</span><span class="en"><b>You should see:</b> the LED turns green within a minute.</span></p>
+      <p><span class="pt"><b>LED:</b> azul = configurar Wi-Fi, vermelho = sem ligação ao AC (troque o A com o B), verde = OK (apaga-se após 30 s; carregue no botão para o ver de novo). Botão carregado 10 s = reposição de fábrica.</span>
+        <span class="en"><b>LED:</b> blue = Wi-Fi setup, red = no AC link (swap A and B), green = OK (turns off after 30 s; press the button to see it again). Hold the button 10 s for a factory reset.</span></p>
     </div>
-    <h2>5. Add to Home Assistant</h2>
-    <p>Once it is on Wi-Fi, Home Assistant finds it: <b>Settings → Devices &amp; services →
-       ESPHome → Configure</b>. Updates install automatically at night (switch <b>Auto Update</b>
-       off to install them yourself from the <b>Firmware Update</b> entity).
-       Full guide: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>.</p>
-    <p class="see">a climate entity for the AC on the device page.</p>
-    <p>Something not working? See
-       <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/troubleshooting.md">Troubleshooting &amp; FAQ</a>.</p>
   </section>
 
-  <p class="warn"><b>Safety:</b> the indoor unit has mains voltage inside. Switch the AC off at
-     the breaker before opening it or touching any wire.</p>
-  <p>Wiring, caveats and credits:
-     <a href="https://github.com/skydoy/ESPHome_AC">github.com/skydoy/ESPHome_AC</a>.</p>
+  <section class="card">
+    <h2><span class="num">5</span>Home Assistant</h2>
+    <p class="pt"><b>Definições → Dispositivos e serviços</b>: aparece <b>Hisense AC</b> (ESPHome) → <b>Configurar</b>. Teste: ponha o <i>Air Conditioner</i> em <i>Cool</i> a 24 °C.</p>
+    <p class="en"><b>Settings → Devices &amp; services</b>: <b>Hisense AC</b> (ESPHome) shows up → <b>Configure</b>. Test: set <i>Air Conditioner</i> to <i>Cool</i> at 24 °C.</p>
+    <table class="ents">
+      <tr><td>Air Conditioner</td><td><span class="pt">Modos Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades, swing, Eco, Boost, Sleep.</span><span class="en">Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 fan speeds, swing, Eco, Boost, Sleep.</span></td></tr>
+      <tr><td><span class="pt">Sensores</span><span class="en">Sensors</span></td><td><span class="pt">Temperaturas exterior e das serpentinas, compressor, humidade, tensão, potência, energia de hoje (quando a máquina as envia).</span><span class="en">Outdoor and coil temperatures, compressor, humidity, voltage, power, energy today (when the unit reports them).</span></td></tr>
+      <tr><td>AC Link · AC Fault</td><td><span class="pt">Se a ligação à máquina está bem, e os códigos de avaria.</span><span class="en">Whether the link to the unit is up, and fault codes.</span></td></tr>
+      <tr><td>AC Display · Eco · Super</td><td><span class="pt">Luz do painel, poupança e turbo.</span><span class="en">Panel light, eco and turbo.</span></td></tr>
+      <tr><td>Firmware Update · Auto Update</td><td><span class="pt">Novas versões com um clique, ou sozinhas de madrugada.</span><span class="en">New versions in one click, or by themselves at night.</span></td></tr>
+    </table>
+    <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> uma entidade de clima para o ar condicionado na página do dispositivo.</span><span class="en"><b>You should see:</b> a climate entity for the AC on the device page.</span></p>
+    <p class="pt"><b>Atualizações:</b> instalam-se sozinhas de madrugada (desligue o interruptor <b>Auto Update</b> para as instalar à mão na entidade <b>Firmware Update</b>). Página do aparelho: <code>http://&lt;ip&gt;/</code> (estados e logs, sem palavra-passe, só na rede local).
+      Cartão de painel pronto e aviso de atualização: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/home-assistant.md">docs/home-assistant.md</a>.</p>
+    <p class="en"><b>Updates:</b> they install by themselves at night (switch <b>Auto Update</b> off to install them yourself from the <b>Firmware Update</b> entity). Device page: <code>http://&lt;ip&gt;/</code> (states and logs, no password, LAN only).
+      Ready-made dashboard card and update notification: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/home-assistant.md">docs/home-assistant.md</a>.</p>
+  </section>
 
-  <script>
-    const button = document.getElementById("install");
-    function selectBoard() {
-      const board = document.querySelector('input[name="device"]:checked');
-      button.setAttribute("manifest", board.value);
-      document.querySelectorAll("[data-board]").forEach((el) => {
-        el.hidden = el.dataset.board !== board.dataset.wiring;
-      });
-    }
-    document.getElementById("board-form").addEventListener("change", selectBoard);
-    selectBoard();
-  </script>
+  <section class="card">
+    <h2><span class="num">?</span><span class="pt">Problemas</span><span class="en">Troubleshooting</span></h2>
+    <details><summary><span class="pt">O ecrã diz <i>No AC</i> ou o LED fica vermelho</span><span class="en">The screen says <i>No AC</i> or the LED stays red</span></summary>
+      <p class="pt">Troque o A com o B (é seguro: só levam sinal). Confirme o GND e que a placa fica ligada sem o USB.</p>
+      <p class="en">Swap A and B (safe: they only carry signal). Check GND and that the board stays on with USB unplugged.</p></details>
+    <details><summary><span class="pt">O Stick funciona por USB mas não pelo ar condicionado</span><span class="en">The Stick works on USB but not from the AC</span></summary>
+      <p class="pt">Ponha uma resistência de 10 kΩ entre o G0 e os 3,3 V. O ATOM não tem este problema.</p>
+      <p class="en">Add a 10 kΩ resistor from G0 to 3.3 V. The ATOM is not affected.</p></details>
+    <details><summary><span class="pt">O Home Assistant não encontra a placa</span><span class="en">Home Assistant doesn't find the board</span></summary>
+      <p class="pt">Tem de estar na mesma rede (sem rede de convidados). Adicione à mão: integração ESPHome → o IP da placa, porta <code>6053</code>.</p>
+      <p class="en">It must be on the same network (not a guest network). Add it by hand: ESPHome integration → the board's IP, port <code>6053</code>.</p></details>
+    <details><summary><span class="pt">A página do aparelho não abre</span><span class="en">The device's web page doesn't open</span></summary>
+      <p class="pt">Escreva <code>http://</code> e o IP, por exemplo <code>http://192.168.1.50/</code>. Não existe <code>https://</code>.</p>
+      <p class="en">Type <code>http://</code> and the IP, for example <code>http://192.168.1.50/</code>. There is no <code>https://</code>.</p></details>
+    <details><summary><span class="pt">Mudar de Wi-Fi ou repor de fábrica</span><span class="en">Change Wi-Fi or factory reset</span></summary>
+      <p class="pt">Sem o Wi-Fi antigo, a placa abre a rede <code>Hisense-AC Setup</code> após cerca de um minuto. Reposição: ATOM, botão 10 s; ou por USB aqui → <b>Erase User Data</b>.</p>
+      <p class="en">Without its old Wi-Fi, the board opens the <code>Hisense-AC Setup</code> hotspot after about a minute. Reset: ATOM, hold the button 10 s; or by USB here → <b>Erase User Data</b>.</p></details>
+    <p><a class="pt" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/problemas.md">Todos os problemas</a><a class="en" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/troubleshooting.md">All troubleshooting</a>
+      · <a class="pt" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/guia-rapido.md">Guia completo</a><a class="en" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/quick-start.md">Full guide</a>
+      · <a href="https://github.com/skydoy/ESPHome_AC/issues/new/choose"><span class="pt">Pedir ajuda</span><span class="en">Ask for help</span></a></p>
+  </section>
+
+  <footer>
+    <p><span class="pt">Firmware, instalador e logótipo:</span><span class="en">Firmware, installer and logo:</span>
+      <a href="https://github.com/skydoy/ESPHome_AC">skydoy/ESPHome_AC</a> ·
+      <a href="https://github.com/skydoy/ESPHome_AC/blob/main/LICENSE">PolyForm Noncommercial 1.0.0</a>
+      (<span class="pt">uso pessoal e não comercial</span><span class="en">personal and non-commercial use</span>).
+      <span class="pt">As imagens das placas são ilustrações.</span><span class="en">Board pictures are illustrations.</span></p>
+    <p><span class="pt">Hisense é uma marca do respetivo dono. Projeto comunitário independente, sem ligação à Hisense. Use por sua conta e risco.</span>
+      <span class="en">Hisense is a trademark of its owner. Independent community project, not affiliated with Hisense. Use at your own risk.</span></p>
+  </footer>
+</main>
+
+<script>
+  const root = document.documentElement;
+  const button = document.getElementById('install');
+  const ver = document.getElementById('ver');
+  let manifest = null;
+  async function showVersion() {
+    const url = button.getAttribute('manifest');
+    try {
+      if (!manifest || manifest.url !== url) manifest = { url, data: await (await fetch(url, { cache: 'no-cache' })).json() };
+      const pt = root.dataset.lang === 'pt';
+      ver.textContent = (pt ? 'Versão ' : 'Version ') + manifest.data.version + ' · ' + manifest.data.name;
+    } catch (e) { ver.textContent = ''; }
+  }
+  function setLang(l) {
+    root.dataset.lang = l; root.lang = l;
+    document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.set === l));
+    try { localStorage.setItem('lang', l); } catch (e) {}
+    showVersion();
+  }
+  function selectBoard() {
+    const board = document.querySelector('input[name="device"]:checked');
+    button.setAttribute('manifest', board.value);
+    document.querySelectorAll('[data-board]').forEach(el => { el.hidden = el.dataset.board !== board.dataset.wiring; });
+    showVersion();
+  }
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.set)));
+  if (!('serial' in navigator)) document.getElementById('nosupport').style.display = 'block';
+  document.getElementById('board-form').addEventListener('change', selectBoard);
+  let saved = null; try { saved = localStorage.getItem('lang'); } catch (e) {}
+  selectBoard();
+  setLang(saved || ((navigator.language || 'en').toLowerCase().startsWith('pt') ? 'pt' : 'en'));
+</script>
 </body>
 </html>
