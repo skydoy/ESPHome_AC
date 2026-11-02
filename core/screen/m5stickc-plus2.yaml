@@ -18,8 +18,10 @@
 #   ac_fault_codes         text_sensor    fault description ("OK" when none)
 #   ac_outdoor_temperature sensor         outdoor temperature in °C (NaN when unknown)
 #
-# After boot a splash (logo, "ESPHome AC" and the firmware version) is shown for about
-# ${splash_ms} ms, then the status page.
+# After boot a short animation plays once (about ${splash_ms} ms): the logo slides in, the
+# "ESPHome AC" wordmark fades in, two airflow waves sweep across and the firmware version
+# appears, then the status page. Frames are drawn procedurally from one image (the badge) by a
+# non-blocking loop in on_boot (async delays), so Wi-Fi, API and the AC bus start meanwhile.
 #
 # Uses "reset_reason" from core/diagnostics.yaml to flag brownouts (weak 5 V supply).
 #
@@ -37,7 +39,8 @@
 substitutions:
   screen_timeout_ms: "30000"
   screen_brightness: 60%
-  splash_ms: "2500"
+  splash_ms: "2200"
+  splash_frame_ms: "30"
   screen_check_ms: "500"
 
 spi:
@@ -63,6 +66,9 @@ globals:
   - id: splash_until
     type: uint32_t
     initial_value: "0"
+  - id: splash_start
+    type: uint32_t
+    initial_value: "0"
   - id: screen_drawn_signature
     type: uint32_t
     initial_value: "0"
@@ -84,11 +90,13 @@ font:
     size: 14
 
 image:
-  # 110x110 project badge (docs/icon.png) on the splash background. Fetched by URL so that
-  # github:// packages, remote builds and the Device Builder bundle all find it.
+  # The original project icon (docs/icon.png, the logo of the README and the web installer)
+  # scaled to 110x110 and pre-blended onto the splash background so its rounded corners stay
+  # smooth (RGB565 has only on/off transparency). Fetched by a commit-pinned URL so that
+  # github:// packages, remote builds and the Device Builder bundle all find the same file.
   - platform: file
-    file: https://raw.githubusercontent.com/skydoy/ESPHome_AC/main/core/screen/splash_badge.png
-    id: splash_badge
+    file: https://raw.githubusercontent.com/skydoy/ESPHome_AC/956884180c7f719af20fc6b8fbb95a1d82590b14/core/screen/boot_logo.png
+    id: boot_logo
     type: RGB565
     resize: 110x110
 
@@ -146,9 +154,17 @@ esphome:
               static OtaScreen ota_screen;
               ota::get_global_ota_callback()->add_global_state_listener(&ota_screen);
             #endif
+        - lambda: id(splash_start) = millis();
         - script.execute: wake_screen
-        - delay: ${splash_ms}ms
-        - lambda: id(splash_until) = 1;  // splash done
+        # Boot animation: one frame per loop pass, timed by millis() so a slow frame never
+        # stretches it. The delay yields to the main loop; nothing else waits for this.
+        - while:
+            condition:
+              lambda: return millis() - id(splash_start) < ${splash_ms} && id(ota_progress) == -1;
+            then:
+              - component.update: lcd
+              - delay: ${splash_frame_ms}ms
+        - lambda: id(splash_until) = 1;  // animation done, status page from now on
         - component.update: lcd
 
 binary_sensor:
@@ -289,15 +305,51 @@ display:
       if (!id(lcd_backlight).current_values.is_on())
         return;  // Screen is off; skip the drawing work.
 
-      // Boot splash: logo, name and firmware version (until on_boot clears it).
+      // Boot animation (until on_boot clears splash_until). t = ms since boot animation start.
       if (id(splash_until) == 0) {
-        it.fill(Color(8, 18, 40));
-        it.image(6, 12, id(splash_badge));
-        const int cx = 124 + (W - 4 - 124) / 2;
-        it.print(cx, 32, id(font_mid), Color::WHITE, TextAlign::TOP_CENTER, "ESPHome");
-        it.print(cx, 60, id(font_mid), blue, TextAlign::TOP_CENTER, "AC");
+        const Color bg(8, 18, 40);
+        const float t = (float) (millis() - id(splash_start));
+        auto ramp = [t](float from, float len) {
+          const float x = (t - from) / len;
+          return x <= 0 ? 0.0f : (x >= 1 ? 1.0f : x);
+        };
+        auto ease = [](float x) { return 1.0f - (1.0f - x) * (1.0f - x) * (1.0f - x); };  // cubic out
+        auto mixc = [&bg](Color c, float a) {
+          return Color(bg.r + (c.r - bg.r) * a, bg.g + (c.g - bg.g) * a, bg.b + (c.b - bg.b) * a);
+        };
+        it.fill(bg);
+        // 1. Logo slides in from the left (0-650 ms).
+        it.image(-110 + (int) (116 * ease(ramp(0, 650))), 12, id(boot_logo));
+        const int x0 = 124, x1 = W - 4, cx = x0 + (x1 - x0) / 2;
+        // 2. Wordmark fades in and rises 8 px ("ESPHome" 350-850 ms, "AC" 550-1050 ms).
+        const float a1 = ease(ramp(350, 500)), a2 = ease(ramp(550, 500));
+        if (a1 > 0)
+          it.print(cx, 30 - (int) (8 * a1), id(font_mid), mixc(Color::WHITE, a1), TextAlign::TOP_CENTER, "ESPHome");
+        if (a2 > 0)
+          it.print(cx, 56 - (int) (8 * a2), id(font_mid), mixc(blue, a2), TextAlign::TOP_CENTER, "AC");
+        // 3. Two airflow waves sweep left to right (700-1600 ms), then keep drifting.
+        for (int k = 0; k < 2; k++) {
+          const float s = ease(ramp(700 + 150 * k, 900));
+          if (s <= 0)
+            continue;
+          const int head = x0 + (int) ((x1 - x0) * s);
+          const Color c = mixc(k == 0 ? blue : Color(80, 220, 220), s);
+          const int base = 84 + 9 * k;
+          const float ph = t * 0.006f + k * 1.6f;
+          int px = x0, py = base + (int) lroundf(3.0f * sinf(x0 * 0.11f - ph));
+          for (int x = x0 + 3; x <= head; x += 3) {
+            const int y = base + (int) lroundf(3.0f * sinf(x * 0.11f - ph));
+            it.line(px, py, x, y, c);
+            it.line(px, py + 1, x, y + 1, c);
+            px = x;
+            py = y;
+          }
+        }
+        // 4. Firmware version fades in (1100-1500 ms).
       #ifdef ESPHOME_PROJECT_VERSION
-        it.printf(cx, 96, id(font_small), grey, TextAlign::TOP_CENTER, "v%s", ESPHOME_PROJECT_VERSION);
+        const float a3 = ramp(1100, 400);
+        if (a3 > 0)
+          it.printf(cx, 106, id(font_small), mixc(grey, a3), TextAlign::TOP_CENTER, "v%s", ESPHOME_PROJECT_VERSION);
       #endif
         return;
       }
