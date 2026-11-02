@@ -82,7 +82,7 @@ jobs:
           test "$size" -le "$MAX_BYTES"
       - name: Only allow-listed Hisense frames are linked in
         run: |
-          NM=$(find ~/.cache/esphome ~/.platformio ~/.espressif \( -type f -o -type l \) -name "xtensa-esp*-elf-nm" 2>/dev/null | head -n 1)
+          NM=$(find ~/.cache/esphome ~/.platformio ~/.espressif \( -type f -o -type l \) -name "xtensa-esp32-elf-nm" 2>/dev/null | head -n 1)
           echo "nm: $NM"
           test -n "$NM"
           "$NM" -C "$BUILD/firmware.elf" > syms.txt
