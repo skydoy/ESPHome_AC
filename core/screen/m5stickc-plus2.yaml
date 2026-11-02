@@ -90,11 +90,13 @@ font:
     size: 14
 
 image:
-  # 110x110 project badge (docs/icon.png) on the splash background. Fetched by URL so that
-  # github:// packages, remote builds and the Device Builder bundle all find it.
+  # The original project icon (docs/icon.png, the logo of the README and the web installer)
+  # scaled to 110x110 and pre-blended onto the splash background so its rounded corners stay
+  # smooth (RGB565 has only on/off transparency). Fetched by a commit-pinned URL so that
+  # github:// packages, remote builds and the Device Builder bundle all find the same file.
   - platform: file
-    file: https://raw.githubusercontent.com/skydoy/ESPHome_AC/main/core/screen/splash_badge.png
-    id: splash_badge
+    file: https://raw.githubusercontent.com/skydoy/ESPHome_AC/956884180c7f719af20fc6b8fbb95a1d82590b14/core/screen/boot_logo.png
+    id: boot_logo
     type: RGB565
     resize: 110x110
 
@@ -317,7 +319,7 @@ display:
         };
         it.fill(bg);
         // 1. Logo slides in from the left (0-650 ms).
-        it.image(-110 + (int) (116 * ease(ramp(0, 650))), 12, id(splash_badge));
+        it.image(-110 + (int) (116 * ease(ramp(0, 650))), 12, id(boot_logo));
         const int x0 = 124, x1 = W - 4, cx = x0 + (x1 - x0) / 2;
         // 2. Wordmark fades in and rises 8 px ("ESPHome" 350-850 ms, "AC" 550-1050 ms).
         const float a1 = ease(ramp(350, 500)), a2 = ease(ramp(550, 500));
