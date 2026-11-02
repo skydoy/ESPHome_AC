@@ -26,7 +26,7 @@
 #endif
 #include <vector>
 
-#include "hisense_protocol.h"
+#include "hisense_command.h"
 
 namespace esphome {
 namespace hisense_ac {
