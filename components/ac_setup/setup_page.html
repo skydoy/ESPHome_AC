@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- ESPHome-AC setup page, served gzipped by the ac_setup component at /setup.
+     SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESPHome-AC setup</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:16px;background:#f6f7f9;color:#222}
+h1{font-size:1.4em;margin:0 0 4px}
+.card{background:#fff;border-radius:10px;padding:14px 16px;margin:12px 0;box-shadow:0 1px 3px #0002}
+.muted{color:#666;font-size:.9em}
+button,a.btn{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #888;background:#fff;cursor:pointer;margin:4px 6px 4px 0;color:#222;text-decoration:none;display:inline-block}
+button.primary{background:#1565c0;border-color:#1565c0;color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.bar{height:14px;background:#ddd;border-radius:7px;overflow:hidden}
+.bar>div{height:100%;background:#1565c0;width:0}
+.ok{color:#2e7d32}.warn{color:#ef6c00}.err{color:#c62828}
+pre{background:#111;color:#ddd;padding:10px;border-radius:8px;overflow:auto;max-height:260px;font-size:12px}
+ul{padding-left:20px}
+</style>
+</head>
+<body>
+<h1>ESPHome-AC setup</h1>
+<div class="muted" id="info">Loading...</div>
+
+<div class="card">
+  <div><b>Status:</b> <span id="state">-</span> <span class="muted" id="step"></span></div>
+  <div class="bar" id="barwrap" style="display:none;margin-top:8px"><div id="bar"></div></div>
+  <div class="muted" id="msg"></div>
+  <div style="margin-top:8px">
+    <button id="bprobe" class="primary">Detect my AC</button>
+    <button id="bcancel">Cancel</button>
+    <label class="muted"><input type="checkbox" id="passive"> listen only (send nothing)</label>
+  </div>
+  <div class="muted">The probe only sends read requests (device type, status, version). It never changes the AC.</div>
+</div>
+
+<div class="card" id="rcard" style="display:none">
+  <div id="rtitle"></div>
+  <ul id="rlist"></ul>
+  <div id="rhelp" class="muted"></div>
+  <button id="binstall" class="primary" style="display:none">Install this firmware</button>
+</div>
+
+<div class="card">
+  <b>Raw capture</b>
+  <div class="muted">Helps add support for your AC. It holds only bus bytes: no Wi-Fi name, password or keys.</div>
+  <div style="margin-top:6px">
+    <button id="bcopy">Copy</button>
+    <a class="btn" href="/api/setup/capture.json" download>Download JSON</a>
+    <a class="btn" href="/api/setup/capture.txt" download>Download text</a>
+    <button id="breport">Report this AC</button>
+  </div>
+  <pre id="cap" style="display:none"></pre>
+</div>
+
+<div class="muted">To go back to the normal firmware at any time use the web installer:
+<a href="https://skydoy.github.io/ESPHome_AC/">skydoy.github.io/ESPHome_AC</a></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let probeId=0,lastSeq=-1,lastState='',busy=false;
+const LABEL={idle:'Ready',listen:'Listening to the bus',identify:'Asking the AC',scan:'Scanning other bus settings',
+ candidate:'AC found',validate:'Validating',validate_ok:'Validated',validate_failed:'Validation failed',
+ install:'Installing',install_failed:'Install failed',no_internet:'No internet',reboot:'Rebooting',
+ unknown:'Unknown AC',no_reply:'No reply from the AC',bus_busy:'Bus busy'};
+const HINT={ab_swap_likely:'Data arrives but makes no sense: swap the A and B wires and try again.',
+ echo_only:'Only our own requests were heard back: check that the AC is powered and A/B are on the right terminals.',
+ silent_bus:'Nothing at all on the bus: check the wiring, the 5 V / GND supply and that the AC has power.'};
+async function api(path,body){
+  const o=body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)};
+  const r=await fetch('/api/setup/'+path,o);
+  let j=null;try{j=await r.json()}catch(e){}
+  return {status:r.status,json:j};
+}
+async function info(){
+  const r=await api('info');
+  if(r.json)$('info').textContent='Firmware '+r.json.fw+' | board '+r.json.board+' | bus '+r.json.phys+
+    (r.json.pins?' ('+r.json.pins+')':'')+(r.json.network?'':' | no internet yet');
+}
+function cls(s){return ['candidate','validate_ok','reboot'].includes(s)?'ok':
+  ['unknown','bus_busy'].includes(s)?'warn':['no_reply','validate_failed','install_failed','no_internet'].includes(s)?'err':''}
+async function poll(){
+  try{
+    const r=await api('state');const s=r.json;if(!s)return;
+    probeId=s.probe_id;
+    $('state').textContent=LABEL[s.state]||s.state;$('state').className=cls(s.state);
+    $('step').textContent=s.step?('- '+s.step+(s.of?' ('+s.attempt+'/'+s.of+')':'')+', '+s.profile):'';
+    const inst=['install','reboot'].includes(s.state);
+    $('barwrap').style.display=inst?'block':'none';
+    if(inst)$('bar').style.width=(s.pct||0)+'%';
+    $('msg').textContent=s.msg||'';
+    busy=['listen','identify','scan','validate','validate_ok','install','reboot'].includes(s.state);
+    $('bprobe').disabled=busy;$('bcancel').disabled=!busy||inst;
+    if(s.state==='reboot')$('msg').textContent='Installed. The device reboots into the AC firmware; this page will stop answering.';
+    if(s.seq!==lastSeq&&(!busy||s.state!==lastState)){lastSeq=s.seq;if(!busy||s.state==='validate_ok')result()}
+    lastState=s.state;
+  }catch(e){$('msg').textContent='Device not reachable (rebooting?)'}
+}
+async function result(){
+  const r=await api('result');const j=r.json;if(!j||j.outcome==='none'||j.outcome==='pending'){$('rcard').style.display='none';return}
+  $('rcard').style.display='block';
+  const l=$('rlist');l.innerHTML='';
+  const add=t=>{const li=document.createElement('li');li.textContent=t;l.appendChild(li)};
+  if(j.driver){
+    $('rtitle').innerHTML='<b class="ok">Found: '+j.label+'</b>';
+    add('Device type: '+j.identity.type);add('Evidence: '+j.confidence);
+    if(j.note)add(j.note);
+    if(j.ac_version)add('AC version: '+j.ac_version);
+    if(j.status)add('Status: '+(j.status.power?'on':'off')+', '+j.status.mode+', set '+j.status.setpoint+'°'+j.status.unit);
+    const can=['candidate','validate_failed','install_failed','no_internet'].includes(j.state);
+    $('binstall').style.display=can?'inline-block':'none';
+    $('rhelp').textContent=can?'Install downloads the Hisense firmware from the project site. Wi-Fi settings are kept.':'';
+  }else{
+    $('rtitle').innerHTML='<b class="'+cls(j.state)+'">'+(LABEL[j.state]||j.outcome)+'</b>';
+    $('binstall').style.display='none';
+    (j.hints||[]).forEach(h=>add(HINT[h]||h));
+    if(j.state==='bus_busy')add('Another controller (the original Wi-Fi module?) is talking on the bus. Unplug it and try again.');
+    add('Received '+j.diagnostics.rx_bytes+' bytes, sent '+j.diagnostics.frames_sent+' requests.');
+    $('rhelp').textContent='If your AC is not supported yet, use "Report this AC" below.';
+  }
+}
+$('bprobe').onclick=async()=>{const r=await api('probe',{passive_only:$('passive').checked});
+  if(r.status===409)$('msg').textContent='A probe is already running.';lastSeq=-1;poll()};
+$('bcancel').onclick=async()=>{await api('cancel',{});poll()};
+$('binstall').onclick=async()=>{
+  if(!confirm('Install the Hisense firmware now? Keep the device powered until it reboots.'))return;
+  const r=await api('confirm',{probe_id:probeId,driver:'hisense_xm'});
+  if(r.status!==202)$('msg').textContent='Could not start: '+((r.json&&r.json.error)||r.status);poll()};
+$('bcopy').onclick=async()=>{
+  const t=await (await fetch('/api/setup/capture.txt')).text();
+  $('cap').style.display='block';$('cap').textContent=t;
+  try{await navigator.clipboard.writeText(t);$('msg').textContent='Capture copied.'}
+  catch(e){const g=document.createRange();g.selectNodeContents($('cap'));const s=getSelection();s.removeAllRanges();s.addRange(g);
+    $('msg').textContent='Select-all done: press Ctrl+C / Cmd+C to copy.'}};
+$('breport').onclick=async()=>{const r=await api('report');if(r.json&&r.json.url)window.open(r.json.url,'_blank','noopener')};
+info();poll();setInterval(poll,800);
+</script>
+</body>
+</html>
