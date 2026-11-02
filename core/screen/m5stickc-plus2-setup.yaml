@@ -1,0 +1,153 @@
+# Setup-firmware screen for the M5StickC Plus2 LCD (240x135 landscape).
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+#
+#   +--------------------------------------+
+#   | ESPHome AC Setup              (o)    |   dot: Wi-Fi (blue = not connected)
+#   |                                      |
+#   |  Found: Hisense                      |   detection state (from ac_setup id "setup")
+#   |  Confirm on /setup                   |
+#   |  [=========        ]                 |   install progress
+#   | http://192.168.1.40/setup            |   or how to join Wi-Fi
+#   +--------------------------------------+
+#
+# Reads only the ac_setup component (id "ac_setup_id"). The backlight stays on: setup is short and the
+# device is on the bench or at the AC. Buttons A/B just redraw. The install download blocks the
+# main loop, so an OTA state listener redraws the progress directly.
+substitutions:
+  screen_brightness: 60%
+
+spi:
+  id: lcd_spi
+  clk_pin: GPIO13
+  mosi_pin:
+    number: GPIO15
+    ignore_strapping_warning: true   # fixed LCD wiring on the Plus2
+
+globals:
+  - id: screen_signature
+    type: uint32_t
+    initial_value: "0"
+
+font:
+  - file: "gfonts://Roboto@500"
+    id: font_mid
+    size: 24
+  - file: "gfonts://Roboto"
+    id: font_small
+    size: 14
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      id: wifi_ip
+      internal: true
+
+script:
+  - id: wake_screen
+    mode: restart
+    then:
+      - light.turn_on:
+          id: lcd_backlight
+          brightness: ${screen_brightness}
+      - component.update: lcd
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            #ifdef USE_OTA_STATE_LISTENER
+              // Registered after ac_setup's own listener, so the engine already holds the new %.
+              struct OtaScreen : public ota::OTAGlobalStateListener {
+                int last{-1};
+                void on_ota_global_state(ota::OTAState state, float progress, uint8_t error,
+                                         ota::OTAComponent *component) override {
+                  (void) state;
+                  (void) progress;
+                  (void) error;
+                  (void) component;
+                  const int p = id(ac_setup_id).screen_pct();
+                  if (p == this->last)
+                    return;
+                  this->last = p;
+                  id(lcd_backlight_pwm).set_level(0.6f);
+                  id(lcd).update();
+                }
+              };
+              static OtaScreen ota_screen;
+              ota::get_global_ota_callback()->add_global_state_listener(&ota_screen);
+            #endif
+        - script.execute: wake_screen
+
+binary_sensor:
+  - id: !extend button_a
+    on_press:
+      - script.execute: wake_screen
+  - id: !extend button_b
+    on_press:
+      - script.execute: wake_screen
+
+interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          auto mix = [](uint32_t h, uint32_t v) { return (h ^ v) * 16777619u; };
+          uint32_t sig = 2166136261u;
+          sig = mix(sig, id(ac_setup_id).screen_seq());
+          sig = mix(sig, wifi::global_wifi_component->is_connected() ? 1 : 0);
+          for (char c : id(wifi_ip).state)
+            sig = mix(sig, (uint8_t) c);
+          if (sig != id(screen_signature)) {
+            id(screen_signature) = sig;
+            id(lcd).update();
+          }
+
+display:
+  - platform: mipi_spi
+    id: lcd
+    spi_id: lcd_spi
+    model: ST7789V
+    cs_pin:
+      number: GPIO5
+      ignore_strapping_warning: true
+    dc_pin: GPIO14
+    reset_pin:
+      number: GPIO12
+      ignore_strapping_warning: true
+    dimensions:
+      width: 135
+      height: 240
+      offset_width: 52
+      offset_height: 40
+    invert_colors: true
+    rotation: 90
+    buffer_size: 25%
+    update_interval: never
+    lambda: |-
+      const Color grey(150, 150, 150);
+      const Color green(60, 200, 90);
+      const Color amber(255, 170, 0);
+      const Color red(235, 60, 60);
+      const Color blue(70, 160, 255);
+      const int W = it.get_width();
+      const int H = it.get_height();
+      it.fill(Color::BLACK);
+      const bool wifi_ok = wifi::global_wifi_component->is_connected();
+      it.print(4, 4, id(font_small), grey, "ESPHome AC Setup");
+      it.filled_circle(W - 10, 11, 5, wifi_ok ? green : blue);
+
+      std::string title, detail;
+      uint8_t level = 0;
+      id(ac_setup_id).screen_text(&title, &detail, &level);
+      const Color cols[4] = {Color::WHITE, green, amber, red};
+      it.print(6, 30, id(font_mid), cols[level & 3], title.c_str());
+      it.print(6, 60, id(font_small), grey, detail.c_str());
+      const int pct = id(ac_setup_id).screen_pct();
+      if (pct >= 0) {
+        it.rectangle(6, 82, W - 12, 16, grey);
+        it.filled_rectangle(8, 84, (W - 16) * pct / 100, 12, blue);
+      }
+      if (!wifi_ok)
+        it.print(4, H - 20, id(font_small), amber, "Wi-Fi: join \"ESPHome-AC Setup\"");
+      else
+        it.printf(4, H - 20, id(font_small), grey, "http://%s/setup", id(wifi_ip).state.c_str());
