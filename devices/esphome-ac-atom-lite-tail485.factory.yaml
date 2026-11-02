@@ -1,0 +1,19 @@
+# FACTORY firmware for NEW installs: ATOM Lite + ATOM Tail485.
+#
+# Flashed by the web installer (https://skydoy.github.io/ESPHome_AC/) since v0.3.0. Same as
+# hisense-atom-lite-tail485.factory.yaml but with brand-neutral names: device "esphome-ac-atom-xxxxxx",
+# friendly name "Air Conditioner" (Home Assistant entities climate.air_conditioner_..., etc.),
+# and its own OTA manifest under install/atom-lite-tail485/ so it never updates into the legacy build.
+#
+# hisense-atom-lite-tail485.factory.yaml stays as the LEGACY build: devices flashed before v0.3.0 keep
+# updating from firmware/... manifests and keep their hisense-ac names and entity IDs.
+#
+# Do not adopt or include this file in your own config (see the base config's dashboard_import).
+substitutions:
+  name: esphome-ac-atom
+  friendly_name: Air Conditioner
+  update_manifest_url: https://skydoy.github.io/ESPHome_AC/install/atom-lite-tail485/manifest.json
+
+packages:
+  device: !include hisense-atom-lite-tail485.yaml
+  auto_update: !include ../core/auto-update.yaml

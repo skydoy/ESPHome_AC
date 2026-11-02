@@ -82,7 +82,7 @@ A porta não aparece? Stick: instale o controlador CH9102; ATOM: o controlador F
 O ecrã diz *No AC* ou o LED fica **vermelho**? Troque o A com o B: não há perigo, só levam sinal.
 
 ## 4. Adicionar ao Home Assistant (1 minuto)
-**Definições → Dispositivos e serviços**: o **Hisense AC** (ESPHome) aparece em *Descobertos* → **Configurar**.
+**Definições → Dispositivos e serviços**: o **Air Conditioner** (ESPHome; **Hisense AC** em placas instaladas antes da v0.3.0) aparece em *Descobertos* → **Configurar**.
 Atribua-lhe uma divisão (por exemplo, Sala).
 
 **Teste:** ponha o **Air Conditioner** em *Cool* a 24 °C e confirme que a máquina arranca.

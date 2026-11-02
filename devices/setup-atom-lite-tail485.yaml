@@ -9,7 +9,7 @@ substitutions:
   friendly_name: ESPHome AC Setup
   project_version: "0.3.0-beta.1"
   setup_board: atom-lite-tail485
-  setup_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json
+  setup_manifest_url: https://skydoy.github.io/ESPHome_AC/install/atom-lite-tail485/manifest.json
 
 esphome:
   name: ${name}

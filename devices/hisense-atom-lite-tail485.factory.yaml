@@ -1,4 +1,6 @@
-# FACTORY firmware: ATOM Lite + ATOM Tail485.
+# LEGACY FACTORY firmware (devices flashed before v0.3.0): ATOM Lite + ATOM Tail485.
+# Keeps the hisense-ac names and the firmware/ manifest so already-flashed devices are never
+# renamed by an OTA update. New installs use esphome-ac-atom-lite-tail485.factory.yaml.
 #
 # Built by GitHub Actions on every v* tag and published to the ESP Web Tools installer at
 # https://skydoy.github.io/ESPHome_AC/ . It is the base config (hisense-atom-lite-tail485.yaml) plus a

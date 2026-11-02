@@ -82,7 +82,7 @@ IP address (*No AC* is normal until it is wired). ATOM: the LED turns from **blu
 Screen says *No AC* or the LED stays **red**? Swap A and B: it is safe, they only carry signal.
 
 ## 4. Add it to Home Assistant (1 minute)
-**Settings → Devices & services**: **Hisense AC** (ESPHome) shows up under *Discovered* → **Configure**.
+**Settings → Devices & services**: **Air Conditioner** (ESPHome; **Hisense AC** on boards installed before v0.3.0) shows up under *Discovered* → **Configure**.
 Give it an area (e.g. Living room).
 
 **Test:** set **Air Conditioner** to *Cool* at 24 °C and check the unit starts.

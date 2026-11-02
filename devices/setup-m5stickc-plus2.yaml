@@ -9,8 +9,8 @@ substitutions:
   friendly_name: ESPHome AC Setup
   project_version: "0.3.0-beta.1"
   setup_board: m5stickc-plus2
-  # Manifest of the brand firmware the setup installs (the Hisense factory build of this board).
-  setup_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/manifest.json
+  # Manifest of the brand firmware the setup installs (the Hisense factory build for new installs of this board).
+  setup_manifest_url: https://skydoy.github.io/ESPHome_AC/install/m5stickc-plus2/manifest.json
 
 esphome:
   name: ${name}

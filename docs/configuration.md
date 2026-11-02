@@ -124,6 +124,20 @@ There are two kinds of firmware, built from two files per board:
 - **Factory firmware:** the `Firmware Update` entity installs new releases from the board's manifest:
   `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json` (Stick) or
   `https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json` (ATOM).
+  Boards flashed since v0.3.0 use the new-install manifests
+  `https://skydoy.github.io/ESPHome_AC/install/m5stickc-plus2/manifest.json` and
+  `https://skydoy.github.io/ESPHome_AC/install/atom-lite-tail485/manifest.json`.
+
+### Device names (v0.3.0)
+- **New installs** from the web installer are called `esphome-ac-xxxxxx` (Stick) or
+  `esphome-ac-atom-xxxxxx` (ATOM), friendly name **Air Conditioner**, so the entities are
+  `climate.air_conditioner_xxxxxx_air_conditioner` and so on
+  (`devices/esphome-ac-*.factory.yaml`, OTA from `install/<board>/manifest.json`).
+- **Boards flashed before v0.3.0** keep `hisense-ac-xxxxxx` / **Hisense AC** and their entity IDs:
+  they update from the legacy `firmware/...` manifests, which keep serving hisense-ac builds
+  (`devices/hisense-*.factory.yaml`).
+- **Adopted in the Device Builder:** your YAML sets `name` and `friendly_name` itself, so nothing
+  changes. The base configs still default to `hisense-ac` / `Hisense AC`.
 There are two ways to update, and neither needs a YAML edit:
 1. **Not adopted** (factory firmware from the installer): nothing to do. With the **Auto Update**
    switch on (configuration, default on, kept across reboots) the device checks once a night at

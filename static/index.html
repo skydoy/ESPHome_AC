@@ -114,11 +114,11 @@
   <section class="card">
     <h2><span class="num">1</span><span class="pt">Qual é a sua placa?</span><span class="en">Which board do you have?</span></h2>
     <form id="board-form" class="boards">
-      <label><input type="radio" name="device" value="firmware/atom-lite-tail485/manifest.json" data-wiring="atom">
+      <label><input type="radio" name="device" value="install/atom-lite-tail485/manifest.json" data-wiring="atom">
         <span class="t">ATOM Lite + ATOM Tail485</span>
         <div class="d"><span class="pt">A mais barata (≈ 15 US$) · LED de estado RGB · botão</span><span class="en">Cheapest (≈ US$15) · RGB status LED · button</span></div>
         <img src="board-atom.svg" alt="Illustration of the M5Stack ATOM Lite and ATOM Tail485" loading="lazy"></label>
-      <label><input type="radio" name="device" value="firmware/manifest.json" data-wiring="stick" checked>
+      <label><input type="radio" name="device" value="install/m5stickc-plus2/manifest.json" data-wiring="stick" checked>
         <span class="t">M5StickC Plus2 + RS485 Hat</span>
         <div class="d"><span class="pt">Ecrã de estado · dois botões (≈ 28 US$)</span><span class="en">Status screen · two buttons (≈ US$28)</span></div>
         <img src="board-stick.svg" alt="Illustration of the M5StickC Plus2 and RS485 Hat" loading="lazy"></label>
@@ -151,7 +151,7 @@
       <li>Press <b>Install</b>, pick the serial port, then <b>Install</b>.</li>
     </ol>
     <div class="install">
-      <esp-web-install-button id="install" manifest="firmware/manifest.json">
+      <esp-web-install-button id="install" manifest="install/m5stickc-plus2/manifest.json">
         <button slot="activate" class="btn"><span class="pt">⚡ Instalar</span><span class="en">⚡ Install</span></button>
         <span slot="unsupported"><span class="pt">Use o Chrome ou Edge num computador.</span><span class="en">Use Chrome or Edge on a computer.</span></span>
         <span slot="not-allowed"><span class="pt">A página tem de abrir em https.</span><span class="en">The page must be opened over https.</span></span>
@@ -267,8 +267,8 @@
 
   <section class="card">
     <h2><span class="num">5</span>Home Assistant</h2>
-    <p class="pt"><b>Definições → Dispositivos e serviços</b>: aparece <b>Hisense AC</b> (ESPHome) → <b>Configurar</b>. Teste: ponha o <i>Air Conditioner</i> em <i>Cool</i> a 24 °C.</p>
-    <p class="en"><b>Settings → Devices &amp; services</b>: <b>Hisense AC</b> (ESPHome) shows up → <b>Configure</b>. Test: set <i>Air Conditioner</i> to <i>Cool</i> at 24 °C.</p>
+    <p class="pt"><b>Definições → Dispositivos e serviços</b>: aparece <b>Air Conditioner</b> (ESPHome; <b>Hisense AC</b> em placas instaladas antes da v0.3.0) → <b>Configurar</b>. Teste: ponha o <i>Air Conditioner</i> em <i>Cool</i> a 24 °C.</p>
+    <p class="en"><b>Settings → Devices &amp; services</b>: <b>Air Conditioner</b> (ESPHome; <b>Hisense AC</b> on boards installed before v0.3.0) shows up → <b>Configure</b>. Test: set <i>Air Conditioner</i> to <i>Cool</i> at 24 °C.</p>
     <table class="ents">
       <tr><td>Air Conditioner</td><td><span class="pt">Modos Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades, swing, Eco, Boost, Sleep.</span><span class="en">Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 fan speeds, swing, Eco, Boost, Sleep.</span></td></tr>
       <tr><td><span class="pt">Sensores</span><span class="en">Sensors</span></td><td><span class="pt">Temperaturas exterior e das serpentinas, compressor, humidade, tensão, potência, energia de hoje (quando a máquina as envia).</span><span class="en">Outdoor and coil temperatures, compressor, humidity, voltage, power, energy today (when the unit reports them).</span></td></tr>
