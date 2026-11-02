@@ -7,8 +7,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 section below, with the factory and OTA images attached.
 
 ## [Unreleased]
+
+## [0.2.17] - 2026-11-02
 ### Added
 - Light / dark mode button on the web installer (follows the OS by default, remembered).
+- **Setup firmware (beta, not on the installer yet):** `devices/setup-m5stickc-plus2.yaml` and
+  `devices/setup-atom-lite-tail485.yaml`, a brand-neutral image that detects the AC and then
+  installs the matching brand firmware over OTA. New `ac_setup` component: `/setup` page, REST
+  API and OTA install, plus a read-only probe engine (strict allow-list, rate limited) with host
+  unit tests.
+- CI builds the setup images and checks their size, the symbol allow-list (no brand command
+  code linked) and that they have no static Wi-Fi networks.
+
+### Changed
+- The read-only Hisense protocol code moved into its own `hisense_proto` component, and the
+  command builders into `hisense_ac/hisense_command.*`. `hisense_ac` loads `hisense_proto`
+  automatically, so existing configs need no change.
+
+The regular Hisense firmware behaves exactly like 0.2.16.
 
 ## [0.2.16] - 2026-11-02
 ### Added
@@ -258,7 +274,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.16...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.17...HEAD
+[0.2.17]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.16...v0.2.17
 [0.2.16]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...v0.2.16
 [0.2.15]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...v0.2.15
 [0.2.14]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...v0.2.14
