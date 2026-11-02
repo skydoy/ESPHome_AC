@@ -29,11 +29,11 @@ Port not in the list? Stick: install the CH9102 driver; ATOM: the FTDI driver. T
 
 ## 2. Wi-Fi (1 minute)
 - Right after flashing, the same window asks for Wi-Fi: pick your network, type the password → **Connect**.
-- Skipped it? From your phone join the **`Hisense-AC Setup`** hotspot; a page opens, pick your Wi-Fi.
+- Skipped it? From your phone join the **`ESPHome_AC Setup`** hotspot; a page opens, pick your Wi-Fi.
   The hotspot comes back on its own whenever the board cannot reach the saved Wi-Fi.
 - You can also set Wi-Fi over Bluetooth (Improv) from the Home Assistant app.
 
-✅ *You should see:* Stick: the screen stops saying *Wi-Fi: join "Hisense-AC Setup"* and shows the
+✅ *You should see:* Stick: the screen stops saying *Wi-Fi: join "ESPHome_AC Setup"* and shows the
 IP address (*No AC* is normal until it is wired). ATOM: the LED turns from **blue** to **red**.
 
 ## 3. Wire it to the AC (10 minutes)

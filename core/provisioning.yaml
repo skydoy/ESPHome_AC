@@ -3,7 +3,7 @@
 #
 wifi:
   ap:
-    ssid: "Hisense-AC Setup"
+    ssid: "ESPHome_AC Setup"
 captive_portal:
 improv_serial:
 improv_ble:

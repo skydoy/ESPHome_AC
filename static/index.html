@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ESPHome AC · Web installer</title>
-  <meta name="description" content="Install the ESPHome AC firmware from your browser: your Hisense air conditioner in Home Assistant, local, no YAML.">
+  <title>ESPHome_AC · Web installer</title>
+  <meta name="description" content="Install the ESPHome_AC firmware from your browser: your air conditioner in Home Assistant (Hisense today, more brands coming), local, no YAML.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <meta property="og:title" content="ESPHome AC">
-  <meta property="og:description" content="Your Hisense air conditioner in Home Assistant. Plug in, click Install, done. No cloud, no app.">
+  <meta property="og:title" content="ESPHome_AC">
+  <meta property="og:description" content="Your air conditioner in Home Assistant. Plug in, click Install, done. No cloud, no app.">
   <meta property="og:image" content="https://raw.githubusercontent.com/skydoy/ESPHome_AC/main/docs/social-preview.png">
   <meta name="theme-color" content="#1784F7">
   <script>
@@ -87,10 +87,10 @@
 <header>
   <div class="wrap">
     <div class="top">
-      <img src="icon.png" alt="ESPHome AC logo">
+      <img src="icon.png" alt="ESPHome_AC logo">
       <div>
-        <h1>ESPHome AC</h1>
-        <small><span class="pt">Instalador web</span><span class="en">Web installer</span> · Hisense</small>
+        <h1>ESPHome_AC</h1>
+        <small><span class="pt">Instalador web</span><span class="en">Web installer</span></small>
       </div>
       <div class="lang" role="group" aria-label="Language">
         <button type="button" data-set="pt">PT</button>
@@ -99,8 +99,8 @@
       </div>
     </div>
     <p class="pitch">
-      <span class="pt">O seu ar condicionado Hisense no Home Assistant. Ligue por USB, carregue em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
-      <span class="en">Your Hisense air conditioner in Home Assistant. Plug in by USB, click Install, done. No YAML, no cloud, no app.</span>
+      <span class="pt">O seu ar condicionado no Home Assistant (Hisense por agora, mais marcas a caminho). Ligue por USB, carregue em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
+      <span class="en">Your air conditioner in Home Assistant (Hisense today, more brands coming). Plug in by USB, click Install, done. No YAML, no cloud, no app.</span>
     </p>
   </div>
 </header>
@@ -181,15 +181,15 @@
     <h2><span class="num">3</span>Wi-Fi</h2>
     <ul class="pt">
       <li>Na mesma janela escolha a sua rede, escreva a palavra-passe e carregue em <b>Connect</b>. Tem de ser uma rede de <b>2,4 GHz</b>.</li>
-      <li>Saltou este passo? No telemóvel ligue-se à rede <code>Hisense-AC Setup</code>: abre-se uma página para escolher o Wi-Fi. Volta a aparecer sempre que a placa não encontra o Wi-Fi.</li>
+      <li>Saltou este passo? No telemóvel ligue-se à rede <code>ESPHome_AC Setup</code>: abre-se uma página para escolher o Wi-Fi. Volta a aparecer sempre que a placa não encontra o Wi-Fi.</li>
       <li>Também pode configurar o Wi-Fi por <b>Bluetooth</b> (Improv) na app do Home Assistant.</li>
     </ul>
     <ul class="en">
       <li>In the same window pick your network, type the password and press <b>Connect</b>. It must be a <b>2.4 GHz</b> network.</li>
-      <li>Skipped it? From your phone join the <code>Hisense-AC Setup</code> hotspot: a page opens to pick your Wi-Fi. It comes back whenever the board can't reach its Wi-Fi.</li>
+      <li>Skipped it? From your phone join the <code>ESPHome_AC Setup</code> hotspot: a page opens to pick your Wi-Fi. It comes back whenever the board can't reach its Wi-Fi.</li>
       <li>You can also set Wi-Fi over <b>Bluetooth</b> (Improv) from the Home Assistant app.</li>
     </ul>
-    <p class="note ok" data-board="stick">✅ <span class="pt"><b>Deve ver:</b> a linha de baixo do ecrã deixa de dizer <i>Wi-Fi: join "Hisense-AC Setup"</i> e mostra o endereço IP (<i>No AC</i> é normal até ligar ao ar condicionado).</span><span class="en"><b>You should see:</b> the bottom line of the screen stops saying <i>Wi-Fi: join "Hisense-AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</span></p>
+    <p class="note ok" data-board="stick">✅ <span class="pt"><b>Deve ver:</b> a linha de baixo do ecrã deixa de dizer <i>Wi-Fi: join "ESPHome_AC Setup"</i> e mostra o endereço IP (<i>No AC</i> é normal até ligar ao ar condicionado).</span><span class="en"><b>You should see:</b> the bottom line of the screen stops saying <i>Wi-Fi: join "ESPHome_AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</span></p>
     <p class="note ok" data-board="atom">✅ <span class="pt"><b>Deve ver:</b> o LED passa de azul (configurar Wi-Fi) a vermelho (Wi-Fi OK, ar condicionado ainda não ligado).</span><span class="en"><b>You should see:</b> the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK, AC not connected yet).</span></p>
   </section>
 
@@ -298,8 +298,8 @@
       <p class="pt">Escreva <code>http://</code> e o IP, por exemplo <code>http://192.168.1.50/</code>. Não existe <code>https://</code>.</p>
       <p class="en">Type <code>http://</code> and the IP, for example <code>http://192.168.1.50/</code>. There is no <code>https://</code>.</p></details>
     <details><summary><span class="pt">Mudar de Wi-Fi ou repor de fábrica</span><span class="en">Change Wi-Fi or factory reset</span></summary>
-      <p class="pt">Sem o Wi-Fi antigo, a placa abre a rede <code>Hisense-AC Setup</code> após cerca de um minuto. Reposição: ATOM, botão 10 s; ou por USB aqui → <b>Erase User Data</b>.</p>
-      <p class="en">Without its old Wi-Fi, the board opens the <code>Hisense-AC Setup</code> hotspot after about a minute. Reset: ATOM, hold the button 10 s; or by USB here → <b>Erase User Data</b>.</p></details>
+      <p class="pt">Sem o Wi-Fi antigo, a placa abre a rede <code>ESPHome_AC Setup</code> após cerca de um minuto. Reposição: ATOM, botão 10 s; ou por USB aqui → <b>Erase User Data</b>.</p>
+      <p class="en">Without its old Wi-Fi, the board opens the <code>ESPHome_AC Setup</code> hotspot after about a minute. Reset: ATOM, hold the button 10 s; or by USB here → <b>Erase User Data</b>.</p></details>
     <p><a class="pt" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/problemas.md">Todos os problemas</a><a class="en" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/troubleshooting.md">All troubleshooting</a>
       · <a class="pt" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/guia-rapido.md">Guia completo</a><a class="en" href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/quick-start.md">Full guide</a>
       · <a href="https://github.com/skydoy/ESPHome_AC/issues/new/choose"><span class="pt">Pedir ajuda</span><span class="en">Ask for help</span></a></p>

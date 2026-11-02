@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
     <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.png">
-    <img src="docs/logo-light.png" alt="ESPHome AC" width="256">
+    <img src="docs/logo-light.png" alt="ESPHome_AC" width="256">
   </picture>
 </p>
 
@@ -13,7 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue" alt="Licença: PolyForm Noncommercial"></a>
 </p>
 
-<p align="center"><b>O seu ar condicionado Hisense no Home Assistant. Ligar por USB, carregar em Instalar, feito. Sem YAML.</b><br>
+<p align="center"><b>O seu ar condicionado no Home Assistant. Ligar por USB, carregar em Instalar, feito. Sem YAML.</b><br>
 🇬🇧 <a href="README.md">Read in English</a></p>
 
 <p align="center">
@@ -32,7 +32,7 @@ Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comerci
 1. **Instalar o firmware.** Abra o **[instalador web](https://skydoy.github.io/ESPHome_AC/)** no Chrome ou Edge,
    escolha a placa, ligue-a ao computador por USB → **Instalar**.
    (ATOM: instale antes de encaixar o Tail485, que ocupa a porta USB-C.)
-2. **Wi-Fi.** Escreva o seu Wi-Fi na mesma janela. (Ou mais tarde: ligue-se à rede `Hisense-AC Setup` com o telemóvel.)
+2. **Wi-Fi.** Escreva o seu Wi-Fi na mesma janela. (Ou mais tarde: ligue-se à rede `ESPHome_AC Setup` com o telemóvel.)
 3. **Ligar e adicionar.** Desligue o ar condicionado no disjuntor, ligue a ficha de 4 fios do módulo Wi-Fi antigo à placa
    ([ligações](docs/wiring.md)) e volte a ligar o disjuntor. O Home Assistant mostra *Hisense AC* em
    **Definições → Dispositivos e serviços** → **Configurar**.

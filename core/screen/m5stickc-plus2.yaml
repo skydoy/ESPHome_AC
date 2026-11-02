@@ -359,7 +359,7 @@ display:
           f = f.substr(0, 25) + "~";
         it.printf(4, y, id(font_small), red, "Fault: %s", f.c_str());
       } else if (!wifi_ok) {
-        it.print(4, y, id(font_small), amber, "Wi-Fi: join \"Hisense-AC Setup\"");
+        it.print(4, y, id(font_small), amber, "Wi-Fi: join \"ESPHome_AC Setup\"");
       } else if (now < 5 * 60 * 1000 && boot.find("brownout") != std::string::npos) {
         it.print(4, y, id(font_small), amber, "Brownout reset: check 5V supply");
       } else if (link_lost_long) {

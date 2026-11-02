@@ -67,7 +67,7 @@ browser (it loads its scripts from the ESPHome website).
 
 ## Change the Wi-Fi network, reset or re-flash
 - **New Wi-Fi network:** if the device cannot reach its old network, it opens the
-  `Hisense-AC Setup` hotspot after about a minute. Join it with your phone and pick the new
+  `ESPHome_AC Setup` hotspot after about a minute. Join it with your phone and pick the new
   network. Or connect it by USB, open the [web installer](https://skydoy.github.io/ESPHome_AC/),
   click **Connect** and choose **Change Wi-Fi**.
 - **Factory reset:** ATOM: hold the button for 10 s (the LED turns white, then it reboots into
