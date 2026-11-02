@@ -1,0 +1,99 @@
+# SETUP FIRMWARE package (brand agnostic): detects the AC and installs the matching firmware.
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+#
+# Included by devices/setup-<board>.yaml together with a board package. There is no brand
+# package, no Home Assistant API and no dashboard_import: this image only
+#   1. joins Wi-Fi (Improv Serial from the web installer, or the "ESPHome-AC Setup" hotspot;
+#      no Improv BLE: it would push the image over the 1.2 MB budget),
+#   2. probes the AC bus with read-only requests (ac_setup component, Hisense 0x0A / 0x66-00 / 0x07),
+#   3. shows the result at http://<device-ip>/setup with a raw capture and a "Report this AC" link,
+#   4. on confirmation installs the brand firmware over HTTPS from GitHub Pages (update entity).
+# Wi-Fi credentials survive that install: neither image has static networks, so both use the
+# same Wi-Fi preference slot.
+#
+# Needs from the board: substitutions ac_tx_pin / ac_rx_pin / ac_tx_ignore_strapping.
+# Needs from the device file: setup_board, setup_manifest_url, project_version.
+external_components:
+  - source: ${hisense_component_source}
+    components: [ac_setup, hisense_proto]
+    refresh: ${hisense_component_refresh}
+
+substitutions:
+  # The setup image is only built by CI from a checkout (never adopted in the Device Builder),
+  # so it always uses the components of the same commit.
+  hisense_component_source: ../components
+  hisense_component_refresh: 1d
+
+wifi:
+  ap:
+    ssid: "ESPHome-AC Setup"
+captive_portal:
+improv_serial:
+  next_url: http://{{ip_address}}/setup
+logger:
+
+web_server:
+  port: 80
+  version: 3
+  log: true
+
+http_request:
+  verify_ssl: true
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+  - platform: http_request
+    id: ota_http
+    on_begin:
+      - logger.log: "Installing the AC firmware (do not unplug)"
+    on_end:
+      - logger.log: "AC firmware installed, rebooting"
+    on_error:
+      - logger.log:
+          level: WARN
+          format: "AC firmware install failed (error %u), still on the setup firmware"
+          args: [x]
+
+# Installs the brand firmware of this board. Checked only when the user confirms on /setup.
+update:
+  - platform: http_request
+    id: brand_firmware
+    name: "AC Firmware"
+    internal: true
+    source: ${setup_manifest_url}
+    update_interval: never
+
+uart:
+  id: ac_uart
+  tx_pin:
+    number: ${ac_tx_pin}
+    ignore_strapping_warning: ${ac_tx_ignore_strapping}
+  rx_pin: ${ac_rx_pin}
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  rx_buffer_size: 1024
+
+ac_setup:
+  id: ac_setup_id
+  uart_id: ac_uart
+  update_id: brand_firmware
+  board: ${setup_board}
+  firmware_version: ${project_version}
+  phys: rs485
+  pins: "TX ${ac_tx_pin}, RX ${ac_rx_pin}"
+
+# Minimal diagnostics: no Home Assistant time, no API.
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+text_sensor:
+  - platform: version
+    name: "Firmware"
+    hide_timestamp: true
+button:
+  - platform: restart
+    name: "Restart"
