@@ -25,6 +25,8 @@ board and control it locally from Home Assistant. No cloud, no app. More AC Bran
 
 Free for personal and non-commercial use. Forks welcome. Commercial use is not permitted.
 
+**Is my AC supported?** See the [compatibility list](docs/compatibility.md) · [Report my AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)
+
 ## Install in 3 steps
 1. **Flash.** Open the **[web installer](https://skydoy.github.io/ESPHome_AC/)** in Chrome or Edge,
    pick your board, plug it into your computer by USB → **Install**.

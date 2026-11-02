@@ -26,6 +26,8 @@ Mais marcas de ar condicionado serão adicionadas à medida que o projeto cresce
 
 Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comercial não é permitido.
 
+**O meu AC é compatível?** Veja a [lista de compatibilidade](docs/compatibilidade.md) · [Reportar o meu AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)
+
 ## Instalar em 3 passos
 1. **Instalar o firmware.** Abra o **[instalador web](https://skydoy.github.io/ESPHome_AC/)** no Chrome ou Edge,
    escolha a placa, ligue-a ao computador por USB → **Instalar**.

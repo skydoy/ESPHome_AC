@@ -1,5 +1,11 @@
 # Compatibility
 
+*[Português](compatibilidade.md)*
+
+**Is my AC supported?** Find your brand below. Not listed, or tried it?
+**[Report my AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)**
+(2 minutes, no coding).
+
 Hisense indoor units whose Wi-Fi module sits on a **4-pin RS-485 connector** (5 V or 12 V,
 GND, A, B) speak the same "XM" bus at 9600 8N1, so they *should* work. "Should" is not
 "does": this page separates the two.
@@ -12,19 +18,21 @@ Status key:
 - 🧪 **In testing:** being tested with this firmware.
 - 🔶 **Reported elsewhere:** reported working with *other* firmware on the same bus; untested here.
 - ❌ **Not working:** confirmed not to work with this firmware.
+- ❔ **Untested:** expected to work (same bus), nobody has tried it yet.
 
 ## With this firmware
 
-| Brand | Indoor unit | Wi-Fi module | Supply | Status | Notes |
-|---|---|---|---|---|---|
-| Hisense | maintainer's unit | AEH-W41H1 | 5 V | ✅ Working (maintainer-tested, v0.2.2) | [Details below](#aeh-w41h1-maintainers-unit) |
+| Brand | Indoor unit | Wi-Fi module | Board tested | Supply | Status | Notes | Reported by |
+|---|---|---|---|---|---|---|---|
+| Hisense | maintainer's unit | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Works (2026-10-29) | Mode, temperature, fan, vertical swing confirmed; power, voltage, current, humidity readings partial. [Details](#aeh-w41h1-maintainers-unit) | [@skydoy](https://github.com/skydoy) |
+| Hisense | any | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Untested | Same protocol code, not yet tried on a real unit | – |
 
 Boards: the maintainer tested the M5StickC Plus2 + RS485 Hat. The ATOM Lite + Tail485 build
 (v0.2.7) uses the same protocol code but is not yet hardware-tested; reports
 welcome.
 
 ### AEH-W41H1 (maintainer's unit)
-Tested 2026-10-28 on an M5StickC Plus2 + RS485 Hat, powered from the 5 V (X) wire.
+Tested 2026-10-28 and 2026-10-29 (commands) on an M5StickC Plus2 + RS485 Hat, powered from the 5 V (X) wire.
 
 Confirmed (reported state and physically):
 - Link handshake: AC Link connected, fault codes OK, 160-byte status frames.

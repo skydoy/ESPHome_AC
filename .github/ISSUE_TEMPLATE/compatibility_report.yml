@@ -23,6 +23,16 @@ body:
       placeholder: AEH-W4G2
     validations:
       required: true
+  - type: dropdown
+    id: board
+    attributes:
+      label: Board used
+      options:
+        - M5StickC Plus2 + RS485 Hat
+        - ATOM Lite + Tail485
+        - Other (describe in notes)
+    validations:
+      required: true
   - type: input
     id: region
     attributes:
@@ -67,7 +77,13 @@ body:
         - label: Presets (eco, boost, sleep, 8 °C)
         - label: Sensors (outdoor temperature, compressor, power…)
   - type: textarea
+    id: log
+    attributes:
+      label: Log ("RX" lines)
+      description: Optional. Paste a few log lines, especially any starting with "RX". Never paste Wi-Fi passwords or API keys.
+      render: text
+  - type: textarea
     id: notes
     attributes:
-      label: Notes, photos and logs
-      description: Photos of the module label and connector help a lot. Attach logs if something failed.
+      label: Notes and photos
+      description: Drag in photos of the Wi-Fi module sticker, the indoor unit label and the 4-pin plug. Describe anything that did not work.
