@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <title>Illustration: M5Stack ATOM Lite with the ATOM Tail485</title>
+  <rect width="360" height="200" rx="14" fill="#eef6fd"/>
+  <!-- ATOM Lite -->
+  <rect x="62" y="56" width="96" height="96" rx="14" fill="#2b2f36" stroke="#111418" stroke-width="2"/>
+  <circle cx="110" cy="104" r="26" fill="#e9edf2" stroke="#9aa3ae" stroke-width="2"/>
+  <circle cx="110" cy="104" r="9" fill="#2bd47d"/>
+  <circle cx="110" cy="104" r="16" fill="none" stroke="#2bd47d" stroke-opacity=".35" stroke-width="4"/>
+  <rect x="98" y="148" width="24" height="8" rx="2" fill="#6b7280"/>
+  <!-- ATOM Tail485 -->
+  <rect x="196" y="66" width="104" height="76" rx="10" fill="#d9dee5" stroke="#8a94a3" stroke-width="2"/>
+  <rect x="210" y="118" width="76" height="20" rx="3" fill="#1f9d55" stroke="#147a40" stroke-width="1.5"/>
+  <g fill="#c7f0d8" stroke="#147a40" stroke-width="1"><circle cx="223" cy="128" r="4"/><circle cx="241" cy="128" r="4"/><circle cx="259" cy="128" r="4"/><circle cx="277" cy="128" r="4"/></g>
+  <rect x="236" y="80" width="24" height="12" rx="3" fill="#6b7280"/>
+  <path d="M164 104 H190" stroke="#1784f7" stroke-width="3" stroke-dasharray="5 4"/>
+  <text x="110" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="#0b1b3f">ATOM Lite</text>
+  <text x="248" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="#0b1b3f">ATOM Tail485</text>
+  <text x="180" y="36" text-anchor="middle" font-size="12" fill="#52647a">RGB status LED · button</text>
+</svg>
