@@ -1,0 +1,26 @@
+# SETUP firmware: M5StickC Plus2 + M5Stack RS485 Hat.
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+#
+# Flash this when you do not know yet which AC you have. It detects the AC (read-only requests)
+# at http://<device-ip>/setup and then installs the matching firmware of this board over the air.
+# It has no Home Assistant API: Home Assistant finds the device after the brand firmware is in.
+substitutions:
+  name: esphome-ac-setup
+  friendly_name: ESPHome AC Setup
+  project_version: "0.3.0-beta.1"
+  setup_board: m5stickc-plus2
+  # Manifest of the brand firmware the setup installs (the Hisense factory build of this board).
+  setup_manifest_url: https://skydoy.github.io/ESPHome_AC/firmware/manifest.json
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: skydoy.esphome-ac-setup
+    version: ${project_version}
+
+packages:
+  board: !include ../core/boards/m5stickc-plus2.yaml
+  screen: !include ../core/screen/m5stickc-plus2-setup.yaml
+  setup: !include ../core/setup.yaml

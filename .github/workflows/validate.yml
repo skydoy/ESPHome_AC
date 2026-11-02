@@ -41,6 +41,65 @@ jobs:
             fi
             grep -q "id: check_for_update" config.txt
           fi
+  setup-firmware:
+    # Generic setup image (detects the AC, then installs the brand firmware). Built from this
+    # checkout only; published nowhere yet, the binaries are kept as a workflow artifact.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [m5stickc-plus2, atom-lite-tail485]
+    env:
+      CFG: devices/setup-${{ matrix.board }}.yaml
+      BUILD: devices/.esphome/build/esphome-ac-setup/build
+      MAX_BYTES: "1200000"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.13" }
+      - run: pip install esphome==2026.10.1
+      - name: No API, no brand package, no static Wi-Fi networks
+        run: |
+          set -o pipefail
+          esphome config "$CFG" | tee config.txt
+          if grep -qE "^(api|dashboard_import|climate):" config.txt; then
+            echo "::error::The setup image must not contain api, dashboard_import or a climate"; exit 1; fi
+          # A static network changes the Wi-Fi preference slot, so the brand firmware would not
+          # find the credentials saved by the setup image.
+          if grep -qE "^  networks:|^  ssid:" config.txt; then
+            echo "::error::The setup image must not have static Wi-Fi networks"; exit 1; fi
+          grep -q "next_url: http://{{ip_address}}/setup" config.txt
+      - name: Compile (no warnings allowed)
+        run: |
+          set -o pipefail
+          esphome compile "$CFG" 2>&1 | tee build.log
+          if grep -E "warning:" build.log | grep -vE "/(\.platformio|\.espressif|managed_components)/"; then
+            echo "::error::Compiler warnings in the setup image"; exit 1; fi
+      - name: Size budget
+        run: |
+          size=$(stat -c %s "$BUILD/firmware.ota.bin")
+          echo "firmware.ota.bin: $size bytes (max $MAX_BYTES)"
+          test "$size" -le "$MAX_BYTES"
+      - name: Only allow-listed Hisense frames are linked in
+        run: |
+          NM=$(find ~/.cache/esphome ~/.platformio ~/.espressif \( -type f -o -type l \) -name "xtensa-esp32-elf-nm" 2>/dev/null | head -n 1)
+          echo "nm: $NM"
+          test -n "$NM"
+          "$NM" -C "$BUILD/firmware.elf" > syms.txt
+          if grep -E "build_command|build_heartbeat|CommandQueue|hisense_ac::HisenseAC" syms.txt; then
+            echo "::error::Brand command code is linked into the setup image"; exit 1; fi
+          builders=$(grep -oE "hisense_ac::proto::build_[a-z_]+" syms.txt | sort -u)
+          echo "$builders"
+          extra=$(echo "$builders" | grep -vxE "hisense_ac::proto::build_(devtype|status|version)_request" || true)
+          if [ -n "$extra" ]; then
+            echo "::error::Unexpected frame builders: $extra"; exit 1; fi
+      - uses: actions/upload-artifact@v7
+        with:
+          name: setup-${{ matrix.board }}
+          path: |
+            ${{ env.BUILD }}/firmware.factory.bin
+            ${{ env.BUILD }}/firmware.ota.bin
+          if-no-files-found: error
   pinned-refs:
     # Adoption follows @stable; the component is pinned to v<project_version> inside the package.
     runs-on: ubuntu-latest

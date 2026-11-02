@@ -18,7 +18,7 @@ substitutions:
 
 external_components:
   - source: ${hisense_component_source}
-    components: [hisense_ac]
+    components: [hisense_ac, hisense_proto]
     refresh: ${hisense_component_refresh}
 
 uart:
