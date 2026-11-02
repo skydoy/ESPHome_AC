@@ -1,0 +1,45 @@
+blueprint:
+  name: ESPHome AC – notify me when an update is available
+  description: >-
+    Sends a notification to your phone when an ESPHome AC device reports a new firmware release
+    ("Update Available" turns on). Works with devices adopted in the ESPHome Device Builder;
+    to update, press Install there.
+  domain: automation
+  author: skydoy
+  source_url: https://github.com/skydoy/ESPHome_AC/blob/stable/blueprints/automation/esphome_ac_update_available.yaml
+  homeassistant:
+    min_version: 2024.10.0
+  input:
+    update_available:
+      name: Update Available sensor
+      description: The device's "Update Available" entity.
+      selector:
+        entity:
+          filter:
+            - integration: esphome
+              domain: binary_sensor
+              device_class: update
+    notify_device:
+      name: Phone
+      description: The phone to notify (needs the Home Assistant Companion app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+
+mode: single
+
+triggers:
+  - trigger: state
+    entity_id: !input update_available
+    from: "off"
+    to: "on"
+
+actions:
+  - domain: mobile_app
+    type: notify
+    device_id: !input notify_device
+    title: "AC firmware update available"
+    message: >-
+      {{ state_attr(trigger.entity_id, 'friendly_name') | replace(' Update Available', '') }}
+      has a new firmware release. Open the ESPHome Device Builder and press Install.

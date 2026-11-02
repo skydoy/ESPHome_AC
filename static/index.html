@@ -14,12 +14,17 @@
     fieldset { border: 1px solid #ccc; border-radius: .5rem; padding: .75rem 1rem; }
     label { display: block; padding: .2rem 0; }
     label.disabled { color: #888; }
-    .soon { font-size: .85em; background: #eee; border-radius: .25rem; padding: 0 .35rem; margin-left: .35rem; }
     .help img { width: 100%; height: auto; border: 1px solid #ddd; border-radius: .5rem; }
     .help table { border-collapse: collapse; margin: .5rem 0; }
     .help td, .help th { border: 1px solid #ccc; padding: .2rem .5rem; text-align: left; }
     .brand { text-align: center; }
     .brand img { width: 96px; height: 96px; }
+    .see { color: #2a6a2a; font-size: .95em; }
+    .see::before { content: "You should see: "; font-weight: 600; }
+    details { margin: .5rem 0; }
+    summary { cursor: pointer; font-weight: 600; }
+    figure.photo { margin: .75rem 0; }
+    figure.photo figcaption { font-size: .9em; color: #555; }
     .warn { background: #fff4e5; border-left: 4px solid #f0a020; padding: .5rem .75rem; }
   </style>
 </head>
@@ -34,12 +39,7 @@
       <legend>1. Choose your AC brand</legend>
       <label><input type="radio" name="brand" value="hisense" checked>
         Hisense (AEH-W4x / AEH-W41H1 module port)</label>
-      <label class="disabled"><input type="radio" name="device" disabled> Mitsubishi Electric (CN105)<span class="soon">coming soon</span></label>
-      <label class="disabled"><input type="radio" name="device" disabled> Daikin (S21 / P1P2)<span class="soon">coming soon</span></label>
-      <label class="disabled"><input type="radio" name="device" disabled> Midea and OEMs<span class="soon">coming soon</span></label>
-      <label class="disabled"><input type="radio" name="device" disabled> Toshiba<span class="soon">coming soon</span></label>
-      <label class="disabled"><input type="radio" name="device" disabled> Fujitsu<span class="soon">coming soon</span></label>
-      <label class="disabled"><input type="radio" name="device" disabled> Any brand via infrared<span class="soon">coming soon</span></label>
+      <label class="disabled">Other brands – <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml">help us test</a></label>
     </fieldset>
   </form>
   <form id="board-form">
@@ -51,25 +51,60 @@
         M5StickC Plus2 + RS485 Hat – status screen (≈ US$28)</label>
     </fieldset>
   </form>
-  <p>Have one of the "coming soon" units and want to help test? See
-     <a href="https://github.com/skydoy/ESPHome_AC/blob/main/adapters/README.md">adapters</a>.</p>
 
   <h2>3. Install</h2>
   <ol>
     <li>Connect the board to this computer with a USB-C cable (Chrome or Edge on desktop).
-        ATOM Lite: flash it <b>before</b> fitting the Tail485, which uses the USB-C port.</li>
-    <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.</li>
-    <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).</li>
-    <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.</li>
+        ATOM Lite: flash it <b>before</b> fitting the Tail485, which uses the USB-C port.
+        <div class="see">a new serial port in the list when you click <b>Connect</b>.</div></li>
+    <li>Click <b>Connect</b>, pick the serial port and choose <b>Install</b>.
+        <div class="see">a progress bar, then <i>Installation complete</i>.</div></li>
+    <li>When it finishes, enter your Wi-Fi network in the same wizard (Improv).
+        <div class="see" data-board="stick">the bottom line of the screen stops saying
+          <i>Wi-Fi: join "Hisense-AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</div>
+        <div class="see" data-board="atom" hidden>the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK,
+          AC not connected yet).</div></li>
+    <li>Home Assistant discovers the device; the ESPHome Dashboard offers to adopt it.
+        <div class="see">a <i>New devices discovered</i> notification in Home Assistant.</div></li>
   </ol>
   <esp-web-install-button id="install" manifest="firmware/manifest.json"></esp-web-install-button>
+  <details>
+    <summary>Board not showing up?</summary>
+    <p>Install the USB driver, then reconnect the board:</p>
+    <ul>
+      <li data-board="stick">M5StickC Plus2 (CH9102 chip):
+        <a href="https://docs.m5stack.com/en/core/M5StickC%20PLUS2">driver on the M5Stack page</a>
+        (section <i>USB Driver</i>).</li>
+      <li data-board="atom" hidden>ATOM Lite (FTDI driver):
+        <a href="https://ftdichip.com/drivers/vcp-drivers/">FTDI VCP driver</a>
+        (also on the <a href="https://docs.m5stack.com/en/core/ATOM%20Lite">M5Stack page</a>).</li>
+    </ul>
+    <p>Still nothing? Try another USB-C cable: some cables only charge.</p>
+    <p>Reinstalling keeps your Wi-Fi settings: on a board that already runs this firmware the
+       installer offers <b>Update</b>, which does not erase it. A first install erases the board.</p>
+  </details>
   <p>No USB? The device also opens a <code>Hisense-AC Setup</code> hotspot with a captive portal
      and supports Improv over Bluetooth.</p>
 
   <section class="help" id="wiring">
     <h2>4. Wire it to the AC</h2>
-    <p>Switch the AC off at the breaker. Measure the plug's <b>X</b> wire to <b>GND</b> with a
-       multimeter, then follow the matching panel.</p>
+    <p>Switch the AC off at the breaker, unplug the original Wi-Fi module and connect the four
+       wires of its plug as shown.</p>
+    <figure class="photo" hidden><img src="photo-ac-plug.jpg" alt="The AC's module plug with its four wires"
+      onload="this.parentElement.hidden=false"><figcaption>The AC's module plug.</figcaption></figure>
+    <details>
+      <summary>Not sure if your plug is 5 V or 12 V?</summary>
+      <p>Measure it once with a multimeter (DC volts):</p>
+      <ol>
+        <li>Switch the AC off at the breaker and unplug the original Wi-Fi module.</li>
+        <li>Put the multimeter probes on the plug's <b>X</b> and <b>GND</b> wires, keeping your
+            hands away from everything else, then switch the breaker on.</li>
+        <li>About 5 V or about 12 V tells you which column below to use.</li>
+        <li>Switch the breaker off again before connecting the board.</li>
+      </ol>
+      <p>Pin order varies by model; <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>
+         explains how to find each wire.</p>
+    </details>
     <div data-board="stick">
     <a href="wiring.svg"><img src="wiring.svg" alt="Wiring diagram for the 5 V and 12 V cases"></a>
     <table>
@@ -79,6 +114,11 @@
       <tr><td>GND</td><td colspan="2">Hat terminal 4</td></tr>
       <tr><td>X</td><td>Stick 5V header pin (terminal 3 empty)</td><td>Hat terminal 3 (12V)</td></tr>
     </table>
+    <figure class="photo" hidden><img src="photo-stick-wiring.jpg" alt="RS485 Hat terminals with the four AC wires"
+      onload="this.parentElement.hidden=false"><figcaption>RS485 Hat wiring.</figcaption></figure>
+    <figure class="photo" hidden><img src="photo-stick-installed.jpg" alt="M5StickC Plus2 fitted in the indoor unit"
+      onload="this.parentElement.hidden=false"><figcaption>The Stick fitted in the indoor unit.</figcaption></figure>
+    <p class="see">green <i>OK</i> at the top right of the screen and the room temperature, within a minute.</p>
     <p><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up
        from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</p>
     </div>
@@ -91,18 +131,26 @@
       <tr><td>GND</td><td colspan="2">Tail485 GND</td></tr>
       <tr><td>X</td><td>ATOM 5V header pin (Tail485 12V empty: it needs 9–24 V)</td><td>Tail485 12V</td></tr>
     </table>
+    <figure class="photo" hidden><img src="photo-atom-wiring.jpg" alt="ATOM Tail485 terminals with the four AC wires"
+      onload="this.parentElement.hidden=false"><figcaption>Tail485 wiring.</figcaption></figure>
+    <figure class="photo" hidden><img src="photo-atom-installed.jpg" alt="ATOM Lite fitted in the indoor unit"
+      onload="this.parentElement.hidden=false"><figcaption>The ATOM fitted in the indoor unit.</figcaption></figure>
+    <p class="see">the LED turns green within a minute.</p>
     <p><b>LED:</b> blue = Wi-Fi setup, red = no AC link (swap A and B), green = OK (turns off
        after 30 s; press the button to see it again). Hold the button 10 s for a factory reset.</p>
     </div>
     <h2>5. Add to Home Assistant</h2>
     <p>Once it is on Wi-Fi, Home Assistant finds it: <b>Settings → Devices &amp; services →
-       ESPHome → Configure</b>. Updates install from the <b>Firmware Update</b> entity.
+       ESPHome → Configure</b>. Updates install automatically at night (switch <b>Auto Update</b>
+       off to install them yourself from the <b>Firmware Update</b> entity).
        Full guide: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/wiring.md">docs/wiring.md</a>.</p>
+    <p class="see">a climate entity for the AC on the device page.</p>
+    <p>Something not working? See
+       <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/troubleshooting.md">Troubleshooting &amp; FAQ</a>.</p>
   </section>
 
   <p class="warn"><b>Safety:</b> the indoor unit has mains voltage inside. Switch the AC off at
-     the breaker before opening it, and measure the module port with a multimeter before
-     connecting anything.</p>
+     the breaker before opening it or touching any wire.</p>
   <p>Wiring, caveats and credits:
      <a href="https://github.com/skydoy/ESPHome_AC">github.com/skydoy/ESPHome_AC</a>.</p>
 

@@ -10,6 +10,12 @@
 # Note: the download runs inside the main loop, so Home Assistant sees no progress while it
 # runs; the device logs "Progress: NN%" and, with a screen, shows a progress bar. After the
 # reboot the device comes back with the new version (about 1-2 minutes in total).
+#
+# Automatic updates: with the "Auto Update" config switch on (the default), the device checks the
+# manifest once a night at 03:MM local time (MM is a random minute picked at boot, so devices do
+# not all hit GitHub at once) and installs a newer release. The Pages manifest only ever carries
+# stable releases. It never runs during the first 10 minutes after boot and logs every decision
+# under the "auto_update" tag. Local time comes from Home Assistant, or from SNTP without it (UTC).
 http_request:
   verify_ssl: true
 
@@ -33,15 +39,95 @@ update:
     source: ${update_manifest_url}
     update_interval: 6h
 
+switch:
+  - platform: template
+    id: auto_update_enabled
+    name: "Auto Update"
+    icon: mdi:update
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+time:
+  - platform: sntp
+    id: sntp_time
+
+globals:
+  - id: auto_update_minute       # 0-59, picked at random on the first tick; 255 = not yet
+    type: uint8_t
+    initial_value: "255"
+  - id: auto_update_last_day     # day of the year of the last nightly check
+    type: int
+    initial_value: "-1"
+  - id: auto_update_uptime_min   # minutes since boot (saturates)
+    type: uint32_t
+    initial_value: "0"
+
+interval:
+  - id: !remove update_check_interval   # report-only check of core/update-check.yaml (see below)
+  - id: auto_update_interval
+    interval: 60s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (id(auto_update_uptime_min) < 0xFFFFFFFF) id(auto_update_uptime_min)++;
+              if (id(auto_update_minute) > 59) {
+                id(auto_update_minute) = random_uint32() % 60;
+                ESP_LOGI("auto_update", "Nightly update check at 03:%02u local time",
+                         (unsigned) id(auto_update_minute));
+              }
+              auto t = id(ha_time).now();
+              if (!t.is_valid()) t = id(sntp_time).now();
+              if (!t.is_valid() || t.hour != 3 || t.minute != id(auto_update_minute) ||
+                  t.day_of_year == id(auto_update_last_day))
+                return false;
+              id(auto_update_last_day) = t.day_of_year;
+              if (!id(auto_update_enabled).state) {
+                ESP_LOGI("auto_update", "Skipped: the Auto Update switch is off");
+                return false;
+              }
+              if (id(auto_update_uptime_min) < 10) {
+                ESP_LOGI("auto_update", "Skipped: less than 10 minutes since boot");
+                return false;
+              }
+              return true;
+          then:
+            - script.execute: auto_update_run
+
+script:
+  - id: !remove update_check
+  - id: auto_update_run
+    mode: single
+    then:
+      - logger.log:
+          tag: auto_update
+          format: "Checking ${update_manifest_url}"
+      - component.update: firmware_update
+      - delay: 30s
+      - if:
+          condition:
+            lambda: return id(firmware_update).state == update::UPDATE_STATE_AVAILABLE;
+          then:
+            - logger.log:
+                tag: auto_update
+                level: WARN
+                format: "Installing %s (running %s)"
+                args:
+                  - id(firmware_update).update_info.latest_version.c_str()
+                  - id(firmware_update).update_info.current_version.c_str()
+            - update.perform: firmware_update
+          else:
+            - logger.log:
+                tag: auto_update
+                format: "No update installed (up to date, or the check failed)"
+
 # The update entity above already shows the latest version and checks GitHub, so drop the
-# report-only entities of core/update-check.yaml (included by the base config) here.
+# report-only entities of core/update-check.yaml (included by the base config) here (its
+# interval and script are removed in the lists above).
 text_sensor:
   - id: !remove latest_version
 binary_sensor:
   - id: !remove update_available
 button:
   - id: !remove check_for_update
-interval:
-  - id: !remove update_check_interval
-script:
-  - id: !remove update_check

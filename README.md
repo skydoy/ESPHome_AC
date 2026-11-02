@@ -22,7 +22,8 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
   <a href="https://skydoy.github.io/ESPHome_AC/"><img src="https://img.shields.io/badge/Open%20the%20web%20installer-1784F7?style=for-the-badge&logo=esphome&logoColor=white" alt="Open the web installer" height="36"></a>
 </p>
 
-[Wiring](docs/wiring.md) · [Configuration](docs/configuration.md) ·
+[Wiring](docs/wiring.md) · [Troubleshooting & FAQ](docs/troubleshooting.md) ·
+[Home Assistant](docs/home-assistant.md) · [Configuration](docs/configuration.md) ·
 [Compatibility](docs/compatibility.md) · [Protocol](brands/hisense/protocol.md) ·
 [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/skydoy/ESPHome_AC/issues/new/choose)
 
@@ -47,7 +48,8 @@ Prices are M5Stack shop list prices, before shipping and tax. Wiring for both:
 3. **Connect:** join the `Hisense-AC Setup` Wi-Fi hotspot (or use Improv in the installer or
    over Bluetooth), then adopt the device in Home Assistant → **Settings → Devices → ESPHome**.
 
-Updates: not adopted in the Device Builder → one click on **Firmware Update** in Home Assistant;
+Updates: not adopted in the Device Builder → installed automatically at night (**Auto Update**
+switch), or one click on **Firmware Update** in Home Assistant;
 adopted → just press **Install** (it follows `@stable`, [details](docs/configuration.md#esphome-device-builder)).
 The firmware ships without an API key; to add one (recommended), see
 [API encryption](docs/configuration.md#api-encryption-and-ota-password-optional).
@@ -73,6 +75,8 @@ Open `http://<device-ip>/` to see states and live logs (no password, LAN only;
 |---|---|
 | Web installer | https://skydoy.github.io/ESPHome_AC/ |
 | Wiring (5 V and 12 V) | [docs/wiring.md](docs/wiring.md) |
+| Troubleshooting & FAQ | [docs/troubleshooting.md](docs/troubleshooting.md) |
+| Dashboard card, update notification | [docs/home-assistant.md](docs/home-assistant.md) |
 | Configuration, entities, screen | [docs/configuration.md](docs/configuration.md) |
 | Hisense notes and modules | [brands/hisense/README.md](brands/hisense/README.md) |
 | Hardware details | [brands/hisense/hardware.md](brands/hisense/hardware.md) |
