@@ -81,6 +81,13 @@
     footer { color:var(--muted); font-size:.88rem; padding: 1rem 0 2.5rem; }
     #nosupport { display:none; }
     @media (max-width: 38rem) { .boards { grid-template-columns:1fr; } .top h1 { font-size:1.3rem; } }
+    .support { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .6rem; margin:.9rem 0 0; font-size:.95rem; }
+    .support b { font-weight:600; margin-right:.2rem; }
+    .support a { display:inline-flex; align-items:center; gap:.35rem; text-decoration:none; font-weight:700; font-size:.88rem; padding:.3rem .8rem; border-radius:999px; box-shadow:0 1px 4px rgba(0,0,0,.18); }
+    .support a:hover { filter:brightness(1.07); }
+    .support .kofi { background:#FF5E5B; color:#fff; }
+    .support .bmc { background:#FFDD00; color:#0b1b3f; }
+    html[data-theme=dark] .support a { box-shadow:0 1px 4px rgba(0,0,0,.5); }
   </style>
 </head>
 <body>
@@ -101,6 +108,11 @@
     <p class="pitch">
       <span class="pt">O seu ar condicionado no Home Assistant (Hisense por agora, mais marcas a caminho). Ligue por USB, carregue em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
       <span class="en">Your air conditioner in Home Assistant (Hisense today, more brands coming). Plug in by USB, click Install, done. No YAML, no cloud, no app.</span>
+    </p>
+    <p class="support">
+      <b><span class="pt">Gostas? Ajuda-me a fazer algo ainda melhor.</span><span class="en">Like it? Help me build something better.</span></b>
+      <a class="kofi" href="https://ko-fi.com/skydoy" target="_blank" rel="noopener">☕ Ko-fi</a>
+      <a class="bmc" href="https://buymeacoffee.com/skydoy" target="_blank" rel="noopener">🍪 Buy Me a Coffee</a>
     </p>
   </div>
 </header>
