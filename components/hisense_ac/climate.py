@@ -35,7 +35,7 @@ from esphome.const import (
 from . import hisense_ac_ns
 
 DEPENDENCIES = ["uart"]
-AUTO_LOAD = ["sensor", "binary_sensor", "text_sensor", "switch", "select", "button"]
+AUTO_LOAD = ["hisense_proto", "sensor", "binary_sensor", "text_sensor", "switch", "select", "button"]
 
 HisenseAC = hisense_ac_ns.class_("HisenseAC", climate.Climate, cg.Component, uart.UARTDevice)
 HisenseDisplaySwitch = hisense_ac_ns.class_("HisenseDisplaySwitch", switch.Switch)
