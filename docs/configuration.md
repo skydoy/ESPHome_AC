@@ -118,21 +118,26 @@ There are two kinds of firmware, built from two files per board:
 
 | File | Who uses it | How it updates |
 |---|---|---|
-| `devices/<board>.factory.yaml` | The web installer firmware (not adopted) | **Firmware Update** entity in Home Assistant (OTA over HTTPS from GitHub Pages) |
+| `devices/<board>.factory.yaml` | The web installer firmware (not adopted) | Automatically at night (**Auto Update**), or the **Firmware Update** entity in Home Assistant (OTA over HTTPS from GitHub Pages) |
 | `devices/<board>.yaml` (base) | Configs adopted in the ESPHome Device Builder, your own builds | **Install** in the Device Builder |
 
 - **Factory firmware:** the `Firmware Update` entity installs new releases from the board's manifest:
   `https://skydoy.github.io/ESPHome_AC/firmware/manifest.json` (Stick) or
   `https://skydoy.github.io/ESPHome_AC/firmware/atom-lite-tail485/manifest.json` (ATOM).
 There are two ways to update, and neither needs a YAML edit:
-1. **Not adopted** (factory firmware from the installer): press **Install** on the
-   **Firmware Update** entity in Home Assistant. One click.
+1. **Not adopted** (factory firmware from the installer): nothing to do. With the **Auto Update**
+   switch on (configuration, default on, kept across reboots) the device checks once a night at
+   03:MM local time (a random minute, so devices do not all hit GitHub at once) and installs a
+   newer release. It never runs in the first 10 minutes after boot and logs every decision under
+   the `auto_update` tag. Switch it off to update by hand: press **Install** on the
+   **Firmware Update** entity in Home Assistant.
 2. **Adopted in the ESPHome Device Builder:** your YAML imports `@stable`; just press
    **Install** → *Wirelessly*. The adopted build has no `Firmware Update` entity on purpose
    (the generic firmware would replace your config and drop your API key).
 - **Is there a new release?** Adopted builds have **Update Available** and **Latest Version**
   (diagnostic), read from the board's manifest at boot and every 6 h, plus a **Check for Update**
-  button. They only report; nothing is installed (`core/update-check.yaml`).
+  button. They only report; nothing is installed (`core/update-check.yaml`). For a phone
+  notification, see [Home Assistant → Update notification](home-assistant.md#update-notification).
 - Adopted before v0.2.9? Those builds still include the update entity. Do not press *Install* on
   it; press **Install** in the Device Builder once and the entity disappears.
 - Progress: an update takes about 1-2 minutes. The download blocks the device's main loop, so

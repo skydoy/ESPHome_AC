@@ -8,6 +8,27 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.14] - 2026-11-02
+### Added
+- **Auto Update** (web-installer firmware only): a configuration switch, on by default and kept
+  across reboots. Once a night at 03:MM local time (random minute) the device checks GitHub and
+  installs a newer release through the existing **Firmware Update** entity. Never in the first
+  10 minutes after boot; every decision is logged under `auto_update`. Adopted builds are
+  unchanged and keep **Update Available**.
+- [Troubleshooting & FAQ](docs/troubleshooting.md): no AC link, Stick boot pin, not found in Home
+  Assistant, updates and the Device Builder, web page, Wi-Fi reset and re-flash, logs.
+- [Home Assistant](docs/home-assistant.md): a dashboard card (built-in cards only) and an
+  **update notification blueprint**
+  ([`blueprints/automation/esphome_ac_update_available.yaml`](blueprints/automation/esphome_ac_update_available.yaml))
+  with a one-click import button.
+
+### Changed
+- **Web installer, simpler:** a "You should see" line for each step (screen or LED state per
+  board), USB driver help on the install step (CH9102 for the M5StickC Plus2, FTDI for the ATOM
+  Lite, charge-only cables), the six "coming soon" brands replaced by one "Other brands – help us
+  test" link, and the 5 V / 12 V multimeter check moved into an optional explainer. Slots for
+  real installation photos appear as photos are added ([list](docs/photos/README.md)).
+
 ## [0.2.13] - 2026-10-29
 ### Added
 - **AC Firmware Version** (diagnostic): the AC's reply to the `07` version request at boot.
@@ -204,7 +225,8 @@ section below, with the factory and OTA images attached.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...HEAD
+[0.2.14]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.10...v0.2.11
