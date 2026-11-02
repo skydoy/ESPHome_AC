@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
     <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.png">
-    <img src="docs/logo-light.png" alt="ESPHome AC" width="256">
+    <img src="docs/logo-light.png" alt="ESPHome_AC" width="256">
   </picture>
 </p>
 
@@ -13,7 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue" alt="License: PolyForm Noncommercial"></a>
 </p>
 
-<p align="center"><b>Your Hisense air conditioner in Home Assistant. Plug in by USB, click Install, done. No YAML.</b><br>
+<p align="center"><b>Your air conditioner in Home Assistant. Plug in by USB, click Install, done. No YAML.</b><br>
 🇵🇹 <a href="README.pt.md">Ler em português</a></p>
 
 <p align="center">
@@ -31,7 +31,7 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
 1. **Flash.** Open the **[web installer](https://skydoy.github.io/ESPHome_AC/)** in Chrome or Edge,
    pick your board, plug it into your computer by USB → **Install**.
    (ATOM: flash before fitting the Tail485, it uses the USB-C port.)
-2. **Wi-Fi.** Type your Wi-Fi in the same window. (Or later: join the `Hisense-AC Setup` hotspot from your phone.)
+2. **Wi-Fi.** Type your Wi-Fi in the same window. (Or later: join the `ESPHome_AC Setup` hotspot from your phone.)
 3. **Wire and add.** AC off at the breaker, connect the 4-wire plug of the old Wi-Fi module to the board
    ([wiring](docs/wiring.md)), breaker back on. Home Assistant shows *Hisense AC* under
    **Settings → Devices & services** → **Configure**.

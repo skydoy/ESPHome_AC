@@ -29,11 +29,11 @@ A porta não aparece? Stick: instale o controlador CH9102; ATOM: o controlador F
 
 ## 2. Wi-Fi (1 minuto)
 - Logo a seguir à instalação, a mesma janela pede o Wi-Fi: escolha a rede, escreva a palavra-passe → **Connect**.
-- Saltou este passo? Com o telemóvel, ligue-se à rede **`Hisense-AC Setup`**; abre-se uma página, escolha o seu Wi-Fi.
+- Saltou este passo? Com o telemóvel, ligue-se à rede **`ESPHome_AC Setup`**; abre-se uma página, escolha o seu Wi-Fi.
   Esta rede volta a aparecer sozinha sempre que a placa não consegue chegar ao Wi-Fi guardado.
 - Também pode configurar o Wi-Fi por Bluetooth (Improv) a partir da app do Home Assistant.
 
-✅ *Deve ver:* Stick: o ecrã deixa de dizer *Wi-Fi: join "Hisense-AC Setup"* e mostra o endereço IP
+✅ *Deve ver:* Stick: o ecrã deixa de dizer *Wi-Fi: join "ESPHome_AC Setup"* e mostra o endereço IP
 (*No AC* é normal até estar ligado à máquina). ATOM: o LED passa de **azul** a **vermelho**.
 
 ## 3. Ligar ao ar condicionado (10 minutos)

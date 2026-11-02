@@ -66,7 +66,7 @@ Escreva **`http://`** seguido do endereço IP, por exemplo `http://192.168.1.50/
 navegador (vai buscar os scripts ao site do ESPHome).
 
 ## Mudar de Wi-Fi, repor de fábrica ou reinstalar
-- **Rede Wi-Fi nova:** se a placa não chega à rede antiga, abre a rede `Hisense-AC Setup` ao fim de cerca
+- **Rede Wi-Fi nova:** se a placa não chega à rede antiga, abre a rede `ESPHome_AC Setup` ao fim de cerca
   de um minuto. Ligue-se a ela com o telemóvel e escolha a rede nova. Ou ligue-a por USB, abra o
   [instalador web](https://skydoy.github.io/ESPHome_AC/), carregue em **Connect** e escolha **Change Wi-Fi**.
 - **Repor de fábrica:** ATOM: mantenha o botão carregado 10 s (o LED fica branco e depois reinicia em modo de

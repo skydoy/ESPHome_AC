@@ -8,6 +8,19 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.18] - 2026-11-02
+### Changed
+- The Wi-Fi setup hotspot is now called **`ESPHome_AC Setup`** (was `Hisense-AC Setup`; the beta
+  setup firmware used `ESPHome-AC Setup`). The M5StickC Plus2 screen, the installer page and the
+  guides say the same. Device names, entity IDs and Home Assistant setups are unchanged.
+- The beta setup page title now reads "ESPHome_AC setup".
+- Product naming is brand-neutral: the installer page title, header and description, and the
+  README taglines say **ESPHome_AC** / "your air conditioner" (Hisense is named as the brand
+  supported today). The beta setup screen header reads "ESPHome_AC Setup".
+
+Note: a board that already saved your Wi-Fi keeps working. Only the name of the fallback hotspot
+changes, after the update.
+
 ## [0.2.17] - 2026-11-02
 ### Added
 - Light / dark mode button on the web installer (follows the OS by default, remembered).
@@ -274,7 +287,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.17...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.18...HEAD
+[0.2.18]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.17...v0.2.18
 [0.2.17]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.16...v0.2.17
 [0.2.16]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...v0.2.16
 [0.2.15]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...v0.2.15
