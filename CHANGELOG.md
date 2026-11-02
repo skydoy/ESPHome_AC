@@ -8,6 +8,16 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.2.16] - 2026-11-02
+### Added
+- **Is my AC supported?** card on the web installer (PT/EN) with links to the compatibility list
+  and a **Report my AC** button.
+- [Compatibilidade](docs/compatibilidade.md): the compatibility list in Portuguese.
+- Compatibility list: "Board tested" and "Reported by" columns, ❔ Untested status, ATOM row.
+- Compatibility report form: board dropdown and a log ("RX" lines) field.
+
+No firmware changes: 0.2.16 behaves exactly like 0.2.15.
+
 ## [0.2.15] - 2026-11-02
 ### Changed
 - **New web installer page**: one card per step (board → install → Wi-Fi → wiring → Home
@@ -246,7 +256,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.16...HEAD
+[0.2.16]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.15...v0.2.16
 [0.2.15]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.14...v0.2.15
 [0.2.14]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.12...v0.2.13
