@@ -18,28 +18,28 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue" alt="Licença: PolyForm Noncommercial"></a>
 </p>
 
-<p align="center"><b>O seu ar condicionado no Home Assistant. Ligar por USB, carregar em Instalar, feito. Sem YAML.</b><br>
+<p align="center"><b>O teu ar condicionado no Home Assistant. Liga por USB, carrega em Instalar, feito. Sem YAML.</b><br>
 🇬🇧 <a href="README.md">Read in English</a></p>
 
 <p align="center">
   <a href="https://skydoy.github.io/ESPHome_AC/"><img src="https://img.shields.io/badge/Abrir%20o%20instalador%20web-1784F7?style=for-the-badge&logo=esphome&logoColor=white" alt="Abrir o instalador web" height="40"></a>
 </p>
 
-Substitua o módulo Wi-Fi do seu ar condicionado **Hisense** (AEH-W4x / **AEH-W41H1**) por uma pequena
-placa ESP32 da M5Stack e controle-o localmente a partir do Home Assistant. Sem nuvem, sem app.
+Substitui o módulo Wi-Fi do teu ar condicionado **Hisense** (AEH-W4x / **AEH-W41H1**) por uma pequena
+placa ESP32 da M5Stack e controla-o localmente a partir do Home Assistant. Sem nuvem, sem app.
 Mais marcas de ar condicionado serão adicionadas à medida que o projeto cresce.
 
 Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comercial não é permitido.
 
-**O meu AC é compatível?** Veja a [lista de compatibilidade](docs/compatibilidade.md) · [Reportar o meu AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)
+**O meu AC é compatível?** Vê a [lista de compatibilidade](docs/compatibilidade.md) · [Reportar o meu AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)
 
 ## Instalar em 3 passos
-1. **Instalar o firmware.** Abra o **[instalador web](https://skydoy.github.io/ESPHome_AC/)** no Chrome ou Edge,
-   escolha a placa, ligue-a ao computador por USB → **Instalar**.
-   (ATOM: instale antes de encaixar o Tail485, que ocupa a porta USB-C.)
-2. **Wi-Fi.** Escreva o seu Wi-Fi na mesma janela. (Ou mais tarde: ligue-se à rede `ESPHome_AC Setup` com o telemóvel.)
-3. **Ligar e adicionar.** Desligue o ar condicionado no disjuntor, ligue a ficha de 4 fios do módulo Wi-Fi antigo à placa
-   ([ligações](docs/wiring.md)) e volte a ligar o disjuntor. O Home Assistant mostra *Air Conditioner* (*Hisense AC* em placas instaladas antes da v0.3.0) em
+1. **Instalar o firmware.** Abre o **[instalador web](https://skydoy.github.io/ESPHome_AC/)** no Chrome ou Edge,
+   escolhe a placa, liga-a ao computador por USB → **Instalar**.
+   (ATOM: instala antes de encaixar o Tail485, que ocupa a porta USB-C.)
+2. **Wi-Fi.** Escreve o teu Wi-Fi na mesma janela. (Ou mais tarde: liga-te à rede `ESPHome_AC Setup` com o telemóvel.)
+3. **Ligar e adicionar.** Desliga o ar condicionado no disjuntor, liga a ficha de 4 fios do módulo Wi-Fi antigo à placa
+   ([ligações](docs/wiring.md)) e volta a ligar o disjuntor. O Home Assistant mostra *Air Conditioner* (*Hisense AC* em placas instaladas antes da v0.3.0) em
    **Definições → Dispositivos e serviços** → **Configurar**.
 
 Passo a passo com imagens: **[Guia rápido](docs/guia-rapido.md)** · **[Quick start (EN)](docs/quick-start.md)**
@@ -57,9 +57,9 @@ Passo a passo com imagens: **[Guia rápido](docs/guia-rapido.md)** · **[Quick s
 
 A placa tem também uma página em `http://<ip-da-placa>/` com os estados e os registos em direto (sem palavra-passe,
 só na rede local; [como pôr uma ou desligar](docs/configuration.md#web-server)).
-O firmware vem sem chave de API; para pôr uma (recomendado), veja
+O firmware vem sem chave de API; para pôr uma (recomendado), vê
 [API encryption](docs/configuration.md#api-encryption-and-ota-password-optional).
-Adotou-a no ESPHome Device Builder? Basta carregar em **Install**: segue a `@stable`
+Adotaste-a no ESPHome Device Builder? Basta carregar em **Install**: segue a `@stable`
 ([detalhes](docs/configuration.md#esphome-device-builder)).
 
 ## Placas
@@ -72,13 +72,13 @@ Adotou-a no ESPHome Device Builder? Basta carregar em **Install**: segue a `@sta
 
 Preços de tabela da loja M5Stack, sem portes nem impostos. O Plus2 foi descontinuado na loja M5Stack.
 
-> ⚠️ **Pino de arranque G0 (só no Stick):** se o Stick arranca por USB mas não pelo ar condicionado, solde uma
+> ⚠️ **Pino de arranque G0 (só no Stick):** se o Stick arranca por USB mas não pelo ar condicionado, solda uma
 > resistência de 10 kΩ entre o G0 e os 3,3 V. [Detalhes](docs/wiring.md#3-boot-pin-g0-read-this-before-closing-the-ac)
 
 > **Estado:** por agora só a Hisense é suportada (máquinas cujo módulo Wi-Fi liga ao conector RS-485 de 4 pinos,
-> veja a [tabela de compatibilidade](docs/compatibility.md)). A versão ATOM é verificada automaticamente mas ainda
-> não foi testada numa máquina real. Experimentou? [Conte-nos como correu](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml).
-> Outras marcas (Mitsubishi, Daikin, Midea, …) esperam por quem as possa testar; veja o [CONTRIBUTING.md](CONTRIBUTING.md).
+> vê a [tabela de compatibilidade](docs/compatibility.md)). A versão ATOM é verificada automaticamente mas ainda
+> não foi testada numa máquina real. Experimentaste? [Conta-nos como correu](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml).
+> Outras marcas (Mitsubishi, Daikin, Midea, …) esperam por quem as possa testar; vê o [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Documentação
 [Problemas](docs/problemas.md) · [Troubleshooting (EN)](docs/troubleshooting.md) ·
@@ -104,5 +104,5 @@ Os documentos técnicos estão em inglês, exceto o guia rápido e os problemas.
 - Firmware, instalador e logótipo: [skydoy](https://github.com/skydoy). As imagens das placas são ilustrações.
 
 [PolyForm Noncommercial 1.0.0](LICENSE): gratuito para uso pessoal e não comercial, forks bem-vindos,
-uso comercial não permitido. Use por sua conta e risco: a unidade interior tem tensão da rede lá dentro.
-Hisense é uma marca registada do seu dono; este é um projeto independente da comunidade, sem ligação à marca.
+uso comercial não permitido. Usa por tua conta e risco: a unidade interior tem tensão da rede lá dentro.
+Hisense é uma marca registada do respetivo dono; este é um projeto independente da comunidade, sem ligação à marca.

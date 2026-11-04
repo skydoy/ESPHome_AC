@@ -8,6 +8,15 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-04
+### Changed
+- **Portuguese texts now use informal "tu"** (pt-PT) everywhere: web installer, `README.pt.md`,
+  `docs/guia-rapido.md`, `docs/problemas.md` and `docs/compatibilidade.md` ("A tua placa",
+  "Liga por USB, carrega em Instalar"), matching the other ESPHome projects by skydoy.
+
+### Notes
+- No firmware changes besides the version number.
+
 ## [0.3.1] - 2026-11-02
 ### Added
 - **M5StickC Plus2 boot animation** now shows the original project logo (`boot_logo.png`, from
@@ -325,7 +334,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.18...v0.3.0
 [0.2.18]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.17...v0.2.18

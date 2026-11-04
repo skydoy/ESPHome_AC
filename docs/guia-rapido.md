@@ -2,7 +2,7 @@
 
 Da caixa ao Home Assistant em cerca de 15 minutos, sem YAML. *English: [quick-start.md](quick-start.md).*
 
-## Precisa de
+## Precisas de
 - Uma das duas placas (as imagens são ilustrações):
 
   | **ATOM Lite + ATOM Tail485** (≈ 15 US$) | **M5StickC Plus2 + RS485 Hat** (≈ 28 US$) |
@@ -12,39 +12,39 @@ Da caixa ao Home Assistant em cerca de 15 minutos, sem YAML. *English: [quick-st
 
 - Um ar condicionado **Hisense** com o módulo Wi-Fi AEH-W4x / AEH-W41H1 ([compatibilidade](compatibility.md)).
 - Um computador com **Chrome ou Edge** e um cabo USB-C **de dados** (os cabos só de carregamento não servem).
-- O nome e a palavra-passe do seu Wi-Fi (rede de **2,4 GHz**).
+- O nome e a palavra-passe do teu Wi-Fi (rede de **2,4 GHz**).
 - Um multímetro, uma chave de fendas pequena e o Home Assistant.
 
 ## 1. Instalar o firmware (2 minutos)
-Faça isto **antes** de mexer no ar condicionado.
-1. Abra **https://skydoy.github.io/ESPHome_AC/**.
-2. Escolha a placa: **ATOM Lite + Tail485** ou **M5StickC Plus2 + RS485 Hat**.
-3. Ligue a placa ao computador por USB. ATOM: sem o Tail485, que usa a mesma porta USB-C.
-4. Carregue em **Install**, escolha a porta série → **Install**.
+Faz isto **antes** de mexer no ar condicionado.
+1. Abre **https://skydoy.github.io/ESPHome_AC/**.
+2. Escolhe a placa: **ATOM Lite + Tail485** ou **M5StickC Plus2 + RS485 Hat**.
+3. Liga a placa ao computador por USB. ATOM: sem o Tail485, que usa a mesma porta USB-C.
+4. Carrega em **Install**, escolhe a porta série → **Install**.
 
-✅ *Deve ver:* uma porta série nova na lista, depois uma barra de progresso (cerca de 1 minuto) e
+✅ *Deves ver:* uma porta série nova na lista, depois uma barra de progresso (cerca de 1 minuto) e
 "Installation complete!".
 
-A porta não aparece? Stick: instale o controlador CH9102; ATOM: o controlador FTDI. Experimente outro cabo.
+A porta não aparece? Stick: instala o controlador CH9102; ATOM: o controlador FTDI. Experimenta outro cabo.
 
 ## 2. Wi-Fi (1 minuto)
-- Logo a seguir à instalação, a mesma janela pede o Wi-Fi: escolha a rede, escreva a palavra-passe → **Connect**.
-- Saltou este passo? Com o telemóvel, ligue-se à rede **`ESPHome_AC Setup`**; abre-se uma página, escolha o seu Wi-Fi.
+- Logo a seguir à instalação, a mesma janela pede o Wi-Fi: escolhe a rede, escreve a palavra-passe → **Connect**.
+- Saltaste este passo? Com o telemóvel, liga-te à rede **`ESPHome_AC Setup`**; abre-se uma página, escolhe o teu Wi-Fi.
   Esta rede volta a aparecer sozinha sempre que a placa não consegue chegar ao Wi-Fi guardado.
-- Também pode configurar o Wi-Fi por Bluetooth (Improv) a partir da app do Home Assistant.
+- Também podes configurar o Wi-Fi por Bluetooth (Improv) a partir da app do Home Assistant.
 
-✅ *Deve ver:* Stick: o ecrã deixa de dizer *Wi-Fi: join "ESPHome_AC Setup"* e mostra o endereço IP
+✅ *Deves ver:* Stick: o ecrã deixa de dizer *Wi-Fi: join "ESPHome_AC Setup"* e mostra o endereço IP
 (*No AC* é normal até estar ligado à máquina). ATOM: o LED passa de **azul** a **vermelho**.
 
 ## 3. Ligar ao ar condicionado (10 minutos)
-> ⚠️ **Desligue primeiro o ar condicionado no disjuntor.** A unidade interior tem tensão da rede lá dentro.
+> ⚠️ **Desliga primeiro o ar condicionado no disjuntor.** A unidade interior tem tensão da rede lá dentro.
 
-1. Abra a tampa da unidade interior e desligue o módulo Wi-Fi original. Fica com uma ficha de 4 fios:
+1. Abre a tampa da unidade interior e desliga o módulo Wi-Fi original. Ficas com uma ficha de 4 fios:
    **A**, **B**, **GND** e **X** (alimentação).
-2. **Meça o X uma vez** com o multímetro (volts DC): disjuntor ligado, ponta preta no GND, ponta vermelha no X.
-   Cerca de **5 V** ou cerca de **12 V**? Volte a desligar o disjuntor. A ordem dos fios varia com o modelo,
-   [veja aqui como encontrar cada fio](wiring.md#1-measure-the-plug).
-3. Ligue os 4 fios como no esquema e na tabela da sua placa e volte a ligar o disjuntor.
+2. **Mede o X uma vez** com o multímetro (volts DC): disjuntor ligado, ponta preta no GND, ponta vermelha no X.
+   Cerca de **5 V** ou cerca de **12 V**? Volta a desligar o disjuntor. A ordem dos fios varia com o modelo,
+   [vê aqui como encontrar cada fio](wiring.md#1-measure-the-plug).
+3. Liga os 4 fios como no esquema e na tabela da tua placa e volta a ligar o disjuntor.
 
 <!-- photo slot: static/photo-ac-plug.jpg (see docs/photos/README.md) -->
 
@@ -60,9 +60,9 @@ A porta não aparece? Stick: instale o controlador CH9102; ATOM: o controlador F
 
 <!-- photo slots: static/photo-stick-wiring.jpg, static/photo-stick-installed.jpg (see docs/photos/README.md) -->
 
-✅ *Deve ver:* **OK** verde no canto superior direito do ecrã e a temperatura da sala, em menos de um minuto.
+✅ *Deves ver:* **OK** verde no canto superior direito do ecrã e a temperatura da sala, em menos de um minuto.
 
-**Pino de arranque G0:** se o Stick arranca por USB mas não pelo ar condicionado, solde uma resistência de
+**Pino de arranque G0:** se o Stick arranca por USB mas não pelo ar condicionado, solda uma resistência de
 10 kΩ entre o G0 e os 3,3 V ([detalhes](wiring.md#3-boot-pin-g0-read-this-before-closing-the-ac)).
 
 ### ATOM Lite + ATOM Tail485
@@ -77,15 +77,15 @@ A porta não aparece? Stick: instale o controlador CH9102; ATOM: o controlador F
 
 <!-- photo slots: static/photo-atom-wiring.jpg, static/photo-atom-installed.jpg (see docs/photos/README.md) -->
 
-✅ *Deve ver:* o LED fica **verde** em menos de um minuto (apaga-se ao fim de 30 s; carregue no botão para o ver outra vez).
+✅ *Deves ver:* o LED fica **verde** em menos de um minuto (apaga-se ao fim de 30 s; carrega no botão para o ver outra vez).
 
-O ecrã diz *No AC* ou o LED fica **vermelho**? Troque o A com o B: não há perigo, só levam sinal.
+O ecrã diz *No AC* ou o LED fica **vermelho**? Troca o A com o B: não há perigo, só levam sinal.
 
 ## 4. Adicionar ao Home Assistant (1 minuto)
 **Definições → Dispositivos e serviços**: o **Air Conditioner** (ESPHome; **Hisense AC** em placas instaladas antes da v0.3.0) aparece em *Descobertos* → **Configurar**.
-Atribua-lhe uma divisão (por exemplo, Sala).
+Atribui-lhe uma divisão (por exemplo, Sala).
 
-**Teste:** ponha o **Air Conditioner** em *Cool* a 24 °C e confirme que a máquina arranca.
+**Teste:** põe o **Air Conditioner** em *Cool* a 24 °C e confirma que a máquina arranca.
 
 | Entidade | Para que serve |
 |---|---|
@@ -95,13 +95,13 @@ Atribua-lhe uma divisão (por exemplo, Sala).
 | **AC Display**, **Eco**, **Super** | Luz do painel, poupança e turbo. |
 | **Firmware Update**, **Auto Update** | Novas versões com um clique, ou sozinhas de madrugada. |
 
-✅ *Deve ver:* uma entidade de clima para o ar condicionado na página do dispositivo.
+✅ *Deves ver:* uma entidade de clima para o ar condicionado na página do dispositivo.
 
 Cartão para o painel e aviso de atualizações: [home-assistant.md](home-assistant.md) (em inglês).
 
 ## 5. Atualizações
-As versões novas instalam-se sozinhas de madrugada. Prefere escolher? Desligue o **Auto Update** e carregue em
+As versões novas instalam-se sozinhas de madrugada. Preferes escolher? Desliga o **Auto Update** e carrega em
 **Install** no **Firmware Update** quando sair uma versão nova. A página da própria placa,
 `http://<ip-da-placa>/`, mostra os estados e os registos em direto.
 
-Algo não funciona? Veja **[problemas.md](problemas.md)**.
+Algo não funciona? Vê **[problemas.md](problemas.md)**.
