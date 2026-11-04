@@ -106,7 +106,7 @@
       </div>
     </div>
     <p class="pitch">
-      <span class="pt">O seu ar condicionado no Home Assistant (Hisense por agora, mais marcas a caminho). Ligue por USB, carregue em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
+      <span class="pt">O teu ar condicionado no Home Assistant (Hisense por agora, mais marcas a caminho). Liga por USB, carrega em Instalar, feito. Sem YAML, sem nuvem, sem app.</span>
       <span class="en">Your air conditioner in Home Assistant (Hisense today, more brands coming). Plug in by USB, click Install, done. No YAML, no cloud, no app.</span>
     </p>
     <p class="support">
@@ -119,12 +119,12 @@
 
 <main class="wrap">
   <div id="nosupport" class="card note warn">
-    <span class="pt"><b>Este browser não consegue instalar.</b> Abra esta página no <b>Chrome</b> ou <b>Edge</b> num computador (não funciona no telemóvel, Safari nem Firefox).</span>
+    <span class="pt"><b>Este browser não consegue instalar.</b> Abre esta página no <b>Chrome</b> ou <b>Edge</b> num computador (não funciona no telemóvel, Safari nem Firefox).</span>
     <span class="en"><b>This browser can't install.</b> Open this page in <b>Chrome</b> or <b>Edge</b> on a computer (phones, Safari and Firefox don't work).</span>
   </div>
 
   <section class="card">
-    <h2><span class="num">1</span><span class="pt">Qual é a sua placa?</span><span class="en">Which board do you have?</span></h2>
+    <h2><span class="num">1</span><span class="pt">Qual é a tua placa?</span><span class="en">Which board do you have?</span></h2>
     <form id="board-form" class="boards">
       <label><input type="radio" name="device" value="install/atom-lite-tail485/manifest.json" data-wiring="atom">
         <span class="t">ATOM Lite + ATOM Tail485</span>
@@ -139,13 +139,13 @@
       <span class="pt">Marca: <b>Hisense</b> (ficha do módulo Wi-Fi AEH-W4x / AEH-W41H1).</span>
       <span class="en">Brand: <b>Hisense</b> (AEH-W4x / AEH-W41H1 Wi-Fi module port).</span>
       <span class="pt">Outras marcas:</span><span class="en">Other brands:</span>
-      <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml"><span class="pt">ajude-nos a testar</span><span class="en">help us test</span></a>.
+      <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml"><span class="pt">ajuda-nos a testar</span><span class="en">help us test</span></a>.
     </p>
   </section>
 
   <section class="card">
     <h2><span class="pt">O meu AC é compatível?</span><span class="en">Is my AC supported?</span></h2>
-    <p><span class="pt">Veja a lista de máquinas testadas. Experimentou noutra? Diga-nos como correu, mesmo que não funcione.</span><span class="en">Check the list of tested units. Tried another one? Tell us how it went, even if it didn't work.</span></p>
+    <p><span class="pt">Vê a lista de máquinas testadas. Experimentaste noutra? Conta-nos como correu, mesmo que não funcione.</span><span class="en">Check the list of tested units. Tried another one? Tell us how it went, even if it didn't work.</span></p>
     <p><a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/compatibility.md"><span class="pt">Lista de compatibilidade</span><span class="en">Compatibility list</span></a> ·
       <a href="https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml"><b><span class="pt">Reportar o meu AC</span><span class="en">Report my AC</span></b></a></p>
   </section>
@@ -153,9 +153,9 @@
   <section class="card">
     <h2><span class="num">2</span><span class="pt">Instalar o firmware</span><span class="en">Install the firmware</span></h2>
     <ol class="pt">
-      <li>Ligue a placa a este computador com um cabo USB-C <b>de dados</b>.
-        <span data-board="atom">Faça isto <b>antes</b> de encaixar o Tail485, que tapa a porta USB-C.</span></li>
-      <li>Carregue em <b>Instalar</b>, escolha a porta série e depois <b>Install</b>.</li>
+      <li>Liga a placa a este computador com um cabo USB-C <b>de dados</b>.
+        <span data-board="atom">Faz isto <b>antes</b> de encaixar o Tail485, que tapa a porta USB-C.</span></li>
+      <li>Carrega em <b>Instalar</b>, escolhe a porta série e depois <b>Install</b>.</li>
     </ol>
     <ol class="en">
       <li>Connect the board to this computer with a USB-C <b>data</b> cable.
@@ -165,14 +165,14 @@
     <div class="install">
       <esp-web-install-button id="install" manifest="install/m5stickc-plus2/manifest.json">
         <button slot="activate" class="btn"><span class="pt">⚡ Instalar</span><span class="en">⚡ Install</span></button>
-        <span slot="unsupported"><span class="pt">Use o Chrome ou Edge num computador.</span><span class="en">Use Chrome or Edge on a computer.</span></span>
+        <span slot="unsupported"><span class="pt">Usa o Chrome ou o Edge num computador.</span><span class="en">Use Chrome or Edge on a computer.</span></span>
         <span slot="not-allowed"><span class="pt">A página tem de abrir em https.</span><span class="en">The page must be opened over https.</span></span>
       </esp-web-install-button>
       <div class="ver" id="ver"></div>
     </div>
-    <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> uma nova porta série na lista, depois uma barra de progresso (cerca de 1 minuto) e <i>Installation complete</i>.</span><span class="en"><b>You should see:</b> a new serial port in the list, then a progress bar (about 1 minute) and <i>Installation complete</i>.</span></p>
+    <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> uma nova porta série na lista, depois uma barra de progresso (cerca de 1 minuto) e <i>Installation complete</i>.</span><span class="en"><b>You should see:</b> a new serial port in the list, then a progress bar (about 1 minute) and <i>Installation complete</i>.</span></p>
     <details><summary><span class="pt">A placa não aparece na lista?</span><span class="en">Board not showing up?</span></summary>
-      <p class="pt">Instale o driver USB e volte a ligar a placa:</p>
+      <p class="pt">Instala o driver USB e volta a ligar a placa:</p>
       <p class="en">Install the USB driver, then reconnect the board:</p>
       <ul>
         <li data-board="stick"><span class="pt">M5StickC Plus2 (chip CH9102):</span><span class="en">M5StickC Plus2 (CH9102 chip):</span>
@@ -182,9 +182,9 @@
           <a href="https://ftdichip.com/drivers/vcp-drivers/">FTDI VCP driver</a>
           (<span class="pt">também na</span><span class="en">also on the</span> <a href="https://docs.m5stack.com/en/core/ATOM%20Lite"><span class="pt">página da M5Stack</span><span class="en">M5Stack page</span></a>).</li>
       </ul>
-      <p class="pt">Continua sem nada? Experimente outro cabo USB-C: muitos só carregam.</p>
+      <p class="pt">Continua sem nada? Experimenta outro cabo USB-C: muitos só carregam.</p>
       <p class="en">Still nothing? Try another USB-C cable: some cables only charge.</p>
-      <p class="pt">Reinstalar mantém o seu Wi-Fi: numa placa que já tem este firmware o instalador oferece <b>Update</b>, que não apaga nada. A primeira instalação apaga a placa.</p>
+      <p class="pt">Reinstalar mantém o teu Wi-Fi: numa placa que já tem este firmware o instalador oferece <b>Update</b>, que não apaga nada. A primeira instalação apaga a placa.</p>
       <p class="en">Reinstalling keeps your Wi-Fi settings: on a board that already runs this firmware the installer offers <b>Update</b>, which does not erase it. A first install erases the board.</p>
     </details>
   </section>
@@ -192,26 +192,26 @@
   <section class="card">
     <h2><span class="num">3</span>Wi-Fi</h2>
     <ul class="pt">
-      <li>Na mesma janela escolha a sua rede, escreva a palavra-passe e carregue em <b>Connect</b>. Tem de ser uma rede de <b>2,4 GHz</b>.</li>
-      <li>Saltou este passo? No telemóvel ligue-se à rede <code>ESPHome_AC Setup</code>: abre-se uma página para escolher o Wi-Fi. Volta a aparecer sempre que a placa não encontra o Wi-Fi.</li>
-      <li>Também pode configurar o Wi-Fi por <b>Bluetooth</b> (Improv) na app do Home Assistant.</li>
+      <li>Na mesma janela escolhe a tua rede, escreve a palavra-passe e carrega em <b>Connect</b>. Tem de ser uma rede de <b>2,4 GHz</b>.</li>
+      <li>Saltaste este passo? No telemóvel liga-te à rede <code>ESPHome_AC Setup</code>: abre-se uma página para escolher o Wi-Fi. Volta a aparecer sempre que a placa não encontra o Wi-Fi.</li>
+      <li>Também podes configurar o Wi-Fi por <b>Bluetooth</b> (Improv) na app do Home Assistant.</li>
     </ul>
     <ul class="en">
       <li>In the same window pick your network, type the password and press <b>Connect</b>. It must be a <b>2.4 GHz</b> network.</li>
       <li>Skipped it? From your phone join the <code>ESPHome_AC Setup</code> hotspot: a page opens to pick your Wi-Fi. It comes back whenever the board can't reach its Wi-Fi.</li>
       <li>You can also set Wi-Fi over <b>Bluetooth</b> (Improv) from the Home Assistant app.</li>
     </ul>
-    <p class="note ok" data-board="stick">✅ <span class="pt"><b>Deve ver:</b> a linha de baixo do ecrã deixa de dizer <i>Wi-Fi: join "ESPHome_AC Setup"</i> e mostra o endereço IP (<i>No AC</i> é normal até ligar ao ar condicionado).</span><span class="en"><b>You should see:</b> the bottom line of the screen stops saying <i>Wi-Fi: join "ESPHome_AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</span></p>
-    <p class="note ok" data-board="atom">✅ <span class="pt"><b>Deve ver:</b> o LED passa de azul (configurar Wi-Fi) a vermelho (Wi-Fi OK, ar condicionado ainda não ligado).</span><span class="en"><b>You should see:</b> the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK, AC not connected yet).</span></p>
+    <p class="note ok" data-board="stick">✅ <span class="pt"><b>Deves ver:</b> a linha de baixo do ecrã deixa de dizer <i>Wi-Fi: join "ESPHome_AC Setup"</i> e mostra o endereço IP (<i>No AC</i> é normal até ligar ao ar condicionado).</span><span class="en"><b>You should see:</b> the bottom line of the screen stops saying <i>Wi-Fi: join "ESPHome_AC Setup"</i> and shows the IP address (<i>No AC</i> is normal until it is wired).</span></p>
+    <p class="note ok" data-board="atom">✅ <span class="pt"><b>Deves ver:</b> o LED passa de azul (configurar Wi-Fi) a vermelho (Wi-Fi OK, ar condicionado ainda não ligado).</span><span class="en"><b>You should see:</b> the LED turns from blue (Wi-Fi setup) to red (Wi-Fi OK, AC not connected yet).</span></p>
   </section>
 
   <section class="card" id="wiring">
     <h2><span class="num">4</span><span class="pt">Ligar ao ar condicionado</span><span class="en">Wire it to the AC</span></h2>
-    <p class="note warn">⚠️ <span class="pt"><b>Desligue primeiro o ar condicionado no disjuntor.</b> A unidade interior tem tensão da rede lá dentro.</span><span class="en"><b>Switch the AC off at the breaker first.</b> The indoor unit has mains voltage inside.</span></p>
+    <p class="note warn">⚠️ <span class="pt"><b>Desliga primeiro o ar condicionado no disjuntor.</b> A unidade interior tem tensão da rede lá dentro.</span><span class="en"><b>Switch the AC off at the breaker first.</b> The indoor unit has mains voltage inside.</span></p>
     <ol class="pt">
-      <li>Abra a tampa da unidade interior e desligue o módulo Wi-Fi original. Fica uma ficha de 4 fios: <b>A</b>, <b>B</b>, <b>GND</b> e <b>X</b> (alimentação).</li>
-      <li>Ligue os 4 fios à placa como no esquema e na tabela abaixo.</li>
-      <li>Volte a ligar o disjuntor.</li>
+      <li>Abre a tampa da unidade interior e desliga o módulo Wi-Fi original. Fica uma ficha de 4 fios: <b>A</b>, <b>B</b>, <b>GND</b> e <b>X</b> (alimentação).</li>
+      <li>Liga os 4 fios à placa como no esquema e na tabela abaixo.</li>
+      <li>Volta a ligar o disjuntor.</li>
     </ol>
     <ol class="en">
       <li>Open the indoor unit's cover and unplug the original Wi-Fi module. You are left with a 4-wire plug: <b>A</b>, <b>B</b>, <b>GND</b> and <b>X</b> (power).</li>
@@ -221,14 +221,14 @@
     <figure class="photo" hidden><img src="photo-ac-plug.jpg" alt="The AC's module plug with its four wires"
       onload="this.parentElement.hidden=false"><figcaption><span class="pt">A ficha do módulo do ar condicionado.</span><span class="en">The AC's module plug.</span></figcaption></figure>
     <details>
-      <summary><span class="pt">Não sabe se a sua ficha é de 5 V ou 12 V?</span><span class="en">Not sure if your plug is 5 V or 12 V?</span></summary>
-      <p class="pt">Meça uma vez com um multímetro (volts DC):</p>
+      <summary><span class="pt">Não sabes se a tua ficha é de 5 V ou 12 V?</span><span class="en">Not sure if your plug is 5 V or 12 V?</span></summary>
+      <p class="pt">Mede uma vez com um multímetro (volts DC):</p>
       <p class="en">Measure it once with a multimeter (DC volts):</p>
       <ol class="pt">
-        <li>Desligue o ar condicionado no disjuntor e desligue o módulo Wi-Fi original.</li>
-        <li>Encoste as pontas do multímetro aos fios <b>X</b> e <b>GND</b> da ficha, com as mãos longe de tudo o resto, e ligue o disjuntor.</li>
-        <li>Cerca de 5 V ou cerca de 12 V diz-lhe que coluna da tabela usar.</li>
-        <li>Volte a desligar o disjuntor antes de ligar a placa.</li>
+        <li>Desliga o ar condicionado no disjuntor e desliga o módulo Wi-Fi original.</li>
+        <li>Encosta as pontas do multímetro aos fios <b>X</b> e <b>GND</b> da ficha, com as mãos longe de tudo o resto, e liga o disjuntor.</li>
+        <li>Cerca de 5 V ou cerca de 12 V diz-te que coluna da tabela usar.</li>
+        <li>Volta a desligar o disjuntor antes de ligar a placa.</li>
       </ol>
       <ol class="en">
         <li>Switch the AC off at the breaker and unplug the original Wi-Fi module.</li>
@@ -254,8 +254,8 @@
         onload="this.parentElement.hidden=false"><figcaption><span class="pt">Ligações no RS485 Hat.</span><span class="en">RS485 Hat wiring.</span></figcaption></figure>
       <figure class="photo" hidden><img src="photo-stick-installed.jpg" alt="M5StickC Plus2 fitted in the indoor unit"
         onload="this.parentElement.hidden=false"><figcaption><span class="pt">O Stick montado na unidade interior.</span><span class="en">The Stick fitted in the indoor unit.</span></figcaption></figure>
-      <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> <i>OK</i> verde no canto superior direito do ecrã e a temperatura da sala, em menos de um minuto.</span><span class="en"><b>You should see:</b> green <i>OK</i> at the top right of the screen and the room temperature, within a minute.</span></p>
-      <p><span class="pt"><b>Pino de arranque G0:</b> se o Stick arranca por USB mas não pelo ar condicionado, ponha uma resistência de 10 kΩ entre o G0 e os 3,3 V. Se o ecrã mostrar <i>No AC</i>, troque o A com o B.</span>
+      <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> <i>OK</i> verde no canto superior direito do ecrã e a temperatura da sala, em menos de um minuto.</span><span class="en"><b>You should see:</b> green <i>OK</i> at the top right of the screen and the room temperature, within a minute.</span></p>
+      <p><span class="pt"><b>Pino de arranque G0:</b> se o Stick arranca por USB mas não pelo ar condicionado, põe uma resistência de 10 kΩ entre o G0 e os 3,3 V. Se o ecrã mostrar <i>No AC</i>, troca o A com o B.</span>
         <span class="en"><b>Boot pin G0:</b> if the Stick boots from USB but not from the AC, add a 10 kΩ pull-up from G0 to 3.3 V. If the screen shows <i>No AC</i>, swap A and B.</span></p>
     </div>
     <div data-board="atom">
@@ -271,15 +271,15 @@
         onload="this.parentElement.hidden=false"><figcaption><span class="pt">Ligações no Tail485.</span><span class="en">Tail485 wiring.</span></figcaption></figure>
       <figure class="photo" hidden><img src="photo-atom-installed.jpg" alt="ATOM Lite fitted in the indoor unit"
         onload="this.parentElement.hidden=false"><figcaption><span class="pt">O ATOM montado na unidade interior.</span><span class="en">The ATOM fitted in the indoor unit.</span></figcaption></figure>
-      <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> o LED fica verde em menos de um minuto.</span><span class="en"><b>You should see:</b> the LED turns green within a minute.</span></p>
-      <p><span class="pt"><b>LED:</b> azul = configurar Wi-Fi, vermelho = sem ligação ao AC (troque o A com o B), verde = OK (apaga-se após 30 s; carregue no botão para o ver de novo). Botão carregado 10 s = reposição de fábrica.</span>
+      <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> o LED fica verde em menos de um minuto.</span><span class="en"><b>You should see:</b> the LED turns green within a minute.</span></p>
+      <p><span class="pt"><b>LED:</b> azul = configurar Wi-Fi, vermelho = sem ligação ao AC (troca o A com o B), verde = OK (apaga-se após 30 s; carrega no botão para o ver de novo). Botão carregado 10 s = reposição de fábrica.</span>
         <span class="en"><b>LED:</b> blue = Wi-Fi setup, red = no AC link (swap A and B), green = OK (turns off after 30 s; press the button to see it again). Hold the button 10 s for a factory reset.</span></p>
     </div>
   </section>
 
   <section class="card">
     <h2><span class="num">5</span>Home Assistant</h2>
-    <p class="pt"><b>Definições → Dispositivos e serviços</b>: aparece <b>Air Conditioner</b> (ESPHome; <b>Hisense AC</b> em placas instaladas antes da v0.3.0) → <b>Configurar</b>. Teste: ponha o <i>Air Conditioner</i> em <i>Cool</i> a 24 °C.</p>
+    <p class="pt"><b>Definições → Dispositivos e serviços</b>: aparece <b>Air Conditioner</b> (ESPHome; <b>Hisense AC</b> em placas instaladas antes da v0.3.0) → <b>Configurar</b>. Testa: põe o <i>Air Conditioner</i> em <i>Cool</i> a 24 °C.</p>
     <p class="en"><b>Settings → Devices &amp; services</b>: <b>Air Conditioner</b> (ESPHome; <b>Hisense AC</b> on boards installed before v0.3.0) shows up → <b>Configure</b>. Test: set <i>Air Conditioner</i> to <i>Cool</i> at 24 °C.</p>
     <table class="ents">
       <tr><td>Air Conditioner</td><td><span class="pt">Modos Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades, swing, Eco, Boost, Sleep.</span><span class="en">Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 fan speeds, swing, Eco, Boost, Sleep.</span></td></tr>
@@ -288,8 +288,8 @@
       <tr><td>AC Display · Eco · Super</td><td><span class="pt">Luz do painel, poupança e turbo.</span><span class="en">Panel light, eco and turbo.</span></td></tr>
       <tr><td>Firmware Update · Auto Update</td><td><span class="pt">Novas versões com um clique, ou sozinhas de madrugada.</span><span class="en">New versions in one click, or by themselves at night.</span></td></tr>
     </table>
-    <p class="note ok">✅ <span class="pt"><b>Deve ver:</b> uma entidade de clima para o ar condicionado na página do dispositivo.</span><span class="en"><b>You should see:</b> a climate entity for the AC on the device page.</span></p>
-    <p class="pt"><b>Atualizações:</b> instalam-se sozinhas de madrugada (desligue o interruptor <b>Auto Update</b> para as instalar à mão na entidade <b>Firmware Update</b>). Página do aparelho: <code>http://&lt;ip&gt;/</code> (estados e logs, sem palavra-passe, só na rede local).
+    <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> uma entidade de clima para o ar condicionado na página do dispositivo.</span><span class="en"><b>You should see:</b> a climate entity for the AC on the device page.</span></p>
+    <p class="pt"><b>Atualizações:</b> instalam-se sozinhas de madrugada (desliga o interruptor <b>Auto Update</b> para as instalar à mão na entidade <b>Firmware Update</b>). Página do aparelho: <code>http://&lt;ip&gt;/</code> (estados e logs, sem palavra-passe, só na rede local).
       Cartão de painel pronto e aviso de atualização: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/home-assistant.md">docs/home-assistant.md</a>.</p>
     <p class="en"><b>Updates:</b> they install by themselves at night (switch <b>Auto Update</b> off to install them yourself from the <b>Firmware Update</b> entity). Device page: <code>http://&lt;ip&gt;/</code> (states and logs, no password, LAN only).
       Ready-made dashboard card and update notification: <a href="https://github.com/skydoy/ESPHome_AC/blob/main/docs/home-assistant.md">docs/home-assistant.md</a>.</p>
@@ -298,16 +298,16 @@
   <section class="card">
     <h2><span class="num">?</span><span class="pt">Problemas</span><span class="en">Troubleshooting</span></h2>
     <details><summary><span class="pt">O ecrã diz <i>No AC</i> ou o LED fica vermelho</span><span class="en">The screen says <i>No AC</i> or the LED stays red</span></summary>
-      <p class="pt">Troque o A com o B (é seguro: só levam sinal). Confirme o GND e que a placa fica ligada sem o USB.</p>
+      <p class="pt">Troca o A com o B (é seguro: só levam sinal). Confirma o GND e que a placa fica ligada sem o USB.</p>
       <p class="en">Swap A and B (safe: they only carry signal). Check GND and that the board stays on with USB unplugged.</p></details>
     <details><summary><span class="pt">O Stick funciona por USB mas não pelo ar condicionado</span><span class="en">The Stick works on USB but not from the AC</span></summary>
-      <p class="pt">Ponha uma resistência de 10 kΩ entre o G0 e os 3,3 V. O ATOM não tem este problema.</p>
+      <p class="pt">Põe uma resistência de 10 kΩ entre o G0 e os 3,3 V. O ATOM não tem este problema.</p>
       <p class="en">Add a 10 kΩ resistor from G0 to 3.3 V. The ATOM is not affected.</p></details>
     <details><summary><span class="pt">O Home Assistant não encontra a placa</span><span class="en">Home Assistant doesn't find the board</span></summary>
-      <p class="pt">Tem de estar na mesma rede (sem rede de convidados). Adicione à mão: integração ESPHome → o IP da placa, porta <code>6053</code>.</p>
+      <p class="pt">Tem de estar na mesma rede (sem rede de convidados). Adiciona-a à mão: integração ESPHome → o IP da placa, porta <code>6053</code>.</p>
       <p class="en">It must be on the same network (not a guest network). Add it by hand: ESPHome integration → the board's IP, port <code>6053</code>.</p></details>
     <details><summary><span class="pt">A página do aparelho não abre</span><span class="en">The device's web page doesn't open</span></summary>
-      <p class="pt">Escreva <code>http://</code> e o IP, por exemplo <code>http://192.168.1.50/</code>. Não existe <code>https://</code>.</p>
+      <p class="pt">Escreve <code>http://</code> e o IP, por exemplo <code>http://192.168.1.50/</code>. Não existe <code>https://</code>.</p>
       <p class="en">Type <code>http://</code> and the IP, for example <code>http://192.168.1.50/</code>. There is no <code>https://</code>.</p></details>
     <details><summary><span class="pt">Mudar de Wi-Fi ou repor de fábrica</span><span class="en">Change Wi-Fi or factory reset</span></summary>
       <p class="pt">Sem o Wi-Fi antigo, a placa abre a rede <code>ESPHome_AC Setup</code> após cerca de um minuto. Reposição: ATOM, botão 10 s; ou por USB aqui → <b>Erase User Data</b>.</p>
@@ -323,7 +323,7 @@
       <a href="https://github.com/skydoy/ESPHome_AC/blob/main/LICENSE">PolyForm Noncommercial 1.0.0</a>
       (<span class="pt">uso pessoal e não comercial</span><span class="en">personal and non-commercial use</span>).
       <span class="pt">As imagens das placas são ilustrações.</span><span class="en">Board pictures are illustrations.</span></p>
-    <p><span class="pt">Hisense é uma marca do respetivo dono. Projeto comunitário independente, sem ligação à Hisense. Use por sua conta e risco.</span>
+    <p><span class="pt">Hisense é uma marca do respetivo dono. Projeto comunitário independente, sem ligação à Hisense. Usa por tua conta e risco.</span>
       <span class="en">Hisense is a trademark of its owner. Independent community project, not affiliated with Hisense. Use at your own risk.</span></p>
   </footer>
 </main>
