@@ -7,6 +7,6 @@ web_server:
   port: 80
   version: 3
   log: true
-  # Caps the debug log panel height (scrolls inside). Path resolves next to this file
-  # (core/web-log.js); only one js_include is allowed — merge here if adding more.
-  js_include: web-log.js
+  # web-ui.js: caps the debug log panel height and draws the live AC diagram (PT/EN).
+  # Path resolves next to this file; only one js_include is allowed — merge here.
+  js_include: web-ui.js
