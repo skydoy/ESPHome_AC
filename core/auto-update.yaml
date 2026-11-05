@@ -37,6 +37,9 @@ update:
   - platform: http_request
     id: firmware_update
     name: "Firmware Update"
+    device_class: firmware
+    entity_category: config
+    # Named + not internal so web_server v3 lists it alongside the buttons below.
     source: ${update_manifest_url}
     update_interval: 6h
 
@@ -131,4 +134,27 @@ text_sensor:
 binary_sensor:
   - id: !remove update_available
 button:
+  # Drop the report-only button from update-check.yaml; factory builds get real OTA buttons.
   - id: !remove check_for_update
+  - platform: template
+    id: firmware_check_update
+    name: "Check for Update"
+    icon: mdi:cloud-search
+    entity_category: config
+    on_press:
+      - logger.log:
+          tag: firmware_update
+          format: "Check for Update pressed"
+      - component.update: firmware_update
+  - platform: template
+    id: firmware_install_update
+    name: "Install Update"
+    icon: mdi:download
+    entity_category: config
+    on_press:
+      - logger.log:
+          tag: firmware_update
+          format: "Install Update pressed (force_update=false)"
+      - update.perform:
+          id: firmware_update
+          force_update: false
