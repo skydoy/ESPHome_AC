@@ -18,6 +18,7 @@
 #
 # Uses the generic ids "ac_link" and "ac_fault" from the brand package.
 substitutions:
+  board_id: atom-lite-tail485
   ac_tx_pin: GPIO26
   ac_rx_pin: GPIO32
   ac_tx_ignore_strapping: "false"     # G26 is not a strapping pin

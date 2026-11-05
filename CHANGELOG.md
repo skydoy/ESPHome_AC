@@ -8,6 +8,20 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-05
+
+### Added
+- **AC Identity** (read-only): at boot (and via **Identify AC**), the board reads device type,
+  AC firmware version, capabilities and one status frame, then shows **AC Identity** and a
+  prefilled **Report my AC** GitHub link.
+- **Auto report** (config switch, default ON): after identify, when Wi-Fi is up, POSTs once to a
+  Cloudflare Worker (`worker/`) with identity, firmware, board and `sha256(MAC)` as `device_id`
+  (never the raw MAC; IPs not stored). Only resent when identity changes. Turn the switch off to
+  disable. See `docs/compatibility.md` / `docs/compatibilidade.md`.
+
+### Changed
+- README wording: no cloud **for control**; optional anonymous compatibility report.
+
 ## [0.3.2] - 2026-11-04
 ### Changed
 - **Portuguese texts now use informal "tu"** (pt-PT) everywhere: web installer, `README.pt.md`,
@@ -334,7 +348,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.2.18...v0.3.0

@@ -3,3 +3,7 @@ secrets.yaml
 tests/test_protocol
 __pycache__/
 tests/test_setup
+
+# Cloudflare Worker
+worker/node_modules/
+worker/.wrangler/

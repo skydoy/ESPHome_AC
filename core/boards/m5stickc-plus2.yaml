@@ -5,6 +5,7 @@
 # A different hat/adapter on the same pins only needs a different brand package; see
 # adapters/README.md.
 substitutions:
+  board_id: m5stickc-plus2
   ac_tx_pin: GPIO0
   ac_rx_pin: GPIO26
   ac_tx_ignore_strapping: "true"   # G0 is a strapping pin, fixed by the Hat wiring

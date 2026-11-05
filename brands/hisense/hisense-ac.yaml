@@ -106,6 +106,12 @@ climate:
       name: "AC Device Type"
       disabled_by_default: true
     # Read-only identify (boot + Identify AC button): summary + prefilled GitHub report URL.
+    # Optional anonymous auto-report to the Cloudflare Worker (no raw MAC/IP; hashed device id).
+    http_request_id: ac_http_request
+    auto_report_url: https://esphome-ac-report.esphome-ac-report.workers.dev/report
+    report_board: ${board_id}
+    auto_report_switch:
+      name: "Auto report"
     ac_identity:
       name: "AC Identity"
     report_url:
