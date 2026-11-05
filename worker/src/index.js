@@ -1,6 +1,7 @@
 /**
  * Anonymous compatibility reports for skydoy/ESPHome_AC.
- * POST /report  — see README.md for the JSON contract.
+ * POST /report  — JSON body; see README.md
+ * GET  /r/<code> or /r?i=&f=&b=  — 302 to prefilled GitHub issue form (no issue created)
  */
 
 const IDENTITY_RE = /^[\x20-\x7E]{8,240}$/;
@@ -8,6 +9,10 @@ const FIRMWARE_RE = /^[A-Za-z0-9._+-]{1,32}$/;
 const BOARD_RE = /^[A-Za-z0-9._+-]{1,48}$/;
 const DEVICE_ID_RE = /^[a-f0-9]{64}$/;
 const STATUS_HEX_RE = /^[0-9A-Fa-f]{0,512}$/;
+const SHORT_CODE_RE = /^[a-f0-9]{8}$/;
+
+const GITHUB_NEW =
+  "https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml";
 
 function json(status, body, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
@@ -16,6 +21,16 @@ function json(status, body, extraHeaders = {}) {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
       ...extraHeaders,
+    },
+  });
+}
+
+function redirect(location) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      location,
+      "cache-control": "no-store",
     },
   });
 }
@@ -35,8 +50,6 @@ async function sha256Hex(text) {
 }
 
 function shortIpKey(ip) {
-  // Hash so we never put a raw IP into a rate-limit key that might be logged.
-  // The Rate Limiting binding only keeps counters; we still avoid feeding it PII-looking strings.
   return ip;
 }
 
@@ -56,6 +69,29 @@ function validate(body) {
       return "status_hex: optional hex string ≤ 512 chars";
   }
   return null;
+}
+
+function validateRedirectParams(identity, firmware, board) {
+  if (typeof identity !== "string" || !IDENTITY_RE.test(identity))
+    return "identity: 8–240 printable ASCII chars required";
+  if (firmware !== undefined && firmware !== null && firmware !== "") {
+    if (typeof firmware !== "string" || !FIRMWARE_RE.test(firmware))
+      return "firmware: 1–32 chars [A-Za-z0-9._+-]";
+  }
+  if (board !== undefined && board !== null && board !== "") {
+    if (typeof board !== "string" || !BOARD_RE.test(board))
+      return "board: 1–48 chars [A-Za-z0-9._+-]";
+  }
+  return null;
+}
+
+function buildGithubIssueUrl(identity, firmware) {
+  const titleBase = identity.length > 80 ? identity.slice(0, 80) : identity;
+  const title = `[Compatibility] ${titleBase}`;
+  let url = `${GITHUB_NEW}&title=${encodeURIComponent(title)}`;
+  if (firmware) url += `&firmware=${encodeURIComponent(firmware)}`;
+  url += `&identity=${encodeURIComponent(identity)}`;
+  return url;
 }
 
 async function github(env, method, path, body) {
@@ -88,11 +124,50 @@ async function github(env, method, path, body) {
   return data;
 }
 
+async function handleRedirect(request, env, url) {
+  // /r/<8hex> — KV short link written during POST /report
+  const pathMatch = url.pathname.match(/^\/r\/([a-f0-9]{8})$/);
+  if (pathMatch) {
+    const code = pathMatch[1];
+    const mapped = await env.REPORTS.get(`short:${code}`, { type: "json" });
+    if (!mapped || typeof mapped.identity !== "string") {
+      return json(404, { error: "unknown_short_code" });
+    }
+    const verr = validateRedirectParams(mapped.identity, mapped.firmware || "", mapped.board || "");
+    if (verr) return json(400, { error: "validation", detail: verr });
+    return redirect(buildGithubIssueUrl(mapped.identity, mapped.firmware || ""));
+  }
+
+  // /r?i=&f=&b= — query fallback (no KV, no GitHub API write)
+  if (url.pathname === "/r" || url.pathname === "/r/") {
+    const identity = url.searchParams.get("i") || "";
+    const firmware = url.searchParams.get("f") || "";
+    const board = url.searchParams.get("b") || "";
+    const verr = validateRedirectParams(identity, firmware, board);
+    if (verr) return json(400, { error: "validation", detail: verr });
+    return redirect(buildGithubIssueUrl(identity, firmware));
+  }
+
+  return json(404, { error: "not_found" });
+}
+
+async function rememberShort(env, device_id, identity, firmware, board) {
+  const code = device_id.slice(0, 8);
+  if (!SHORT_CODE_RE.test(code)) return;
+  await env.REPORTS.put(
+    `short:${code}`,
+    JSON.stringify({ identity, firmware, board, device_prefix: code, at: Date.now() }),
+  );
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
       return json(200, { ok: true, service: "esphome-ac-report" });
+    }
+    if (request.method === "GET" && (url.pathname === "/r" || url.pathname.startsWith("/r/"))) {
+      return handleRedirect(request, env, url);
     }
     if (request.method !== "POST" || url.pathname !== "/report") {
       return json(404, { error: "not_found" });
@@ -110,6 +185,13 @@ export default {
     const { identity, firmware, board, device_id } = body;
     const status_hex = typeof body.status_hex === "string" ? body.status_hex : "";
 
+    // Always refresh the short redirect mapping (even on duplicate reports).
+    try {
+      await rememberShort(env, device_id, identity, firmware, board);
+    } catch (e) {
+      console.log("short_kv_error", String(e));
+    }
+
     // Rate limits (approximate, per Cloudflare location). Never persisted as IPs in KV.
     try {
       const ip = shortIpKey(clientIp(request));
@@ -121,8 +203,6 @@ export default {
         return json(429, { error: "rate_limited" }, { "retry-after": "60" });
       }
     } catch (e) {
-      // If the binding is unavailable, fall through rather than failing open forever —
-      // still protected by KV dedupe below.
       console.log("rate_limit_error", String(e));
     }
 

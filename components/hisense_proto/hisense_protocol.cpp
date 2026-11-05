@@ -580,6 +580,50 @@ std::string build_compatibility_report_url(const IdentityInfo &id, const std::st
   return url;
 }
 
+std::string build_short_report_url(const std::string &report_base, const std::string &device_id_prefix,
+                                   const IdentityInfo &id, const std::string &firmware_version,
+                                   const std::string &board) {
+  std::string base = report_base;
+  while (!base.empty() && base.back() == '/')
+    base.pop_back();
+  // Strip a trailing /report if the caller passed the POST endpoint by mistake.
+  static const char kReport[] = "/report";
+  if (base.size() >= sizeof(kReport) - 1 &&
+      base.compare(base.size() - (sizeof(kReport) - 1), sizeof(kReport) - 1, kReport) == 0)
+    base.resize(base.size() - (sizeof(kReport) - 1));
+
+  if (device_id_prefix.size() == 8) {
+    bool ok = true;
+    for (char ch : device_id_prefix) {
+      if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) {
+      std::string url = base;
+      url += "/r/";
+      url += device_id_prefix;
+      return url;
+    }
+  }
+
+  // Fallback query form (no KV needed). Longer than /r/<code>, still far shorter than GitHub.
+  const std::string line = format_identity_line(id);
+  std::string url = base;
+  url += "/r?i=";
+  url += url_encode(line);
+  if (!firmware_version.empty()) {
+    url += "&f=";
+    url += url_encode(firmware_version);
+  }
+  if (!board.empty()) {
+    url += "&b=";
+    url += url_encode(board);
+  }
+  return url;
+}
+
 
 std::string json_escape(const std::string &s) {
   std::string out;

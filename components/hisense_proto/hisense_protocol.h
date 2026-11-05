@@ -224,7 +224,16 @@ std::string url_encode(const std::string &s);
 
 /// Prefills the GitHub compatibility_report.yml form with firmware + identity (no token needed).
 /// Other required fields (model, board, result, ...) are left for the user to fill in the browser.
+/// Full URL — log only; do not publish to a text sensor (breaks web_server layout).
 std::string build_compatibility_report_url(const IdentityInfo &id, const std::string &firmware_version);
+
+/// Short Worker redirect for the "Report my AC" text sensor (~60–70 chars).
+/// `report_base` is e.g. https://esphome-ac-report….workers.dev (no trailing slash);
+/// `device_id_prefix` is 8 lowercase hex chars (sha256(MAC) prefix). Falls back to
+/// `/r?i=&f=&b=` query form when the prefix is missing (longer, still no GitHub host).
+std::string build_short_report_url(const std::string &report_base, const std::string &device_id_prefix,
+                                   const IdentityInfo &id, const std::string &firmware_version,
+                                   const std::string &board);
 
 /// Escape a string for inclusion inside a JSON string value (quotes, backslash, controls).
 std::string json_escape(const std::string &s);

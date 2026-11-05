@@ -84,12 +84,13 @@ version, capabilities, and one full status frame). Open the device page at
 `http://<device-ip>/`:
 
 1. Check **AC Identity** (compact summary, also in the INFO log).
-2. Open or copy **Report my AC** — it is a GitHub link with the identity line and firmware
-   version already filled in.
+2. Open or copy **Report my AC** — a short link on the report Worker that redirects to the
+   prefilled GitHub issue form (identity + firmware). The full GitHub URL is only in the INFO log
+   so the device web UI stays readable.
 3. Fill the remaining fields (brand/model, board, result) and press **Submit**.
 
 You can press the **Identify AC** button anytime to re-run the read-only queries and refresh
-the link. The manual **Report my AC** link still opens GitHub for you to fill brand/model.
+the link. The short **Report my AC** link still lands on GitHub for you to fill brand/model.
 
 ### Automatic compatibility report (optional)
 
