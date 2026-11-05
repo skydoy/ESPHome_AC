@@ -431,6 +431,155 @@ float power_watts(const Status &s) {
   return static_cast<float>((s.power_raw_hi << 8) | s.power_raw_lo);
 }
 
+
+// ---- Identify / compatibility report ---------------------------------------------------------
+bool is_known_status_byte(size_t off) {
+  // Decoded by parse_status(); keep in sync with brands/hisense/protocol.md.
+  switch (off) {
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 26:
+    case 35:
+    case 36:
+    case 37:
+    case 39:
+    case 40:
+    case 41:
+    case 42:
+    case 44:
+    case 45:
+    case 50:
+    case 55:
+    case 56:
+    case 64:
+    case 66:
+    case 77:
+      return true;
+    default:
+      return false;
+  }
+}
+
+std::string describe_unknown_status_bytes(const uint8_t *f, size_t len, size_t max_chars) {
+  std::string out;
+  if (f == nullptr || len < STATUS_MIN_LEN || max_chars == 0)
+    return out;
+  // Payload is after the class/sub header (byte 15 is typically padding); checksum occupies the
+  // last 4 bytes (CK_HI CK_LO F4 FB). Framing 0..15 is never listed.
+  if (len < 20)
+    return out;
+  const size_t payload_end = len - 4;
+  static const char HEX[] = "0123456789ABCDEF";
+  for (size_t i = 16; i < payload_end; i++) {
+    if (is_known_status_byte(i))
+      continue;
+    char piece[12];
+    // "bNN=XX " = up to 8 chars
+    size_t p = 0;
+    piece[p++] = 'b';
+    if (i >= 100)
+      piece[p++] = static_cast<char>('0' + (i / 100) % 10);
+    if (i >= 10)
+      piece[p++] = static_cast<char>('0' + (i / 10) % 10);
+    piece[p++] = static_cast<char>('0' + (i % 10));
+    piece[p++] = '=';
+    piece[p++] = HEX[f[i] >> 4];
+    piece[p++] = HEX[f[i] & 0x0F];
+    piece[p] = 0;
+    const size_t need = (out.empty() ? 0 : 1) + p;
+    if (out.size() + need + 4 > max_chars) {  // room for " ..."
+      if (out.size() + 4 <= max_chars)
+        out += " ...";
+      break;
+    }
+    if (!out.empty())
+      out += ' ';
+    out.append(piece, p);
+  }
+  return out;
+}
+
+std::string format_identity_line(const IdentityInfo &id) {
+  static const char HEX[] = "0123456789ABCDEF";
+  std::string out = "type=";
+  if (id.have_type) {
+    out += HEX[id.type_hi >> 4];
+    out += HEX[id.type_hi & 0x0F];
+    out += ' ';
+    out += HEX[id.type_lo >> 4];
+    out += HEX[id.type_lo & 0x0F];
+  } else {
+    out += "?? ??";
+  }
+  out += " fw=";
+  out += id.version_text.empty() ? "?" : id.version_text;
+  out += " caps=";
+  if (id.caps.valid)
+    out += describe_capabilities(id.caps);
+  else
+    out += "?";
+  out += " status_len=";
+  // Decimal without snprintf so the host tests stay free of locale/format helpers.
+  size_t n = id.status_len;
+  if (n == 0) {
+    out += '0';
+  } else {
+    char tmp[16];
+    size_t p = 0;
+    while (n > 0 && p < sizeof(tmp)) {
+      tmp[p++] = static_cast<char>('0' + (n % 10));
+      n /= 10;
+    }
+    while (p > 0)
+      out += tmp[--p];
+  }
+  return out;
+}
+
+std::string url_encode(const std::string &s) {
+  static const char HEX[] = "0123456789ABCDEF";
+  std::string out;
+  out.reserve(s.size() * 3);
+  for (unsigned char c : s) {
+    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' ||
+        c == '_' || c == '.' || c == '~') {
+      out += static_cast<char>(c);
+    } else {
+      out += '%';
+      out += HEX[c >> 4];
+      out += HEX[c & 0x0F];
+    }
+  }
+  return out;
+}
+
+std::string build_compatibility_report_url(const IdentityInfo &id, const std::string &firmware_version) {
+  const std::string line = format_identity_line(id);
+  std::string title = "[Compatibility] ";
+  // Keep the title short for the GitHub UI.
+  if (line.size() <= 80)
+    title += line;
+  else
+    title.append(line, 0, 80);
+  std::string url =
+      "https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml";
+  url += "&title=";
+  url += url_encode(title);
+  if (!firmware_version.empty()) {
+    url += "&firmware=";
+    url += url_encode(firmware_version);
+  }
+  url += "&identity=";
+  url += url_encode(line);
+  return url;
+}
+
 }  // namespace proto
 }  // namespace hisense_ac
 }  // namespace esphome

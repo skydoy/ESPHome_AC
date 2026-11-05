@@ -499,6 +499,67 @@ static void test_command_queue() {
   CHECK(f1 != f2);
 }
 
+
+static void test_unknown_status_bytes() {
+  CHECK(is_known_status_byte(16) && is_known_status_byte(77) && !is_known_status_byte(24));
+  CHECK(describe_unknown_status_bytes(nullptr, 160).empty());
+
+  // Minimal valid-length synthetic status: known bytes zeroed, one unknown at 24.
+  std::vector<uint8_t> f(82, 0);
+  f[0] = 0xF4;
+  f[1] = 0xF5;
+  f[2] = DIR_FROM_AC;
+  f[3] = 0x40;
+  f[4] = static_cast<uint8_t>(82 - 9);
+  f[13] = CLASS_STATUS;
+  f[14] = 0x00;
+  f[24] = 0xAB;
+  f[25] = 0xCD;
+  f[80] = 0xF4;
+  f[81] = 0xFB;
+  seal(f.data(), f.size());
+  // describe_unknown does not require frame_valid checksum path beyond length; use sealed frame.
+  const std::string u = describe_unknown_status_bytes(f.data(), f.size(), 240);
+  CHECK(u.find("b24=AB") != std::string::npos);
+  CHECK(u.find("b25=CD") != std::string::npos);
+  CHECK(u.find("b16=") == std::string::npos);  // known, omitted
+  // Truncation
+  const std::string short_u = describe_unknown_status_bytes(f.data(), f.size(), 20);
+  CHECK(short_u.size() <= 20);
+  CHECK(short_u.find("...") != std::string::npos || short_u.size() < 20);
+}
+
+static void test_identity_and_report_url() {
+  IdentityInfo id;
+  id.have_type = true;
+  id.type_hi = 0x01;
+  id.type_lo = 0x01;
+  id.version_text = "Protocol 0x0215 (raw 00 01 02 15)";
+  id.caps.valid = true;
+  id.caps.cool_heat = true;
+  id.caps.fan_mute = true;
+  id.status_len = 160;
+  const std::string line = format_identity_line(id);
+  CHECK(line ==
+        "type=01 01 fw=Protocol 0x0215 (raw 00 01 02 15) caps=Heat/Cool, Fan Mute status_len=160");
+
+  IdentityInfo empty;
+  CHECK(format_identity_line(empty) == "type=?? ?? fw=? caps=? status_len=0");
+
+  CHECK(url_encode("A Z") == "A%20Z");
+  CHECK(url_encode("a-b_c.d~") == "a-b_c.d~");
+  CHECK(url_encode("1/2") == "1%2F2");
+
+  const std::string url = build_compatibility_report_url(id, "0.3.3");
+  CHECK(url.find("https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml") == 0);
+  CHECK(url.find("&firmware=0.3.3") != std::string::npos);
+  CHECK(url.find("&identity=") != std::string::npos);
+  CHECK(url.find("&title=") != std::string::npos);
+  CHECK(url.find("type%3D01%2001") != std::string::npos || url.find("type=01") != std::string::npos);
+  // identity value is encoded
+  CHECK(url.find("status_len%3D160") != std::string::npos);
+}
+
 int main() {
   test_templates();
   test_checksum_and_valid();
@@ -511,6 +572,8 @@ int main() {
   test_version_reply();
   test_commands();
   test_hex_bytes();
+  test_unknown_status_bytes();
+  test_identity_and_report_url();
   test_power_steps();
   test_command_queue();
   std::printf("%d passed, %d failed\n", g_passed, g_failed);

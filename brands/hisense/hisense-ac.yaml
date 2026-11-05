@@ -105,6 +105,13 @@ climate:
     device_type:
       name: "AC Device Type"
       disabled_by_default: true
+    # Read-only identify (boot + Identify AC button): summary + prefilled GitHub report URL.
+    ac_identity:
+      name: "AC Identity"
+    report_url:
+      name: "Report my AC"
+    identify_button:
+      name: "Identify AC"
     aux_heater:
       name: "Auxiliary Heater"
     display:

@@ -77,10 +77,17 @@ body:
         - label: Presets (eco, boost, sleep, 8 °C)
         - label: Sensors (outdoor temperature, compressor, power…)
   - type: textarea
+    id: identity
+    attributes:
+      label: AC Identity line
+      description: Optional. Paste the "AC Identity" text sensor value (or the INFO log line). The device web page "Report my AC" link prefills this.
+      placeholder: "type=01 01 fw=Protocol 0x0215 (raw ..) caps=Heat/Cool, Fan Mute status_len=160"
+      render: text
+  - type: textarea
     id: log
     attributes:
       label: Log ("RX" lines)
-      description: Optional. Paste a few log lines, especially any starting with "RX". Never paste Wi-Fi passwords or API keys.
+      description: Optional. Paste a few log lines, especially any starting with "RX" or "Status unknown bytes". Never paste Wi-Fi passwords or API keys.
       render: text
   - type: textarea
     id: notes

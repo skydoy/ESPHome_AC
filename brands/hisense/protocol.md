@@ -96,6 +96,14 @@ best effort:
 The raw reply frame is always logged at DEBUG (`RX version frame`) and the decoded text at INFO.
 Please attach that log to an issue so the layout can be confirmed.
 
+
+## Identify (read-only)
+After link bring-up the climate component publishes an `AC Identity` summary
+(`type=XX XX fw=... caps=... status_len=N`), logs the full status frame at INFO with a list of
+**unknown payload bytes** (offsets not yet decoded above), and fills a `Report my AC` text
+sensor with a prefilled GitHub compatibility-report URL. The **Identify AC** button re-runs the
+same read-only queries (`07`, `66/40`, next status). No `65` command frame is ever sent for this.
+
 ## Bus error counters
 `AC Bus Checksum Errors` counts complete frames with a bad checksum, `AC Bus Framing Errors`
 frames dropped for a bad length, an overflow, a bad `F4` escape or a new header in the middle

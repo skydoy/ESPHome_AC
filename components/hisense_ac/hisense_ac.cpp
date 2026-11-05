@@ -74,6 +74,7 @@ void HisenseSleepSelect::control(size_t index) {
 #endif
 #ifdef USE_BUTTON
 void HisenseLightButton::press_action() { this->parent_->set_display(this->on_); }
+void HisenseIdentifyButton::press_action() { this->parent_->request_identify(); }
 #endif
 
 // ---- Dedicated feature controls ---------------------------------------------------------------
@@ -216,6 +217,79 @@ void HisenseAC::log_frame_(const char *what, const uint8_t *f, size_t len) {
       ESP_LOGD(TAG, "  key: V b50=%d b51=%d | P b55=%d b56=%d b60=%d b71=%d | b144=%d b145=%d", b(50), b(51), b(55),
                b(56), b(60), b(71), b(144), b(145));
   }
+}
+
+void HisenseAC::log_frame_info_(const char *what, const uint8_t *f, size_t len) {
+  ESP_LOGI(TAG, "%s frame: class %02X sub %02X, %u bytes", what, f[proto::OFF_CLASS], f[proto::OFF_SUB],
+           (unsigned) len);
+  for (size_t off = 0; off < len; off += 16)
+    ESP_LOGI(TAG, "  %03u: %s", (unsigned) off, proto::hex_bytes(f, len, off, 16).c_str());
+}
+
+void HisenseAC::request_identify() {
+  // Read-only: re-query version + capabilities and dump the next status frame. Never queues a
+  // command (0x65) frame.
+  ESP_LOGI(TAG, "Identify AC queued (read-only: version, capabilities, status dump)");
+  this->identify_pending_ = true;
+  this->want_version_ = true;
+  this->product_tries_ = 0;
+  this->caps_.valid = false;
+  // Kick the next cycle soon if the bus is idle between polls.
+  if (!this->waiting_ && this->step_ == Step::CYCLE_BEGIN) {
+    const uint32_t now = millis();
+    this->next_at_ = reached(now, this->bus_free_at_) ? now : this->bus_free_at_;
+  }
+}
+
+bool HisenseAC::identify_ready_() const {
+  if (!this->have_status_ || this->last_status_len_ == 0)
+    return false;
+  // Wait until capabilities arrived, or we gave up asking (same limit as the PRODUCT step).
+  if (this->caps_.valid)
+    return true;
+  if (!this->handshake_)
+    return true;
+  return this->product_tries_ >= 3;
+}
+
+void HisenseAC::complete_identify_() {
+  if (!this->identify_ready_())
+    return;
+
+  proto::IdentityInfo id;
+  id.have_type = this->handshake_ok_;
+  id.type_hi = this->type_hi_;
+  id.type_lo = this->type_lo_;
+  id.version_text = this->version_text_;
+  id.caps = this->caps_;
+  id.status_len = this->last_status_len_;
+
+  const std::string line = proto::format_identity_line(id);
+  ESP_LOGI(TAG, "AC Identity: %s", line.c_str());
+  this->log_frame_info_("RX status (identify)", this->last_status_frame_, this->last_status_len_);
+  const std::string unknown =
+      proto::describe_unknown_status_bytes(this->last_status_frame_, this->last_status_len_);
+  if (unknown.empty())
+    ESP_LOGI(TAG, "Status unknown bytes: (none — every payload byte is decoded)");
+  else
+    ESP_LOGI(TAG, "Status unknown bytes: %s", unknown.c_str());
+
+#ifdef USE_TEXT_SENSOR
+  publish_text_if_changed_(this->ac_identity_text_, line);
+#endif
+
+  std::string fw;
+#ifdef ESPHOME_PROJECT_VERSION
+  fw = ESPHOME_PROJECT_VERSION;
+#endif
+  const std::string url = proto::build_compatibility_report_url(id, fw);
+  ESP_LOGI(TAG, "Report my AC: %s", url.c_str());
+#ifdef USE_TEXT_SENSOR
+  publish_text_if_changed_(this->report_url_text_, url);
+#endif
+
+  this->identify_done_ = true;
+  this->identify_pending_ = false;
 }
 
 // ---- Setup / config ---------------------------------------------------------------------------
@@ -373,6 +447,8 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
       proto::Version v;
       if (proto::parse_version(f, len, &v)) {
         ESP_LOGI(TAG, "AC version reply: %s", v.text.c_str());
+        this->version_text_ = v.text;
+        this->version_seen_ = true;
 #ifdef USE_TEXT_SENSOR
         publish_text_if_changed_(this->ac_version_text_, v.text);
 #endif
@@ -396,8 +472,13 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
         }
       } else {
         proto::Status s;
-        if (proto::parse_status(f, len, &s))
+        if (proto::parse_status(f, len, &s)) {
+          if (len <= sizeof(this->last_status_frame_)) {
+            std::memcpy(this->last_status_frame_, f, len);
+            this->last_status_len_ = len;
+          }
           this->apply_status_(s);
+        }
       }
       break;
     default:
@@ -461,6 +542,11 @@ void HisenseAC::run_step_(uint32_t now) {
       n = proto::build_heartbeat(this->type_hi_, this->type_lo_, this->heard_ac_, f, sizeof(f));
       this->send_(f, n, 0, now);
       return;
+    case Step::VERSION_ONCE:
+      // Read-only re-query of class 0x07 for Identify AC. Never a command frame.
+      n = proto::build_version_request(this->type_hi_, this->type_lo_, f, sizeof(f));
+      this->send_(f, n, 0, now);
+      return;
     case Step::COMMAND: {
       proto::CommandQueue::Item q;
       if (this->cycle_commands_ >= MAX_COMMANDS_PER_CYCLE || !this->queue_.pop_ready(now, &q)) {
@@ -485,6 +571,8 @@ void HisenseAC::run_step_(uint32_t now) {
       return;
     case Step::PRODUCT:
       if (this->caps_.valid || this->product_tries_ >= 3 || this->link_ != LinkState::CONNECTED) {
+        if ((!this->identify_done_ || this->identify_pending_) && this->identify_ready_())
+          this->complete_identify_();
         this->step_ = Step::PACE;
         this->run_step_(now);
         return;
@@ -525,6 +613,14 @@ void HisenseAC::transaction_done_(bool replied, uint32_t now) {
       this->step_ = Step::HEARTBEAT;
       break;
     case Step::HEARTBEAT:
+      if (this->want_version_) {
+        this->want_version_ = false;
+        this->step_ = Step::VERSION_ONCE;
+      } else {
+        this->step_ = Step::COMMAND;
+      }
+      break;
+    case Step::VERSION_ONCE:
       this->step_ = Step::COMMAND;
       break;
     case Step::COMMAND:
@@ -546,6 +642,9 @@ void HisenseAC::transaction_done_(bool replied, uint32_t now) {
       break;
     case Step::PRODUCT:
       this->step_ = Step::PACE;
+      // After the first (or a requested) product/capabilities attempt, publish the identity.
+      if ((!this->identify_done_ || this->identify_pending_) && this->identify_ready_())
+        this->complete_identify_();
       break;
     default:
       break;

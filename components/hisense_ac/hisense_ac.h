@@ -84,6 +84,11 @@ class HisenseLightButton : public button::Button, public Parented<HisenseAC> {
   void press_action() override;
   bool on_{true};
 };
+/// Re-runs the read-only identify sequence (device type / version / capabilities / status dump).
+class HisenseIdentifyButton : public button::Button, public Parented<HisenseAC> {
+ protected:
+  void press_action() override;
+};
 #endif
 
 class HisenseAC : public Component, public climate::Climate, public uart::UARTDevice {
@@ -132,6 +137,11 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_capabilities_text_sensor(text_sensor::TextSensor *s) { this->capabilities_text_ = s; }
   void set_device_type_text_sensor(text_sensor::TextSensor *s) { this->device_type_text_ = s; }
   void set_ac_firmware_version_text_sensor(text_sensor::TextSensor *s) { this->ac_version_text_ = s; }
+  void set_ac_identity_text_sensor(text_sensor::TextSensor *s) { this->ac_identity_text_ = s; }
+  void set_report_url_text_sensor(text_sensor::TextSensor *s) { this->report_url_text_ = s; }
+#endif
+#ifdef USE_BUTTON
+  void set_identify_button(HisenseIdentifyButton *b) { this->identify_button_ = b; }
 #endif
 #ifdef USE_SWITCH
   void set_display_switch(HisenseDisplaySwitch *s) { this->display_switch_ = s; }
@@ -162,6 +172,8 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   bool has_fault() const { return this->have_status_ && this->status_.faults.any(); }
   /// Outdoor temperature in C, NAN if unknown.
   float get_outdoor_temperature() const;
+  /// Queue a read-only re-identify (0x07 + capabilities + next status dump). Safe to call anytime.
+  void request_identify();
 
  protected:
   // ---- Climate ----
@@ -175,6 +187,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
     CYCLE_BEGIN,
     RECOVER,
     HEARTBEAT,
+    VERSION_ONCE,  // one-shot 0x07 re-query for Identify AC
     COMMAND,
     STATUS,
     PRODUCT,
@@ -193,6 +206,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint8_t to_panel_temp_(float c) const;
   float from_panel_temp_(int16_t v) const;
   void log_frame_(const char *what, const uint8_t *f, size_t len);
+  void log_frame_info_(const char *what, const uint8_t *f, size_t len);
+  bool identify_ready_() const;
+  void complete_identify_();
   void sync_controls_(const proto::Status &s);
   void sync_controls_from_climate_();
   void publish_bus_errors_();
@@ -277,6 +293,15 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   };
   std::vector<FaultSensor> fault_sensors_;
 #endif
+  // Identify (read-only): last status frame kept for the dump + report URL.
+  uint8_t last_status_frame_[proto::MAX_FRAME];
+  size_t last_status_len_{0};
+  std::string version_text_;
+  bool version_seen_{false};
+  bool identify_done_{false};
+  bool identify_pending_{false};
+  bool want_version_{false};
+
 #ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *fault_text_{nullptr};
   text_sensor::TextSensor *link_text_{nullptr};
@@ -284,6 +309,11 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   text_sensor::TextSensor *capabilities_text_{nullptr};
   text_sensor::TextSensor *device_type_text_{nullptr};
   text_sensor::TextSensor *ac_version_text_{nullptr};
+  text_sensor::TextSensor *ac_identity_text_{nullptr};
+  text_sensor::TextSensor *report_url_text_{nullptr};
+#endif
+#ifdef USE_BUTTON
+  HisenseIdentifyButton *identify_button_{nullptr};
 #endif
 #ifdef USE_SWITCH
   HisenseDisplaySwitch *display_switch_{nullptr};
