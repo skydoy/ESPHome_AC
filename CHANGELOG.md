@@ -8,6 +8,13 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-11-05
+
+### Fixed
+- Factory web UI: debug log panel capped at `min(45vh, 420px)` with internal scroll
+  (`core/web-log.js` injected into `esp-log` shadowRoot via `js_include`). Stock
+  web_server v3 grew the log to full page height and pushed controls off-screen.
+
 ## [0.3.5] - 2026-11-05
 
 ### Fixed
