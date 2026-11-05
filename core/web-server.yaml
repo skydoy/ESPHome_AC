@@ -7,3 +7,6 @@ web_server:
   port: 80
   version: 3
   log: true
+  # Caps the debug log panel height (scrolls inside). Path resolves next to this file
+  # (core/web-log.js); only one js_include is allowed — merge here if adding more.
+  js_include: web-log.js
