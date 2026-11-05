@@ -8,6 +8,12 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Added
+- Web UI: live AC diagram above the entity list (outdoor and indoor unit linked by
+  refrigerant pipes; hot/cold lines swap between heat and cool, dimmed when off) with live
+  values from `/events` and a PT/EN toggle (browser default, saved in the browser).
+  `core/web-log.js` is now `core/web-ui.js` (keeps the debug log height cap).
+
 ## [0.3.6] - 2026-11-05
 
 ### Fixed
