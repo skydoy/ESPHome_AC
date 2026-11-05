@@ -8,6 +8,8 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-11-05
+
 ### Added
 - Web UI: live AC diagram above the entity list (outdoor and indoor unit linked by
   refrigerant pipes; hot/cold lines swap between heat and cool, dimmed when off) with live
@@ -380,7 +382,9 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.5...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...HEAD
+[0.3.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.6...v0.3.7
+[0.3.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.2...v0.3.3
