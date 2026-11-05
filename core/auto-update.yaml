@@ -17,6 +17,7 @@
 # stable releases. It never runs during the first 10 minutes after boot and logs every decision
 # under the "auto_update" tag. Local time comes from Home Assistant, or from SNTP without it (UTC).
 http_request:
+  id: ac_http_request
   verify_ssl: true
 
 ota:

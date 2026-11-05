@@ -26,7 +26,7 @@
 </p>
 
 Substitui o módulo Wi-Fi do teu ar condicionado **Hisense** (AEH-W4x / **AEH-W41H1**) por uma pequena
-placa ESP32 da M5Stack e controla-o localmente a partir do Home Assistant. Sem nuvem, sem app.
+placa ESP32 da M5Stack e controla-o localmente a partir do Home Assistant. Sem nuvem para o controlo; relatório anónimo de compatibilidade opcional. Sem app do fabricante.
 Mais marcas de ar condicionado serão adicionadas à medida que o projeto cresce.
 
 Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comercial não é permitido.

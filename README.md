@@ -26,7 +26,7 @@
 </p>
 
 Replace your **Hisense** AC's Wi-Fi module (AEH-W4x / **AEH-W41H1**) with a small M5Stack ESP32
-board and control it locally from Home Assistant. No cloud, no app. More AC Brands Will be added as The project Grows.
+board and control it locally from Home Assistant. No cloud for control; optional anonymous compatibility report. No vendor app. More AC Brands Will be added as The project Grows.
 
 Free for personal and non-commercial use. Forks welcome. Commercial use is not permitted.
 

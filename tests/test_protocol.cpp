@@ -529,6 +529,22 @@ static void test_unknown_status_bytes() {
   CHECK(short_u.find("...") != std::string::npos || short_u.size() < 20);
 }
 
+
+static void test_auto_report_json() {
+  CHECK(json_escape("a\"b\\c") == "a\\\"b\\\\c");
+  CHECK(json_escape("x\ny") == "x\\ny");
+  const std::string body = build_auto_report_json(
+      "type=01 01 fw=Protocol 0x0215 caps=Heat status_len=160", "0.3.3", "m5stickc-plus2",
+      std::string(64, 'a'), "F4F5");
+  CHECK(body.find("\"identity\":\"type=01 01") != std::string::npos);
+  CHECK(body.find("\"firmware\":\"0.3.3\"") != std::string::npos);
+  CHECK(body.find("\"board\":\"m5stickc-plus2\"") != std::string::npos);
+  CHECK(body.find("\"device_id\":\"") != std::string::npos);
+  CHECK(body.find("\"status_hex\":\"F4F5\"") != std::string::npos);
+  const std::string no_hex = build_auto_report_json("identityxx", "1.0", "board", std::string(64, 'b'), "");
+  CHECK(no_hex.find("status_hex") == std::string::npos);
+}
+
 static void test_identity_and_report_url() {
   IdentityInfo id;
   id.have_type = true;
@@ -574,6 +590,7 @@ int main() {
   test_hex_bytes();
   test_unknown_status_bytes();
   test_identity_and_report_url();
+  test_auto_report_json();
   test_power_steps();
   test_command_queue();
   std::printf("%d passed, %d failed\n", g_passed, g_failed);

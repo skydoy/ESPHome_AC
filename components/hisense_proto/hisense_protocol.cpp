@@ -580,6 +580,69 @@ std::string build_compatibility_report_url(const IdentityInfo &id, const std::st
   return url;
 }
 
+
+std::string json_escape(const std::string &s) {
+  std::string out;
+  out.reserve(s.size() + 8);
+  for (unsigned char c : s) {
+    switch (c) {
+      case '"':
+        out += "\\\"";
+        break;
+      case '\\':
+        out += "\\\\";
+        break;
+      case '\b':
+        out += "\\b";
+        break;
+      case '\f':
+        out += "\\f";
+        break;
+      case '\n':
+        out += "\\n";
+        break;
+      case '\r':
+        out += "\\r";
+        break;
+      case '\t':
+        out += "\\t";
+        break;
+      default:
+        if (c < 0x20) {
+          static const char HEX[] = "0123456789ABCDEF";
+          out += "\\u00";
+          out += HEX[c >> 4];
+          out += HEX[c & 0x0F];
+        } else {
+          out += static_cast<char>(c);
+        }
+        break;
+    }
+  }
+  return out;
+}
+
+std::string build_auto_report_json(const std::string &identity, const std::string &firmware,
+                                   const std::string &board, const std::string &device_id,
+                                   const std::string &status_hex) {
+  std::string out = "{\"identity\":\"";
+  out += json_escape(identity);
+  out += "\",\"firmware\":\"";
+  out += json_escape(firmware);
+  out += "\",\"board\":\"";
+  out += json_escape(board);
+  out += "\",\"device_id\":\"";
+  out += json_escape(device_id);
+  out += '"';
+  if (!status_hex.empty()) {
+    out += ",\"status_hex\":\"";
+    out += json_escape(status_hex);
+    out += '"';
+  }
+  out += '}';
+  return out;
+}
+
 }  // namespace proto
 }  // namespace hisense_ac
 }  // namespace esphome

@@ -1,0 +1,29 @@
+# Cloudflare Worker: anonymous AC compatibility reports for skydoy/ESPHome_AC.
+# Deploy: CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… npx wrangler deploy
+# Secret: npx wrangler secret put GITHUB_TOKEN
+name = "esphome-ac-report"
+main = "src/index.js"
+compatibility_date = "2026-11-05"
+account_id = "48b81a3ba6ae2b514af557bcd57b715d"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "REPORTS"
+id = "0899d2f3ae6b4df399c991451d5d8566"
+
+# Approximate per-location rate limits (Free plan). Keys are device_id or a short IP hash —
+# we never persist raw client IPs in KV.
+[[ratelimits]]
+name = "DEVICE_RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
+[[ratelimits]]
+name = "IP_RATE_LIMITER"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
+[vars]
+GITHUB_OWNER = "skydoy"
+GITHUB_REPO = "ESPHome_AC"
+GITHUB_LABEL = "compatibility"

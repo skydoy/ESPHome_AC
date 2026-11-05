@@ -1,3 +1,4 @@
+#include <algorithm>
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #include "hisense_ac.h"
 
@@ -7,6 +8,10 @@
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
+#include "esphome/components/network/util.h"
+#ifdef USE_SHA256
+#include "esphome/components/sha256/sha256.h"
+#endif
 
 namespace esphome {
 namespace hisense_ac {
@@ -59,6 +64,18 @@ void HisenseFrameLogSwitch::write_state(bool state) {
   this->publish_state(state);
 }
 #endif
+
+void HisenseAutoReportSwitch::setup() {
+  auto initial = this->get_initial_state_with_restore_mode();
+  bool on = initial.has_value() ? *initial : this->parent_->get_auto_report_enabled();
+  this->parent_->set_auto_report_enabled(on);
+  this->publish_state(on);
+}
+
+void HisenseAutoReportSwitch::write_state(bool state) {
+  this->parent_->set_auto_report_enabled(state);
+  this->publish_state(state);
+}
 
 #ifdef USE_SWITCH
 void HisenseFeatureSwitch::write_state(bool state) {
@@ -282,6 +299,8 @@ void HisenseAC::complete_identify_() {
 #ifdef ESPHOME_PROJECT_VERSION
   fw = ESPHOME_PROJECT_VERSION;
 #endif
+  if (fw.empty())
+    fw = "unknown";
   const std::string url = proto::build_compatibility_report_url(id, fw);
   ESP_LOGI(TAG, "Report my AC: %s", url.c_str());
 #ifdef USE_TEXT_SENSOR
@@ -290,6 +309,37 @@ void HisenseAC::complete_identify_() {
 
   this->identify_done_ = true;
   this->identify_pending_ = false;
+
+  // Queue an anonymous POST when Auto report is on and the identity is new for this device.
+  if (this->auto_report_enabled_ && !this->auto_report_url_.empty()) {
+    const uint32_t ih = fnv1_hash(line);
+    if (ih != this->last_reported_identity_hash_) {
+      std::string status_hex;
+      const size_t max_bytes = 256;  // Worker accepts ≤ 512 hex chars
+      const size_t n = std::min(this->last_status_len_, max_bytes);
+      status_hex.reserve(n * 2);
+      static const char *HEX = "0123456789ABCDEF";
+      for (size_t i = 0; i < n; i++) {
+        const uint8_t b = this->last_status_frame_[i];
+        status_hex.push_back(HEX[b >> 4]);
+        status_hex.push_back(HEX[b & 0x0F]);
+      }
+      const std::string device_id = this->device_id_hash_();
+      if (device_id.size() == 64) {
+        this->pending_report_body_ =
+            proto::build_auto_report_json(line, fw, this->report_board_, device_id, status_hex);
+        this->pending_identity_hash_ = ih;
+        this->auto_report_pending_ = true;
+        this->auto_report_attempted_ = false;
+        this->auto_report_next_try_ = 0;
+        ESP_LOGI(TAG, "Auto report queued (identity changed)");
+      } else {
+        ESP_LOGW(TAG, "Auto report skipped: could not hash device id");
+      }
+    } else {
+      ESP_LOGD(TAG, "Auto report skipped: identity already reported");
+    }
+  }
 }
 
 // ---- Setup / config ---------------------------------------------------------------------------
@@ -308,6 +358,12 @@ void HisenseAC::setup() {
   // Give the AC time to boot when both are powered from the same 5 V rail.
   this->next_at_ = millis() + 2000;
   this->set_link_(LinkState::SEARCHING);
+
+  this->auto_report_hash_pref_ =
+      global_preferences->make_preference<uint32_t>(fnv1_hash("hisense_ac_auto_rpt"));
+  uint32_t stored = 0;
+  if (this->auto_report_hash_pref_.load(&stored))
+    this->last_reported_identity_hash_ = stored;
 }
 
 void HisenseAC::dump_config() {
@@ -321,6 +377,10 @@ void HisenseAC::dump_config() {
   ESP_LOGCONFIG(TAG, "  Device type pair: %02X %02X", this->type_hi_, this->type_lo_);
   ESP_LOGCONFIG(TAG, "  Raw frame logging: %s (status every %" PRIu32 " ms)", ONOFF(this->debug_frames_),
                 this->debug_interval_ms_);
+  if (!this->auto_report_url_.empty()) {
+    ESP_LOGCONFIG(TAG, "  Auto report: %s → %s (board %s)", ONOFF(this->auto_report_enabled_),
+                  this->auto_report_url_.c_str(), this->report_board_.c_str());
+  }
 }
 
 const char *HisenseAC::get_link_state_text() const {
@@ -363,6 +423,7 @@ void HisenseAC::set_link_(LinkState s) {
 void HisenseAC::loop() {
   this->read_uart_();
   const uint32_t now = millis();
+  this->maybe_auto_report_();
 #ifdef USE_SENSOR
   if (reached(now, this->next_bus_errors_check_)) {
     this->next_bus_errors_check_ = now + BUS_ERRORS_CHECK_MS;
@@ -1175,6 +1236,71 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
     if (!this->fault_text_->has_state() || this->fault_text_->state != d)
       this->fault_text_->publish_state(d);
   }
+#endif
+}
+
+void HisenseAC::maybe_auto_report_() {
+  if (!this->auto_report_pending_ || this->auto_report_attempted_)
+    return;
+  if (!this->auto_report_enabled_ || this->auto_report_url_.empty() || this->pending_report_body_.empty()) {
+    this->auto_report_pending_ = false;
+    return;
+  }
+  // Never stall the RS-485 state machine while a reply is outstanding.
+  if (this->waiting_)
+    return;
+  const uint32_t now = millis();
+  if (this->auto_report_next_try_ != 0 && !reached(now, this->auto_report_next_try_))
+    return;
+  if (!network::is_connected()) {
+    // Retry later when Wi-Fi comes up; never block or crash while offline.
+    this->auto_report_next_try_ = now + 5000;
+    return;
+  }
+
+  if (this->http_request_ == nullptr) {
+    ESP_LOGW(TAG, "Auto report skipped: no http_request component");
+    this->auto_report_pending_ = false;
+    return;
+  }
+
+  ESP_LOGI(TAG, "Auto report POST %s (%u bytes)", this->auto_report_url_.c_str(),
+           (unsigned) this->pending_report_body_.size());
+  // Mark attempted before the call so a long/failing POST cannot loop forever.
+  this->auto_report_attempted_ = true;
+  this->auto_report_pending_ = false;
+
+  std::vector<http_request::Header> headers;
+  headers.push_back(http_request::Header{"Content-Type", "application/json"});
+  auto response = this->http_request_->post(this->auto_report_url_, this->pending_report_body_, headers);
+  int status = 0;
+  if (response != nullptr) {
+    status = response->status_code;
+    response->end();
+  }
+  if (http_request::is_success(status)) {
+    this->last_reported_identity_hash_ = this->pending_identity_hash_;
+    this->auto_report_hash_pref_.save(&this->last_reported_identity_hash_);
+    ESP_LOGI(TAG, "Auto report OK (HTTP %d)", status);
+  } else {
+    ESP_LOGW(TAG, "Auto report failed (HTTP %d) — will not retry until identity changes", status);
+  }
+  this->pending_report_body_.clear();
+}
+
+std::string HisenseAC::device_id_hash_() const {
+#ifdef USE_SHA256
+  uint8_t mac[6] = {0};
+  get_mac_address_raw(mac);
+  sha256::SHA256 hasher;
+  hasher.init();
+  hasher.add(mac, sizeof(mac));
+  hasher.calculate();
+  char hex[65];
+  hasher.get_hex(hex);
+  return std::string(hex);
+#else
+  return {};
 #endif
 }
 

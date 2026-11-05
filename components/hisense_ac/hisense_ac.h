@@ -6,6 +6,8 @@
 #include "esphome/core/component.h"
 #include "esphome/components/climate/climate.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/components/http_request/http_request.h"
+#include "esphome/core/preferences.h"
 #ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
 #endif
@@ -55,6 +57,12 @@ class HisenseBeepSwitch : public switch_::Switch, public Component, public Paren
   void write_state(bool state) override;
 };
 class HisenseFrameLogSwitch : public switch_::Switch, public Component, public Parented<HisenseAC> {
+ public:
+  void setup() override;
+ protected:
+  void write_state(bool state) override;
+};
+class HisenseAutoReportSwitch : public switch_::Switch, public Component, public Parented<HisenseAC> {
  public:
   void setup() override;
  protected:
@@ -147,8 +155,14 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_display_switch(HisenseDisplaySwitch *s) { this->display_switch_ = s; }
   void set_beep_switch(HisenseBeepSwitch *s) { this->beep_switch_ = s; }
   void set_frame_log_switch(HisenseFrameLogSwitch *s) { this->frame_log_switch_ = s; }
+  void set_auto_report_switch(HisenseAutoReportSwitch *s) { this->auto_report_switch_ = s; }
   void add_feature_switch(HisenseFeatureSwitch *s) { this->feature_switches_.push_back(s); }
 #endif
+  void set_auto_report_url(const std::string &url) { this->auto_report_url_ = url; }
+  void set_report_board(const std::string &board) { this->report_board_ = board; }
+  void set_auto_report_enabled(bool on) { this->auto_report_enabled_ = on; }
+  bool get_auto_report_enabled() const { return this->auto_report_enabled_; }
+  void set_http_request(http_request::HttpRequestComponent *http) { this->http_request_ = http; }
 #ifdef USE_SELECT
   void set_sleep_select(HisenseSleepSelect *s) { this->sleep_select_ = s; }
 #endif
@@ -209,6 +223,8 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void log_frame_info_(const char *what, const uint8_t *f, size_t len);
   bool identify_ready_() const;
   void complete_identify_();
+  void maybe_auto_report_();
+  std::string device_id_hash_() const;
   void sync_controls_(const proto::Status &s);
   void sync_controls_from_climate_();
   void publish_bus_errors_();
@@ -302,6 +318,19 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   bool identify_pending_{false};
   bool want_version_{false};
 
+  // Optional anonymous compatibility report (Cloudflare Worker). Off by switch / no URL.
+  std::string auto_report_url_;
+  std::string report_board_{"unknown"};
+  bool auto_report_enabled_{true};
+  bool auto_report_pending_{false};
+  bool auto_report_attempted_{false};
+  uint32_t last_reported_identity_hash_{0};
+  uint32_t auto_report_next_try_{0};
+  uint32_t pending_identity_hash_{0};
+  std::string pending_report_body_;
+  ESPPreferenceObject auto_report_hash_pref_;
+  http_request::HttpRequestComponent *http_request_{nullptr};
+
 #ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *fault_text_{nullptr};
   text_sensor::TextSensor *link_text_{nullptr};
@@ -319,6 +348,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   HisenseDisplaySwitch *display_switch_{nullptr};
   HisenseBeepSwitch *beep_switch_{nullptr};
   HisenseFrameLogSwitch *frame_log_switch_{nullptr};
+  HisenseAutoReportSwitch *auto_report_switch_{nullptr};
   std::vector<HisenseFeatureSwitch *> feature_switches_;
 #endif
 #ifdef USE_SELECT

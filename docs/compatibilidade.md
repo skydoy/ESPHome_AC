@@ -32,7 +32,17 @@ em `http://<ip-do-dispositivo>/`:
 3. Preenche o resto (marca/modelo, placa, resultado) e carrega em **Submit**.
 
 Podes carregar no botão **Identify AC** a qualquer momento para repetir as consultas só de
-leitura e actualizar o link. O dispositivo nunca publica sozinho no GitHub (não leva token).
+leitura e actualizar o link. O link manual **Report my AC** continua a abrir o GitHub para
+preencheres marca/modelo.
+
+### Relatório automático de compatibilidade (opcional)
+
+Com **Auto report** ligado (predefinição), depois da identificação e com Wi-Fi activo o
+dispositivo faz um POST uma vez para um Cloudflare Worker: `identity`, `firmware`, `board` e
+um **sha256 do MAC Wi-Fi** como `device_id` (nunca o MAC em claro). Pode ir também
+`status_hex`. Não se guardam IPs. Desliga **Auto report** no Home Assistant / na página do
+dispositivo para desactivar. A mesma identidade só volta a ser enviada se mudar. O controlo
+do AC continua local — isto é um sinal anónimo de compatibilidade, não cloud de controlo.
 
 ## Verificar a tua máquina num minuto
 1. Usas a app **ConnectLife** (ou uma app Hisense antiga / equivalente).

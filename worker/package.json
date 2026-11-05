@@ -1,0 +1,14 @@
+{
+  "name": "esphome-ac-report",
+  "private": true,
+  "version": "0.3.3",
+  "description": "Anonymous compatibility report endpoint for ESPHome_AC devices",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.36.0"
+  }
+}

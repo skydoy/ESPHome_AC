@@ -4,7 +4,7 @@ SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 """
 
 import esphome.codegen as cg
-from esphome.components import binary_sensor, button, climate, select, sensor, switch, text_sensor, uart
+from esphome.components import binary_sensor, button, climate, http_request, select, sensor, switch, text_sensor, uart
 import esphome.config_validation as cv
 from esphome.const import (
     CONF_HUMIDITY,
@@ -35,12 +35,13 @@ from esphome.const import (
 from . import hisense_ac_ns
 
 DEPENDENCIES = ["uart"]
-AUTO_LOAD = ["hisense_proto", "sensor", "binary_sensor", "text_sensor", "switch", "select", "button"]
+AUTO_LOAD = ["hisense_proto", "sensor", "binary_sensor", "text_sensor", "switch", "select", "button", "sha256"]
 
 HisenseAC = hisense_ac_ns.class_("HisenseAC", climate.Climate, cg.Component, uart.UARTDevice)
 HisenseDisplaySwitch = hisense_ac_ns.class_("HisenseDisplaySwitch", switch.Switch)
 HisenseBeepSwitch = hisense_ac_ns.class_("HisenseBeepSwitch", switch.Switch, cg.Component)
 HisenseFrameLogSwitch = hisense_ac_ns.class_("HisenseFrameLogSwitch", switch.Switch, cg.Component)
+HisenseAutoReportSwitch = hisense_ac_ns.class_("HisenseAutoReportSwitch", switch.Switch, cg.Component)
 HisenseFeatureSwitch = hisense_ac_ns.class_("HisenseFeatureSwitch", switch.Switch)
 HisenseSleepSelect = hisense_ac_ns.class_("HisenseSleepSelect", select.Select)
 HisenseLightButton = hisense_ac_ns.class_("HisenseLightButton", button.Button)
@@ -115,6 +116,10 @@ CONF_IDENTIFY_BUTTON = "identify_button"
 CONF_DISPLAY = "display"
 CONF_BEEP_SWITCH = "beep_switch"
 CONF_FRAME_LOG_SWITCH = "frame_log_switch"
+CONF_AUTO_REPORT_SWITCH = "auto_report_switch"
+CONF_AUTO_REPORT_URL = "auto_report_url"
+CONF_REPORT_BOARD = "report_board"
+CONF_HTTP_REQUEST_ID = "http_request_id"
 
 
 def _temp(icon):
@@ -279,6 +284,15 @@ CONFIG_SCHEMA = (
                 icon="mdi:magnify-scan",
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
             ),
+            cv.Optional(CONF_AUTO_REPORT_SWITCH): switch.switch_schema(
+                HisenseAutoReportSwitch,
+                icon="mdi:cloud-upload-outline",
+                entity_category=ENTITY_CATEGORY_CONFIG,
+                default_restore_mode="RESTORE_DEFAULT_ON",
+            ).extend(cv.COMPONENT_SCHEMA),
+            cv.Optional(CONF_AUTO_REPORT_URL): cv.url,
+            cv.Optional(CONF_REPORT_BOARD, default="unknown"): cv.string,
+            cv.Optional(CONF_HTTP_REQUEST_ID): cv.use_id(http_request.HttpRequestComponent),
         }
     )
     .extend(uart.UART_DEVICE_SCHEMA)
@@ -380,6 +394,19 @@ async def to_code(config):
         b = await button.new_button(config[CONF_IDENTIFY_BUTTON])
         await cg.register_parented(b, var)
         cg.add(var.set_identify_button(b))
+
+    if CONF_AUTO_REPORT_URL in config:
+        cg.add(var.set_auto_report_url(config[CONF_AUTO_REPORT_URL]))
+    if CONF_REPORT_BOARD in config:
+        cg.add(var.set_report_board(config[CONF_REPORT_BOARD]))
+    if CONF_HTTP_REQUEST_ID in config:
+        http = await cg.get_variable(config[CONF_HTTP_REQUEST_ID])
+        cg.add(var.set_http_request(http))
+    if CONF_AUTO_REPORT_SWITCH in config:
+        s = await switch.new_switch(config[CONF_AUTO_REPORT_SWITCH])
+        await cg.register_component(s, config[CONF_AUTO_REPORT_SWITCH])
+        await cg.register_parented(s, var)
+        cg.add(var.set_auto_report_switch(s))
     if CONF_SLEEP_MODE in config:
         sel = await select.new_select(config[CONF_SLEEP_MODE], options=SLEEP_OPTIONS)
         await cg.register_parented(sel, var)

@@ -9,6 +9,7 @@
 #
 # Needs the substitution update_manifest_url (set by each base device file).
 http_request:
+  id: ac_http_request
   verify_ssl: true
   timeout: 5s
 

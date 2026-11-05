@@ -89,7 +89,16 @@ version, capabilities, and one full status frame). Open the device page at
 3. Fill the remaining fields (brand/model, board, result) and press **Submit**.
 
 You can press the **Identify AC** button anytime to re-run the read-only queries and refresh
-the link. The device never posts to GitHub by itself (no token on the board).
+the link. The manual **Report my AC** link still opens GitHub for you to fill brand/model.
+
+### Automatic compatibility report (optional)
+
+With **Auto report** on (default), after identify completes and Wi-Fi is up the device POSTs
+once to a Cloudflare Worker: `identity`, `firmware`, `board`, and a **sha256 of the Wi-Fi MAC**
+as `device_id` (never the raw MAC). Optional `status_hex` may be included. No IP is stored.
+Turn **Auto report** off in Home Assistant / the device web UI to disable. The same identity is
+only sent again when it changes. Control of the AC stays fully local — this is an optional
+anonymous compatibility signal, not cloud control.
 
 ## How to check your unit in a minute
 1. It pairs with the **ConnectLife** app, an older Hisense app, or a rebadged equivalent.

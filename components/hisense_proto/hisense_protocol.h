@@ -226,6 +226,14 @@ std::string url_encode(const std::string &s);
 /// Other required fields (model, board, result, ...) are left for the user to fill in the browser.
 std::string build_compatibility_report_url(const IdentityInfo &id, const std::string &firmware_version);
 
+/// Escape a string for inclusion inside a JSON string value (quotes, backslash, controls).
+std::string json_escape(const std::string &s);
+
+/// Compact JSON body for POST /report. status_hex may be empty (field omitted).
+std::string build_auto_report_json(const std::string &identity, const std::string &firmware,
+                                   const std::string &board, const std::string &device_id,
+                                   const std::string &status_hex);
+
 }  // namespace proto
 }  // namespace hisense_ac
 }  // namespace esphome
