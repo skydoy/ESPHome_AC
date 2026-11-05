@@ -574,6 +574,19 @@ static void test_identity_and_report_url() {
   CHECK(url.find("type%3D01%2001") != std::string::npos || url.find("type=01") != std::string::npos);
   // identity value is encoded
   CHECK(url.find("status_len%3D160") != std::string::npos);
+
+  const std::string base = "https://esphome-ac-report.esphome-ac-report.workers.dev";
+  const std::string short_u =
+      build_short_report_url(base + "/report", "abcdef12", id, "0.3.5", "m5stickc-plus2");
+  CHECK(short_u == base + "/r/abcdef12");
+  CHECK(short_u.size() < 70);
+
+  const std::string q =
+      build_short_report_url(base, "", id, "0.3.5", "m5stickc-plus2");
+  CHECK(q.find(base + "/r?i=") == 0);
+  CHECK(q.find("&f=0.3.5") != std::string::npos);
+  CHECK(q.find("&b=m5stickc-plus2") != std::string::npos);
+  CHECK(q.find("github.com") == std::string::npos);
 }
 
 int main() {

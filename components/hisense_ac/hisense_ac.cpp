@@ -301,10 +301,16 @@ void HisenseAC::complete_identify_() {
 #endif
   if (fw.empty())
     fw = "unknown";
-  const std::string url = proto::build_compatibility_report_url(id, fw);
-  ESP_LOGI(TAG, "Report my AC: %s", url.c_str());
+  const std::string full_url = proto::build_compatibility_report_url(id, fw);
+  // Full prefilled GitHub URL is huge — log only. Text sensor gets a short Worker redirect.
+  ESP_LOGI(TAG, "Report my AC (full): %s", full_url.c_str());
+  const std::string device_id = this->device_id_hash_();
+  const std::string prefix = device_id.size() >= 8 ? device_id.substr(0, 8) : "";
+  const std::string short_url = proto::build_short_report_url(this->auto_report_url_, prefix, id, fw,
+                                                              this->report_board_);
+  ESP_LOGI(TAG, "Report my AC: %s", short_url.c_str());
 #ifdef USE_TEXT_SENSOR
-  publish_text_if_changed_(this->report_url_text_, url);
+  publish_text_if_changed_(this->report_url_text_, short_url);
 #endif
 
   this->identify_done_ = true;

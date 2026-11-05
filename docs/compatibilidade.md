@@ -27,12 +27,13 @@ versão do firmware, capacidades e uma trama de estado completa). Abre a página
 em `http://<ip-do-dispositivo>/`:
 
 1. Vê o **AC Identity** (resumo compacto; também aparece no log INFO).
-2. Abre ou copia **Report my AC** — é um link do GitHub com a linha de identidade e a versão
-   do firmware já preenchidas.
+2. Abre ou copia **Report my AC** — é um link curto no Worker que redirecciona para o formulário
+   do GitHub já preenchido (identidade + firmware). O URL completo do GitHub fica só no log INFO
+   para a página web da placa não partir o layout.
 3. Preenche o resto (marca/modelo, placa, resultado) e carrega em **Submit**.
 
 Podes carregar no botão **Identify AC** a qualquer momento para repetir as consultas só de
-leitura e actualizar o link. O link manual **Report my AC** continua a abrir o GitHub para
+leitura e actualizar o link. O link curto **Report my AC** continua a abrir o GitHub para
 preencheres marca/modelo.
 
 ### Relatório automático de compatibilidade (opcional)
