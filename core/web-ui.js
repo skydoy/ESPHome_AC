@@ -76,8 +76,15 @@
     // outdoor unit
     '<g transform="translate(10,10)"><rect width="190" height="200" rx="14" class="u"/>' +
     '<text x="95" y="24" class="ut" data-t="outdoor"></text>' +
-    '<g id="fo"><circle cx="62" cy="72" r="30" class="fan"/>' +
-    '<path d="M62 46 L68 68 L62 72 L56 68Z M62 98 L68 76 L62 72 L56 76Z M36 72 L58 66 L62 72 L58 78Z M88 72 L66 66 L62 72 L66 78Z" class="bl"/></g>' +
+    // Axial fan (same look as esphome-altherma): shroud, guard rings, spokes, 3-blade rotor.
+    '<g id="fa" transform="translate(62,72) scale(.92)"><circle r="38" class="fs1"/><circle r="34" class="fs2"/>' +
+    '<circle r="34" class="frim"/><circle r="26" class="fg"/><circle r="18" class="fg"/><circle r="11" class="fg"/>' +
+    '<path d="M0-34V34M-34 0H34M-24-24L24 24M24-24L-24 24" class="fsp"/>' +
+    '<g id="fo"><circle r="30" fill-opacity="0"/>' +
+    [0, 120, 240].map(function (a) {
+      return '<path d="M-3.5-7C-10-28 10-28 3.5-7C2-3 1.2 1 0 5C-1.2 1-2-3-3.5-7Z" class="bl" transform="rotate(' + a + ')"/>';
+    }).join('') +
+    '<circle r="6" class="fh"/><circle r="2" class="fc"/></g></g>' +
     '<rect x="112" y="52" width="62" height="40" rx="8" class="cp"/>' +
     '<text x="143" y="76" class="sm">comp</text>' +
     chip("tout", 12, 112, 80) + chip("tocoil", 98, 112, 80) +
@@ -110,7 +117,11 @@
     "#acd .u{fill:color-mix(in srgb,Canvas 88%,CanvasText 12%);stroke:color-mix(in srgb,CanvasText 20%,transparent);stroke-width:1.5}" +
     "#acd .ui{fill:color-mix(in srgb,Canvas 86%,#1784f7 14%)}" +
     "#acd .ut{font:600 12px sans-serif;opacity:.85}#acd .sm{font:10px sans-serif;opacity:.6}" +
-    "#acd .fan,#acd .lv{fill:none;stroke:currentColor;stroke-width:2;opacity:.45}#acd .bl{fill:currentColor;opacity:.35}" +
+    "#acd .lv{fill:none;stroke:currentColor;stroke-width:2;opacity:.45}" +
+    "#acd .fs1{fill:color-mix(in srgb,#6b7280 70%,Canvas 30%)}#acd .fs2{fill:color-mix(in srgb,#111827 55%,#4b5563 45%)}" +
+    "#acd .frim{fill:none;stroke:#e5e7eb;stroke-width:2;opacity:.55}#acd .fg,#acd .fsp{fill:none;stroke:#9ca3af;stroke-width:1.1;opacity:.5}" +
+    "#acd .bl{fill:#d1d5db;stroke:#6b7280;stroke-width:.6}#acd .fh{fill:#9ca3af;stroke:#4b5563}#acd .fc{fill:#e5e7eb}" +
+    "#acd #fo{transform-box:fill-box;transform-origin:50% 50%}" +
     "#acd .cp,#acd .sp{fill:color-mix(in srgb,Canvas 72%,CanvasText 28%);opacity:.8}" +
     "#acd .md{fill:color-mix(in srgb,Canvas 70%,var(--acc) 30%)}#acd .mt{font:700 10px sans-serif}" +
     "#acd .c{fill:color-mix(in srgb,Canvas 74%,CanvasText 26%)}#acd .c.h{fill:color-mix(in srgb,Canvas 70%,var(--acc) 30%)}" +
@@ -119,8 +130,8 @@
     "#acd .pf{fill:none;stroke-width:3;stroke-linecap:round;stroke:Canvas;stroke-dasharray:4 14;opacity:0}" +
     "#acd .hot{stroke:var(--hot)}#acd .cold{stroke:var(--cold)}#acd .pp.hot,#acd .pp.cold{opacity:.9}" +
     "#acd.run .pf{opacity:.55;animation:acf 1.2s linear infinite}#acd.run .pf.rev{animation-direction:reverse}" +
-    "#acd.run #fo{transform-origin:62px 72px;animation:acs 1.6s linear infinite}" +
-    "#acd.off .u,#acd.off .c{opacity:.55}" +
+    "#acd.run #fo{animation:acs 1.15s linear infinite}" +
+    "#acd.off .u,#acd.off .c,#acd.off #fa{opacity:.55}" +
     "#acd .lg{stroke-width:6;stroke-linecap:round}#acd .lt{font:10px sans-serif;opacity:.65;text-anchor:start}" +
     "@keyframes acf{to{stroke-dashoffset:-18}}@keyframes acs{to{transform:rotate(360deg)}}" +
     "@media (prefers-reduced-motion:reduce){#acd.run .pf,#acd.run #fo{animation:none}}" +
