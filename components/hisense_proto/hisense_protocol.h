@@ -198,6 +198,34 @@ std::string hex_bytes(const uint8_t *frame, size_t len, size_t off, size_t n);
 inline float f_to_c(float f) { return (f - 32.0f) * 5.0f / 9.0f; }
 inline float c_to_f(float c) { return c * 9.0f / 5.0f + 32.0f; }
 
+// ---- Identify / compatibility report (read-only helpers) ------------------------------------
+/// Payload offsets of a status frame that parse_status() already decodes (see protocol.md).
+/// Framing bytes 0..15 and the trailing checksum/tail are never treated as unknown data.
+bool is_known_status_byte(size_t off);
+
+/// Compact "bNN=XX ..." list of undecoded payload bytes. Empty when every payload byte is known
+/// or the frame is too short. Truncates at max_chars (appends " ...") so INFO logs stay short.
+std::string describe_unknown_status_bytes(const uint8_t *frame, size_t len, size_t max_chars = 240);
+
+struct IdentityInfo {
+  uint8_t type_hi{0};
+  uint8_t type_lo{0};
+  bool have_type{false};
+  std::string version_text;  // empty when the 0x07 reply was never seen
+  Capabilities caps;         // caps.valid false -> caps shown as "?"
+  size_t status_len{0};
+};
+
+/// One-line summary, e.g. "type=01 01 fw=Protocol 0x0215 (raw ..) caps=Heat/Cool, Fan Mute status_len=160".
+std::string format_identity_line(const IdentityInfo &id);
+
+/// Percent-encode for query-string values (RFC 3986 unreserved left as-is; space -> %20).
+std::string url_encode(const std::string &s);
+
+/// Prefills the GitHub compatibility_report.yml form with firmware + identity (no token needed).
+/// Other required fields (model, board, result, ...) are left for the user to fill in the browser.
+std::string build_compatibility_report_url(const IdentityInfo &id, const std::string &firmware_version);
+
 }  // namespace proto
 }  // namespace hisense_ac
 }  // namespace esphome

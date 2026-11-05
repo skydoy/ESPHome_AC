@@ -77,6 +77,20 @@ AEH-W4A1, AEH-W4B1, AEH-W4E1, AEH-W4F1, AEH-W4G1, AEH-W4G2 and AEH-W41H1 all sit
 (see the [wiring guide](wiring.md)). Rebadged units (Tornado, ACOND, Ballu, Newtek…) often use
 the same electronics.
 
+## Report from the device (AC Identity)
+
+After the board links to the AC it runs a **read-only identify** (device type, firmware
+version, capabilities, and one full status frame). Open the device page at
+`http://<device-ip>/`:
+
+1. Check **AC Identity** (compact summary, also in the INFO log).
+2. Open or copy **Report my AC** — it is a GitHub link with the identity line and firmware
+   version already filled in.
+3. Fill the remaining fields (brand/model, board, result) and press **Submit**.
+
+You can press the **Identify AC** button anytime to re-run the read-only queries and refresh
+the link. The device never posts to GitHub by itself (no token on the board).
+
 ## How to check your unit in a minute
 1. It pairs with the **ConnectLife** app, an older Hisense app, or a rebadged equivalent.
 2. The Wi-Fi module is a small dongle behind the front panel; its part number starts with **AEH-W4**.

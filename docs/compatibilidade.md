@@ -20,6 +20,20 @@ Legenda: ✅ Funciona · 🧪 Em teste · 🔶 Reportado com outro firmware · �
 Hisense, Tornado, ACOND, Ballu e Newtek com módulo Wi-Fi **AEH-W4x / AEH-W41H1** na ficha de
 4 pinos. Lista completa com modelos e fontes: [tabela em inglês](compatibility.md#reported-working-with-other-firmware-untested-here).
 
+## Reportar a partir do dispositivo (AC Identity)
+
+Depois de a placa ligar ao AC, corre uma **identificação só de leitura** (tipo de unidade,
+versão do firmware, capacidades e uma trama de estado completa). Abre a página do dispositivo
+em `http://<ip-do-dispositivo>/`:
+
+1. Vê o **AC Identity** (resumo compacto; também aparece no log INFO).
+2. Abre ou copia **Report my AC** — é um link do GitHub com a linha de identidade e a versão
+   do firmware já preenchidas.
+3. Preenche o resto (marca/modelo, placa, resultado) e carrega em **Submit**.
+
+Podes carregar no botão **Identify AC** a qualquer momento para repetir as consultas só de
+leitura e actualizar o link. O dispositivo nunca publica sozinho no GitHub (não leva token).
+
 ## Verificar a tua máquina num minuto
 1. Usas a app **ConnectLife** (ou uma app Hisense antiga / equivalente).
 2. O módulo Wi-Fi atrás da tampa frontal tem uma referência que começa por **AEH-W4**.

@@ -44,6 +44,7 @@ HisenseFrameLogSwitch = hisense_ac_ns.class_("HisenseFrameLogSwitch", switch.Swi
 HisenseFeatureSwitch = hisense_ac_ns.class_("HisenseFeatureSwitch", switch.Switch)
 HisenseSleepSelect = hisense_ac_ns.class_("HisenseSleepSelect", select.Select)
 HisenseLightButton = hisense_ac_ns.class_("HisenseLightButton", button.Button)
+HisenseIdentifyButton = hisense_ac_ns.class_("HisenseIdentifyButton", button.Button)
 Feature = hisense_ac_ns.enum("Feature", is_class=True)
 FaultGroup = hisense_ac_ns.enum("FaultGroup", is_class=True)
 
@@ -108,6 +109,9 @@ CONF_PANEL_UNIT = "panel_unit"
 CONF_CAPABILITIES = "capabilities"
 CONF_DEVICE_TYPE = "device_type"
 CONF_AC_FIRMWARE_VERSION = "ac_firmware_version"
+CONF_AC_IDENTITY = "ac_identity"
+CONF_REPORT_URL = "report_url"
+CONF_IDENTIFY_BUTTON = "identify_button"
 CONF_DISPLAY = "display"
 CONF_BEEP_SWITCH = "beep_switch"
 CONF_FRAME_LOG_SWITCH = "frame_log_switch"
@@ -248,6 +252,8 @@ CONFIG_SCHEMA = (
                     (CONF_CAPABILITIES, "mdi:format-list-checks"),
                     (CONF_DEVICE_TYPE, "mdi:identifier"),
                     (CONF_AC_FIRMWARE_VERSION, "mdi:chip"),
+                    (CONF_AC_IDENTITY, "mdi:card-account-details-outline"),
+                    (CONF_REPORT_URL, "mdi:github"),
                 )
             },
             # Switches
@@ -268,6 +274,11 @@ CONFIG_SCHEMA = (
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
                 default_restore_mode="RESTORE_DEFAULT_OFF",
             ).extend(cv.COMPONENT_SCHEMA),
+            cv.Optional(CONF_IDENTIFY_BUTTON): button.button_schema(
+                HisenseIdentifyButton,
+                icon="mdi:magnify-scan",
+                entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            ),
         }
     )
     .extend(uart.UART_DEVICE_SCHEMA)
@@ -304,6 +315,8 @@ _TEXT_SENSORS = {
     CONF_CAPABILITIES: "set_capabilities_text_sensor",
     CONF_DEVICE_TYPE: "set_device_type_text_sensor",
     CONF_AC_FIRMWARE_VERSION: "set_ac_firmware_version_text_sensor",
+    CONF_AC_IDENTITY: "set_ac_identity_text_sensor",
+    CONF_REPORT_URL: "set_report_url_text_sensor",
 }
 
 
@@ -363,6 +376,10 @@ async def to_code(config):
             b = await button.new_button(config[key])
             await cg.register_parented(b, var)
             cg.add(b.set_on(on))
+    if CONF_IDENTIFY_BUTTON in config:
+        b = await button.new_button(config[CONF_IDENTIFY_BUTTON])
+        await cg.register_parented(b, var)
+        cg.add(var.set_identify_button(b))
     if CONF_SLEEP_MODE in config:
         sel = await select.new_select(config[CONF_SLEEP_MODE], options=SLEEP_OPTIONS)
         await cg.register_parented(sel, var)
