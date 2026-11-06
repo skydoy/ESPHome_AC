@@ -92,6 +92,7 @@
     "Restart": "Reiniciar",
     "Restart (Safe Mode)": "Reiniciar (modo seguro)",
     "Update Available": "Atualização disponível",
+    "Update Status": "Estado da atualização",
     "Check for Update": "Verificar atualizações",
     "Auto Update": "Atualização automática",
     "Install Update": "Instalar atualização",

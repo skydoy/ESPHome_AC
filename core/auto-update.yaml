@@ -7,6 +7,10 @@
 # that config (API encryption key, name, extra components). Adopted devices are updated with
 # "Install" in the Device Builder instead.
 #
+# The stock web_server v3 frontend has no render_update() handler, so the update entity
+# row is not rendered even though the backend sends it. Install Update + Update Status
+# make updating visible and usable without relying on that unsupported UI row.
+#
 # Note: the download runs inside the main loop, so Home Assistant sees no progress while it
 # runs; the device logs "Progress: NN%" and, with a screen, shows a progress bar. After the
 # reboot the device comes back with the new version (about 1-2 minutes in total).
@@ -24,10 +28,19 @@ ota:
   - platform: http_request
     id: ota_http
     on_begin:
+      - text_sensor.template.publish:
+          id: update_status
+          state: "Downloading firmware (do not unplug)"
       - logger.log: "Firmware update download started (do not unplug)"
     on_end:
+      - text_sensor.template.publish:
+          id: update_status
+          state: "Installed, rebooting"
       - logger.log: "Firmware update installed, rebooting"
     on_error:
+      - text_sensor.template.publish:
+          id: update_status
+          state: !lambda 'return "Update failed (" + to_string(x) + ")";'
       - logger.log:
           level: WARN
           format: "Firmware update failed (error %u), still running the old firmware"
@@ -39,9 +52,12 @@ update:
     name: "Firmware Update"
     device_class: firmware
     entity_category: config
-    # Named + not internal so web_server v3 lists it alongside the buttons below.
     source: ${update_manifest_url}
     update_interval: 6h
+    on_update_available:
+      - text_sensor.template.publish:
+          id: update_status
+          state: !lambda 'return "Update available: " + x.latest_version;'
 
 switch:
   - platform: template
@@ -131,6 +147,13 @@ script:
 # interval and script are removed in the lists above).
 text_sensor:
   - id: !remove latest_version
+  - id: !remove update_status
+  - platform: template
+    id: update_status
+    name: "Update Status"
+    icon: mdi:information-outline
+    entity_category: config
+    update_interval: never
 binary_sensor:
   - id: !remove update_available
 button:
@@ -142,6 +165,9 @@ button:
     icon: mdi:cloud-search
     entity_category: config
     on_press:
+      - text_sensor.template.publish:
+          id: update_status
+          state: "Checking for updates"
       - logger.log:
           tag: firmware_update
           format: "Check for Update pressed"
@@ -152,6 +178,9 @@ button:
     icon: mdi:download
     entity_category: config
     on_press:
+      - text_sensor.template.publish:
+          id: update_status
+          state: "Install requested"
       - logger.log:
           tag: firmware_update
           format: "Install Update pressed (force_update=false)"
