@@ -224,7 +224,15 @@
         if (lang === "en" && v === GROUP_PT[en]) h.textContent = en;
       });
     });
+    // Climate current temperature shares its label with the value ("Current: 26.0 °C").
+    // Only replace its prefix, never the state value.
     sr.querySelectorAll("label").forEach(function (l) {
+      for (var i = 0; i < l.childNodes.length; i++) {
+        var n = l.childNodes[i];
+        if (n.nodeType !== 3) continue;
+        if (lang === "pt") n.nodeValue = n.nodeValue.replace(/Current:\s*/, "Atual: ");
+        else n.nodeValue = n.nodeValue.replace(/Atual:\s*/, "Current: ");
+      }
       var key = l.textContent.trim().replace(/\s*:$/, "");
       Object.keys(LABEL_PT).forEach(function (en) {
         if (lang === "pt" && key === en) l.textContent = LABEL_PT[en] + " ";
@@ -238,8 +246,8 @@
     // 3) Buttons: visible label only (PRESS).
     sr.querySelectorAll(".abutton,.abuttonIsState").forEach(function (b) {
       var v = b.textContent.trim();
-      if (!/^PRESS|PREMIR$/.test(v)) return;
-      b.textContent = lang === "pt" ? "PREMIR" : "PRESS";
+      if (!/^(PRESS|PREMIR|CARREGAR)$/.test(v)) return;
+      b.textContent = lang === "pt" ? "CARREGAR" : "PRESS";
     });
     if (!tb.__langObs) {
       tb.__langObs = new MutationObserver(function (recs) {
