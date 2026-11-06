@@ -16,6 +16,7 @@ section below, with the factory and OTA images attached.
 - Adopted builds put Update Status next to Check for Update in Configuration, explicitly
   saying when a new version is available and to install from Device Builder (PT/EN).
   Web UI buttons now say CARREGAR in PT; climate "Current" labels preserve their value.
+  The multi-split hint has its own space below the outdoor data chips (no overlap).
 
 ## [0.3.8] - 2026-11-06
 

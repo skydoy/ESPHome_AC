@@ -277,12 +277,12 @@
       '<text x="' + w / 2 + '" y="29" class="cv" data-v="' + k + '">—</text></g>';
   }
   var SVG =
-    '<svg viewBox="0 0 640 220" role="img">' +
+    '<svg viewBox="0 0 640 250" role="img">' +
     // pipes: top = gas line, bottom = liquid line
     '<path id="p1" class="pp" d="M200 95 H440"/><path id="p2" class="pp" d="M200 165 H440"/>' +
     '<path id="f1" class="pf" d="M200 95 H440"/><path id="f2" class="pf" d="M200 165 H440"/>' +
     // outdoor unit
-    '<g id="uo" transform="translate(10,10)"><rect width="190" height="200" rx="14" class="u"/>' +
+    '<g id="uo" transform="translate(10,10)"><rect width="190" height="220" rx="14" class="u"/>' +
     '<text x="95" y="24" class="ut" data-t="outdoor"></text>' +
     // Axial fan (same look as esphome-altherma): shroud, guard rings, spokes, 3-blade rotor.
     '<g class="fa" transform="translate(62,72) scale(.92)"><circle r="38" class="fs1"/><circle r="34" class="fs2"/>' +
@@ -295,20 +295,22 @@
     '<circle r="6" class="fh"/><circle r="2" class="fc"/></g></g>' +
     '<rect x="112" y="52" width="62" height="40" rx="8" class="cp"/>' +
     '<text x="143" y="76" class="sm">comp</text>' +
-    '<text x="95" y="46" class="oh" id="oh"></text>' +
+    '' +
     chip("tout", 12, 112, 80) + chip("tocoil", 98, 112, 80) +
-    chip("freq", 12, 154, 80) + chip("pwr", 98, 154, 80) + "</g>" +
+    chip("freq", 12, 154, 80) + chip("pwr", 98, 154, 80) +
+    '<text x="95" y="206" class="oh" id="oh"></text></g>' +
     // indoor unit
-    '<g transform="translate(440,10)"><rect width="190" height="200" rx="14" class="u ui" id="ui"/>' +
+    '<g transform="translate(440,10)"><rect width="190" height="220" rx="14" class="u ui" id="ui"/>' +
     '<text x="95" y="24" class="ut" data-t="indoor"></text>' +
     '<rect x="18" y="38" width="154" height="40" rx="10" class="sp"/>' +
     '<path d="M30 70 H160" class="lv"/>' +
     '<rect x="30" y="86" width="130" height="18" rx="9" class="md"/>' +
     '<text x="95" y="99" class="mt" id="mt"></text>' +
     chip("troom", 12, 112, 80, "h") + chip("ttgt", 98, 112, 80) +
-    chip("ticoil", 12, 154, 80) + chip("hum", 98, 154, 80) + "</g>" +
+    chip("ticoil", 12, 154, 80) + chip("hum", 98, 154, 80) +
+    '' +
     // legend
-    '<g transform="translate(222,206)"><line x1="0" y1="0" x2="20" y2="0" class="lg hot"/>' +
+    '<g transform="translate(222,240)"><line x1="0" y1="0" x2="20" y2="0" class="lg hot"/>' +
     '<text x="26" y="4" class="lt" data-t="legHot"></text>' +
     '<line x1="112" y1="0" x2="132" y2="0" class="lg cold"/>' +
     '<text x="138" y="4" class="lt" data-t="legCold"></text></g></svg>';
@@ -338,7 +340,7 @@
     "#acd .pp{fill:none;stroke-width:9;stroke-linecap:round;stroke:#9aa0a6;opacity:.3;transition:stroke .4s,opacity .4s}" +
     "#acd .pf{fill:none;stroke-width:3;stroke-linecap:round;stroke:Canvas;stroke-dasharray:4 14;opacity:0}" +
     "#acd .hot{stroke:var(--hot)}#acd .cold{stroke:var(--cold)}#acd .pp.hot,#acd .pp.cold{opacity:.9}" +
-    "#acd .oh{font:600 8px sans-serif;opacity:.85}#acd.other .oh{fill:var(--hot)}" +"#acd.run .pf{opacity:.55;animation:acf 1.2s linear infinite}#acd.run .pf.rev{animation-direction:reverse}" +
+    "#acd .oh{font:600 9px sans-serif;opacity:.85;text-anchor:middle}#acd.other .oh{fill:var(--hot)}" +"#acd.run .pf{opacity:.55;animation:acf 1.2s linear infinite}#acd.run .pf.rev{animation-direction:reverse}" +
     "#acd.run #fo,#acd.orun #fo{animation:acs 1.15s linear infinite}" +
     "#acd .lg{stroke-width:6;stroke-linecap:round}#acd .lt{font:10px sans-serif;opacity:.65;text-anchor:start}" +
     "@keyframes acf{to{stroke-dashoffset:-18}}@keyframes acs{to{transform:rotate(360deg)}}" +
