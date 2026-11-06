@@ -15,6 +15,7 @@ section below, with the factory and OTA images attached.
   report only (use Install in the builder to preserve your config).
 - Adopted builds put Update Status next to Check for Update in Configuration, explicitly
   saying when a new version is available and to install from Device Builder (PT/EN).
+  Web UI buttons now say CARREGAR in PT; climate "Current" labels preserve their value.
 
 ## [0.3.8] - 2026-11-06
 
