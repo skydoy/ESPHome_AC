@@ -16,6 +16,11 @@ section below, with the factory and OTA images attached.
   values from `/events` and a PT/EN toggle (browser default, saved in the browser).
   `core/web-log.js` is now `core/web-ui.js` (keeps the debug log height cap).
 
+### Fixed
+- Web UI diagram: the outdoor fan now spins whenever the AC is not OFF (including fan-only
+  and auto), also following the climate action, with compressor frequency as a fallback
+  before the climate entity arrives.
+
 ## [0.3.6] - 2026-11-05
 
 ### Fixed
