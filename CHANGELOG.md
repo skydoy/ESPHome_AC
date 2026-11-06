@@ -8,6 +8,12 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Fixed
+- Factory OTA firmware: added a public Update Status row (current/latest, checking,
+  downloading, failure), since the ESPHome web_server v3 frontend does not render update
+  entities. Install Update remains a public button; adopted Device Builder builds still
+  report only (use Install in the builder to preserve your config).
+
 ## [0.3.8] - 2026-11-06
 
 ## [0.3.7] - 2026-11-05

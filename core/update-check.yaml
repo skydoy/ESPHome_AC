@@ -3,7 +3,8 @@
 # Reads the board's GitHub Pages manifest (JSON "version") at boot and every 6 h, or now with
 # the "Check for Update" button, and compares it with this firmware's project version.
 # It only REPORTS: nothing is downloaded or installed, so an adopted config (API key, name,
-# extras) is never replaced. Update with "Install" in the Device Builder (adopted configs
+# extras) is never replaced. Adopted devices show Check for Update + status only: Install
+# Update deliberately lives in the factory OTA package (core/auto-update.yaml), never here. Update with "Install" in the Device Builder (adopted configs
 # follow the "stable" branch, so no YAML edit is needed).
 # The factory firmware removes these entities: its "Firmware Update" entity already does this.
 #
@@ -14,6 +15,13 @@ http_request:
   timeout: 5s
 
 text_sensor:
+  - platform: template
+    id: update_status
+    name: "Update Status"
+    icon: mdi:information-outline
+    entity_category: diagnostic
+    update_interval: never
+
   - platform: template
     id: latest_version
     name: "Latest Version"
@@ -96,6 +104,7 @@ script:
                                  current.c_str(), newer ? " -> update available" : "");
                         id(latest_version).publish_state(latest);
                         id(update_available).publish_state(newer);
+                        id(update_status).publish_state(newer ? "Update available: " + latest : "Up to date (" + current + ")");
                 on_error:
                   then:
                     - logger.log:
