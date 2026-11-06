@@ -13,6 +13,8 @@ section below, with the factory and OTA images attached.
   downloading, failure), since the ESPHome web_server v3 frontend does not render update
   entities. Install Update remains a public button; adopted Device Builder builds still
   report only (use Install in the builder to preserve your config).
+- Adopted builds put Update Status next to Check for Update in Configuration, explicitly
+  saying when a new version is available and to install from Device Builder (PT/EN).
 
 ## [0.3.8] - 2026-11-06
 

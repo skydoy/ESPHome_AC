@@ -19,7 +19,7 @@ text_sensor:
     id: update_status
     name: "Update Status"
     icon: mdi:information-outline
-    entity_category: diagnostic
+    entity_category: config
     update_interval: never
 
   - platform: template
@@ -104,7 +104,7 @@ script:
                                  current.c_str(), newer ? " -> update available" : "");
                         id(latest_version).publish_state(latest);
                         id(update_available).publish_state(newer);
-                        id(update_status).publish_state(newer ? "Update available: " + latest : "Up to date (" + current + ")");
+                        id(update_status).publish_state(newer ? "New version " + latest + " available, install from Device Builder" : "Up to date (" + current + ")");
                 on_error:
                   then:
                     - logger.log:
