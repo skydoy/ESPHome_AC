@@ -60,7 +60,7 @@
     indoorcoiltemperature: ["ticoil", "°C", 1],
     indoorhumidity: ["hum", "%", 0]
   };
-  var vals = {}, mode = "";
+  var vals = {}, mode = "", action = "", freq = 0, haveClimate = false;
 
   function chip(k, x, y, w, cls) {
     return '<g data-c="' + k + '" transform="translate(' + x + "," + y + ')">' +
@@ -157,18 +157,25 @@
     b.textContent = lang === "pt" ? "PT · EN" : "EN · PT";
     b.title = t("lang");
     el.querySelector("svg").setAttribute("aria-label", t("title"));
-    var m = mode.toLowerCase();
+    var m = mode.toLowerCase().replace(/^climate_mode_/, "");
+    var act = action.toLowerCase().replace(/^climate_action_/, "");
     el.querySelector("#mt").textContent = m ? t("m_" + m) : "—";
     // Heat: hot gas goes to the indoor unit on the top line. Cool: roles swap.
-    var heat = m === "heat", cool = m === "cool" || m === "dry" || m === "heat_cool" || m === "auto";
-    var run = heat || cool;
+    if (!m && act) m = act;
+    var heat = m === "heat" || act === "heating", cool = m === "cool" || m === "dry" || m === "heat_cool" || m === "auto" || act === "cooling" || act === "drying";
+    // Any mode other than OFF (including FAN_ONLY) can run the outdoor fan. Frequency
+    // is a fallback for units whose climate action is not exposed or not updated.
+    // Frequency fallback only until the climate entity arrives (its last value may be
+    // stale, so it must never keep the fan spinning against an OFF climate state).
+    var compressor = !haveClimate && freq > 0;
+    var run = compressor || (!!m && m !== "off" && act !== "off");
     var p1 = el.querySelector("#p1"), p2 = el.querySelector("#p2");
     p1.setAttribute("class", "pp" + (run ? (heat ? " hot" : " cold") : ""));
     p2.setAttribute("class", "pp" + (run ? (heat ? " cold" : " hot") : ""));
     // Flow direction: heat = top line outdoor->indoor; cool = reversed.
     el.querySelector("#f1").setAttribute("class", "pf" + (heat ? "" : " rev"));
     el.querySelector("#f2").setAttribute("class", "pf" + (heat ? " rev" : ""));
-    el.className = run ? "run" : m === "off" || !m ? "off" : "";
+    el.className = run ? "run" : "";
   }
 
   function mount() {
@@ -198,13 +205,16 @@
     try { d = JSON.parse(e.data); } catch (x) { return; }
     var id = String(d.id || "");
     if (/^climate[-\/]/.test(id)) {
+      haveClimate = true;
       if (d.mode != null) mode = String(d.mode);
+      if (d.action != null) action = String(d.action);
       vals.troom = fmt(d.current_temperature, "°C", 1);
       vals.ttgt = fmt(d.target_temperature, "°C", 1);
     } else {
       var m = MAP[norm(d.name_id || id)] || MAP[norm(d.name)];
       if (!m) return;
       vals[m[0]] = fmt(d.value, m[1], m[2]);
+      if (m[0] === "freq") freq = typeof d.value === "number" && isFinite(d.value) ? d.value : 0;
     }
     paint();
   }
