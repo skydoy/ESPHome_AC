@@ -8,6 +8,8 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-11-06
+
 ## [0.3.7] - 2026-11-05
 
 ### Added
@@ -17,6 +19,11 @@ section below, with the factory and OTA images attached.
   `core/web-log.js` is now `core/web-ui.js` (keeps the debug log height cap).
 
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - Web UI diagram: the outdoor fan now spins whenever the AC is not OFF (including fan-only
   and auto), also following the climate action, with compressor frequency as a fallback
   before the climate entity arrives.
@@ -24,6 +31,11 @@ section below, with the factory and OTA images attached.
 ## [0.3.6] - 2026-11-05
 
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - Factory web UI: debug log panel capped at `min(45vh, 420px)` with internal scroll
   (`core/web-log.js` injected into `esp-log` shadowRoot via `js_include`). Stock
   web_server v3 grew the log to full page height and pushed controls off-screen.
@@ -31,6 +43,11 @@ section below, with the factory and OTA images attached.
 ## [0.3.5] - 2026-11-05
 
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - **Report my AC** text sensor now shows a short Worker redirect
   (`…/r/<8 hex>`, ~66 chars) instead of the huge prefilled GitHub URL that broke
   web_server v3 layout. Full GitHub URL remains in the INFO log only.
@@ -224,6 +241,11 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 
 ## [0.2.10] - 2026-10-29
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - **Device Builder rebuilt an old version, or failed with 28 errors after an update.** Adopted
   configs referenced `@main`, and ESPHome caches git sources for one day (the one-line
   `github://` form cannot change that), so *Install* could rebuild the old release, or combine
@@ -243,6 +265,11 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 
 ## [0.2.9] - 2026-10-29
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - **Adopted devices were replaced by the generic firmware.** The `Firmware Update` entity was
   part of the device config that the ESPHome Device Builder adopts, so pressing *Install* on it in
   Home Assistant flashed the generic web-installer firmware over an adopted config. That firmware
@@ -316,6 +343,11 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
   firmware still ships without them, so existing devices keep working.
 
 ### Fixed
+- Web UI diagram: multi-split outdoor activity drives the outdoor fan (compressor frequency,
+  power fallback) even when this indoor unit is OFF, with a PT/EN "running for another unit"
+  hint. Climate temperatures arrive as strings, so room/target now show real values.
+- PT/EN toggle also translates the web_server v3 entity list: all entity names, group
+  headers, climate labels, select options and PRESS buttons (display text only).
 - Device Builder compile warnings:
   - the splash image uses the `platform: file` image syntax;
   - the splash PNG is loaded by URL, so remote and bundled builds no longer skip it
@@ -387,7 +419,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...HEAD
+[0.3.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.5...v0.3.6
 [0.3.5]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.4...v0.3.5

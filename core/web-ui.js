@@ -22,7 +22,81 @@
     return true;
   }
 
+  
   // --- 2) AC diagram ---
+;
+  // Web UI entity names (exact English name -> PT-PT). English is restored on EN.
+  var ENT_PT = {
+    "Air Conditioner": "Ar condicionado",
+    "Outdoor Temperature": "Temperatura exterior",
+    "Indoor Coil Temperature": "Temperatura da bateria interior",
+    "Outdoor Coil Temperature": "Temperatura da bateria exterior",
+    "Compressor Frequency": "Frequência do compressor",
+    "Compressor Target Frequency": "Frequência alvo do compressor",
+    "Indoor Humidity": "Humidade interior",
+    "Supply Voltage": "Tensão de alimentação",
+    "Power": "Potência",
+    "Current": "Corrente",
+    "AC Link": "Ligação ao AC",
+    "AC Fault": "Falha do AC",
+    "AC Fault Codes": "Códigos de falha do AC",
+    "AC Link Status": "Estado da ligação ao AC",
+    "AC Firmware Version": "Versão do firmware do AC",
+    "AC Bus Checksum Errors": "Erros de checksum do barramento do AC",
+    "AC Bus Framing Errors": "Erros de trama do barramento do AC",
+    "Humidity Set Point": "Alvo de humidade",
+    "AC Panel Unit": "Unidade do painel do AC",
+    "AC Capabilities": "Capacidades do AC",
+    "AC Device Type": "Tipo de dispositivo do AC",
+    "Auto report": "Relatório automático",
+    "AC Identity": "Identidade do AC",
+    "Auxiliary Heater": "Aquecimento auxiliar",
+    "AC Display": "Ecrã do AC",
+    "AC Beep": "Som do AC",
+    "AC Frame Logging": "Registo de tramas do AC",
+    "Fan Mute": "Silenciar ventoinha",
+    "Indoor Temperature Sensor Failure": "Falha do sensor de temperatura interior",
+    "Indoor Coil Temperature Sensor Failure": "Falha do sensor da bateria interior",
+    "Indoor Humidity Sensor Failure": "Falha do sensor de humidade interior",
+    "Water Tank Full": "Depósito de água cheio",
+    "Indoor Fan Motor Failure": "Falha do motor da ventoinha interior",
+    "Cabinet Grille Protection Alarm": "Alarme de proteção da grelha",
+    "Indoor Voltage Zero-Crossing Fault": "Falha de passagem por zero da tensão interior",
+    "Indoor-Outdoor Communication Failure": "Falha de comunicação interior-exterior",
+    "Indoor Board-Display Communication Failure": "Falha de comunicação placa-ecrã da unidade interior",
+    "Indoor Board-Keypad Communication Failure": "Falha de comunicação placa-teclado da unidade interior",
+    "WiFi-Indoor Communication Failure": "Falha de comunicação WiFi-unidade interior",
+    "Electrical Fault": "Falha elétrica",
+    "Indoor Control Board EEPROM Error": "Erro de EEPROM da placa de controlo interior",
+    "Outdoor EEPROM Error": "Erro de EEPROM da unidade exterior",
+    "Outdoor Coil Temperature Sensor Failure": "Falha do sensor da bateria exterior",
+    "Exhaust Temperature Sensor Failure": "Falha do sensor de temperatura de descarga",
+    "Outdoor Ambient Temperature Sensor Failure": "Falha do sensor de temperatura ambiente exterior",
+    "Overheat or Overcool Protection": "Proteção contra sobreaquecimento ou subarrefecimento",
+    "High Discharge Temperature Protection": "Proteção contra temperatura de descarga elevada",
+    "Firmware Version": "Versão do firmware",
+    "ESPHome Version": "Versão do ESPHome",
+    "Latest Version": "Última versão",
+    "Firmware Update": "Atualização do firmware",
+    "Sleep Mode": "Modo de sono",
+    "Light On": "Ligar luz",
+    "Light Off": "Desligar luz",
+    "Eco": "Eco",
+    "Super": "Super",
+    "Report my AC": "Reportar o meu AC",
+    "Identify AC": "Identificar AC",
+    "Energy Today": "Energia hoje",
+    "Uptime": "Tempo ligado",
+    "Wi-Fi Signal": "Sinal Wi-Fi",
+    "Reset Reason": "Motivo do reinício",
+    "Restart": "Reiniciar",
+    "Restart (Safe Mode)": "Reiniciar (modo seguro)",
+    "Update Available": "Atualização disponível",
+    "Check for Update": "Verificar atualizações",
+    "Auto Update": "Atualização automática",
+    "Install Update": "Instalar atualização",
+    "Latest Version": "Última versão",
+  };
   var KEY = "esphome_ac_lang", lang;
   try { lang = localStorage.getItem(KEY); } catch (e) {}
   if (lang !== "pt" && lang !== "en") lang = /^pt/i.test(navigator.language || "") ? "pt" : "en";
@@ -64,6 +138,89 @@
     roomtemperature: ["troom", "°C", 1],indoortemperature: ["troom", "°C", 1],ambienttemperature: ["troom", "°C", 1]
   };
   var vals = {}, mode = "", action = "", outdoor = { freq: null, pwr: null };
+
+  var OPT_PT = {
+    OFF: "Desligado", HEAT_COOL: "Automático", COOL: "Frio", HEAT: "Aquecer",
+    DRY: "Desumidificar", FAN_ONLY: "Ventilação", AUTO: "Auto",
+    "1": "1", "2": "2", "3": "3", "4": "4"
+  };
+  var GROUP_PT = {
+    "Sensor and Control": "Sensores e controlo", Configuration: "Configuração",
+    Diagnostic: "Diagnóstico", Undefined: "Outros"
+  };
+  var LABEL_PT = { Current: "Atual", Target: "Alvo", Mode: "Modo" };
+
+  // Translate esp-entity-table without touching option values or REST action URLs.
+  // entity.name is the source string; the observer keeps new/re-rendered rows translated.
+  function tableEl() {
+    var sr = root(), t = sr && sr.querySelector("esp-entity-table");
+    return t && t.shadowRoot ? t : null;
+  }
+  function translateTable() {
+    var tb = tableEl();
+    if (!tb) return false;
+    var sr = tb.shadowRoot;
+    // 1) Entity names: text slot inside each .entity-row (the second div, after the icon).
+    if (tb.entities) {
+      var rows = sr.querySelectorAll(".entity-row");
+      for (var i = 0; i < tb.entities.length && i < rows.length; i++) {
+        var e = tb.entities[i], box = rows[i].children && rows[i].children[1];
+        if (!box) continue;
+        var tn = null;
+        for (var c = 0; c < box.childNodes.length; c++)
+          if (box.childNodes[c].nodeType === 3 && box.childNodes[c].nodeValue.trim()) tn = box.childNodes[c];
+        if (tn) {
+          if (tn.__en === undefined) tn.__en = tn.nodeValue.trim();
+          var en = tn.__en, pt = ENT_PT[en];
+          tn.nodeValue = lang === "pt" && pt ? pt : en;
+        }
+      }
+    }
+    // 2) Group headers, climate labels, option display text.
+    sr.querySelectorAll(".tab-header").forEach(function (h) {
+      var v = h.textContent.trim();
+      Object.keys(GROUP_PT).forEach(function (en) {
+        if (lang === "pt" && v === en) h.textContent = GROUP_PT[en];
+        if (lang === "en" && v === GROUP_PT[en]) h.textContent = en;
+      });
+    });
+    sr.querySelectorAll("label").forEach(function (l) {
+      var key = l.textContent.trim().replace(/\s*:$/, "");
+      Object.keys(LABEL_PT).forEach(function (en) {
+        if (lang === "pt" && key === en) l.textContent = LABEL_PT[en] + " ";
+        if (lang === "en" && key === LABEL_PT[en]) l.textContent = en + ": ";
+      });
+    });
+    sr.querySelectorAll("option").forEach(function (o) {
+      if (o.__en === undefined) o.__en = o.textContent.trim();
+      o.textContent = lang === "pt" ? OPT_PT[o.__en] || o.__en : o.__en;
+    });
+    // 3) Buttons: visible label only (PRESS).
+    sr.querySelectorAll(".abutton,.abuttonIsState").forEach(function (b) {
+      var v = b.textContent.trim();
+      if (!/^PRESS|PREMIR$/.test(v)) return;
+      b.textContent = lang === "pt" ? "PREMIR" : "PRESS";
+    });
+    if (!tb.__langObs) {
+      tb.__langObs = new MutationObserver(function (recs) {
+        if (recs.every(function (r) {
+          return r.type === "childList" &&
+            (r.addedNodes.length === 0 ? true : Array.prototype.every.call(r.addedNodes, function (n) {
+              return n.nodeType !== 1 || n.tagName !== "OPTION";
+            }));
+        })) return;
+        translateTableSoon();
+      });
+      tb.__langObs.observe(sr, { childList: true, subtree: true });
+    }
+    return true;
+  }
+  var tTimer = null;
+  function translateTableSoon() {
+    if (tTimer) return;
+    tTimer = setTimeout(function () { tTimer = null; translateTable(); }, 30);
+  }
+
 
   function chip(k, x, y, w, cls) {
     return '<g data-c="' + k + '" transform="translate(' + x + "," + y + ')">' +
@@ -211,11 +368,12 @@
       var el = document.createElement("section");
       el.id = "acd";
       el.innerHTML = '<div class="hd"><div><h2></h2><p></p></div><button type="button"></button></div>' + SVG;
-      main.parentNode.insertBefore(el, main);
+      (main.parentNode || main).insertBefore(el, main);
       el.querySelector("button").onclick = function () {
         lang = lang === "pt" ? "en" : "pt";
         try { localStorage.setItem(KEY, lang); } catch (e) {}
         paint();
+        translateTable();
       };
     }
     paint();
@@ -256,6 +414,7 @@
   var n = 0, logOk = false, dOk = false, timer = setInterval(function () {
     logOk = logOk || fixLog();
     dOk = dOk || mount();
+    translateTable();
     if ((logOk && dOk) || ++n > 240) clearInterval(timer);
   }, 250);
 })();
