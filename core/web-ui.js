@@ -91,8 +91,8 @@
     "Reset Reason": "Motivo do reinício",
     "Restart": "Reiniciar",
     "Restart (Safe Mode)": "Reiniciar (modo seguro)",
-    "Update Available": "Atualização disponível",
     "Update Status": "Estado da atualização",
+    "Update Available": "Atualização disponível",
     "Check for Update": "Verificar atualizações",
     "Auto Update": "Atualização automática",
     "Install Update": "Instalar atualização",
@@ -157,6 +157,29 @@
     var sr = root(), t = sr && sr.querySelector("esp-entity-table");
     return t && t.shadowRoot ? t : null;
   }
+  // Content translations for common state strings. Keep option values and REST unchanged.
+  function uiString(v) {
+    if (lang !== "pt") return v;
+    var m = /^New version (.+) available, install from Device Builder$/.exec(v);
+    if (m) return "Versão nova " + m[1] + " disponível, instala no Device Builder";
+    if (/^New version .+ available$/.test(v)) return v.replace("New version ", "Versão nova disponível: ").replace(" available", "");
+    m = /^Up to date \((.+)\)$/.exec(v);
+    if (m) return "Atualizado (" + m[1] + ")";
+    m = /^Update available: (.+)$/.exec(v);
+    if (m) return "Atualização disponível: " + m[1];
+    var CONTENT_PT = {
+      "Checking for updates": "A verificar atualizações",
+      "Install requested": "Instalação solicitada",
+      "Downloading firmware (do not unplug)": "A transferir o firmware (não desligues)",
+      "Installed, rebooting": "Instalado, a reiniciar",
+      "Check failed (no internet)": "Falha na verificação (sem internet)"
+    };
+    if (CONTENT_PT[v]) return CONTENT_PT[v];
+    if (/^Update failed \(/.test(v)) return v.replace("Update failed", "Falha na atualização");
+    if (/^Invalid manifest$/.test(v)) return "Manifesto inválido";
+    return v;
+  }
+
   function translateTable() {
     var tb = tableEl();
     if (!tb) return false;
@@ -177,6 +200,22 @@
         }
       }
     }
+    // 2) Dynamic text states (e.g. update status) inside entity action/value area.
+    sr.querySelectorAll(".entity-row").forEach(function (row) {
+      var nameEl = row.children && row.children[1], name = nameEl && nameEl.textContent;
+      if (!name) return;
+      var wanted = lang === "pt" ? "Estado da atualização" : "Update Status";
+      if (name.trim().replace(/^\[[^\]]+\]\s*/, "").trim() !== wanted) return;
+      var walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT), nodes = [], n;
+      while ((n = walker.nextNode())) nodes.push(n);
+      nodes.forEach(function (node) {
+        var txt = node.nodeValue.trim();
+        if (!txt || node.parentNode === nameEl) return;
+        if (node.__statusEn !== undefined) txt = node.__statusEn;
+        else if (/^(New version|Up to date|Checking for updates|Install requested|Downloading firmware|Installed, rebooting|Check failed|Update failed|Invalid manifest)/.test(txt)) node.__statusEn = txt;
+        if (node.__statusEn !== undefined) node.nodeValue = uiString(node.__statusEn);
+      });
+    });
     // 2) Group headers, climate labels, option display text.
     sr.querySelectorAll(".tab-header").forEach(function (h) {
       var v = h.textContent.trim();
