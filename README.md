@@ -82,6 +82,8 @@ Prices are M5Stack shop list prices, before shipping and tax. The Plus2 is end-o
 ## Automatic updates (OTA)
 The board checks for new firmware on its own (at start-up and every 6 hours). Only tested
 releases from the `stable` branch are offered.
+API key, Device Builder vs factory OTA, and the open LAN web page:
+[Security and OTA](docs/security.md).
 - **Web installer image:** Home Assistant shows **Firmware Update**. Press **Install** (or leave
   **Auto Update** on for a night install). Wi-Fi and settings are kept.
 - **Adopted in the ESPHome Device Builder:** the board only *reports* a new version
@@ -97,14 +99,15 @@ See [CHANGELOG.md](CHANGELOG.md).
 [Configuration](docs/configuration.md) · [Compatibility](docs/compatibility.md) ·
 [Hisense notes](brands/hisense/README.md) · [Hardware](brands/hisense/hardware.md) ·
 [Protocol](brands/hisense/protocol.md) · [Adapters](adapters/README.md) ·
-[Changelog](CHANGELOG.md) · [Report a problem](https://github.com/skydoy/ESPHome_AC/issues/new/choose) ·
-[Discussions](https://github.com/skydoy/ESPHome_AC/discussions) · [Security](SECURITY.md)
+[Changelog](CHANGELOG.md) · [Security and OTA](docs/security.md) · [Report a problem](https://github.com/skydoy/ESPHome_AC/issues/new/choose) ·
+[Discussions](https://github.com/skydoy/ESPHome_AC/discussions) · [Security policy](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Own build or dashboard import: [Stick](devices/hisense-m5stickc-plus2.yaml) / [ATOM](devices/hisense-atom-lite-tail485.yaml)
 device configs, [examples/](examples/my-ac-livingroom.yaml).
 
 ## Credits
 - Original implementation; no code copied. Protocol knowledge from
+  (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)):
   [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1),
   [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome),
   [Druidblack/AC-Hisense](https://github.com/Druidblack/AC-Hisense),

@@ -83,6 +83,8 @@ Preços de tabela da loja M5Stack, sem portes nem impostos. O Plus2 foi desconti
 ## Atualizações automáticas (OTA)
 A placa procura firmware novo sozinha (ao arrancar e de 6 em 6 horas). Só aparecem releases
 testadas do ramo `stable`.
+Chave de API, Device Builder vs OTA de fábrica, e a página web aberta na LAN:
+[Segurança e OTA](docs/seguranca.md).
 - **Imagem do instalador web:** o Home Assistant mostra **Firmware Update**. Carrega em
   **Install** (ou deixa o **Auto Update** ligado para instalar de madrugada). O Wi-Fi e as
   definições mantêm-se.
@@ -99,13 +101,14 @@ Vê o [CHANGELOG.md](CHANGELOG.md).
 [Configuração](docs/configuration.md) · [Compatibilidade](docs/compatibility.md) ·
 [Notas Hisense](brands/hisense/README.md) · [Hardware](brands/hisense/hardware.md) ·
 [Protocolo](brands/hisense/protocol.md) · [Adaptadores](adapters/README.md) ·
-[Alterações](CHANGELOG.md) · [Reportar um problema](https://github.com/skydoy/ESPHome_AC/issues/new/choose) ·
-[Discussões](https://github.com/skydoy/ESPHome_AC/discussions) · [Segurança](SECURITY.md)
+[Alterações](CHANGELOG.md) · [Segurança e OTA](docs/seguranca.md) · [Reportar um problema](https://github.com/skydoy/ESPHome_AC/issues/new/choose) ·
+[Discussões](https://github.com/skydoy/ESPHome_AC/discussions) · [Política de segurança](SECURITY.md) · [Avisos de terceiros](THIRD_PARTY_NOTICES.md)
 
 Os documentos técnicos estão em inglês, exceto o guia rápido e os problemas.
 
 ## Créditos
 - Implementação original; nenhum código copiado. Conhecimento do protocolo vindo de
+  (vê [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)):
   [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1),
   [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome),
   [Druidblack/AC-Hisense](https://github.com/Druidblack/AC-Hisense),
