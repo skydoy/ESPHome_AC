@@ -56,7 +56,8 @@ void build_command(const Command &c, uint8_t t_hi, uint8_t t_lo, uint8_t *f) {
   if (c.has_quiet)
     f[35] = onoff_(c.quiet, 0x30, 0x10);
   if (c.has_display)
-    f[36] = onoff_(c.display, 0xC0, 0x40);
+    // Hisense panel light is inverted: 0x40 turns it ON, 0xC0 turns it OFF (confirmed on a real unit).
+    f[36] = onoff_(c.display, 0x40, 0xC0);
   if (c.has_heat8)
     f[37] |= onoff_(c.heat8, 0x03, 0x01);
   seal(f, COMMAND_LEN);

@@ -384,7 +384,12 @@ static void test_commands() {
   sp = Command();
   sp.has_display = sp.display = true;
   build_command(sp, 1, 1, f);
-  CHECK(f[36] == 0xC0);
+  CHECK(f[36] == 0x40);  // light ON
+  sp = Command();
+  sp.has_display = true;
+  sp.display = false;
+  build_command(sp, 1, 1, f);
+  CHECK(f[36] == 0xC0);  // light OFF
   sp = Command();
   sp.has_heat8 = sp.heat8 = true;
   build_command(sp, 1, 1, f);
