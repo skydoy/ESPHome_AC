@@ -9,6 +9,9 @@ section below, with the factory and OTA images attached.
 ## [Unreleased]
 
 ### Added
+- Docs: short [Security and OTA](docs/security.md) / [Segurança e OTA](docs/seguranca.md)
+  (API key, Device Builder vs factory OTA, open LAN web page) and
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for protocol reference credits.
 - Device web UI: project favicon on the tab (same SVG as the installer), matching Hunter and Altherma.
 - README: short Automatic updates (OTA) section (EN + PT), aligned with Hunter.
 - CI: pin runners to `ubuntu-24.04` and `esphome/build-action` to the v8.1.0 commit SHA

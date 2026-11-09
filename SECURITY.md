@@ -30,3 +30,5 @@ configuration and flash it once:
 - `api: encryption: key:` (Home Assistant asks for it when you add the device)
 - an OTA password (`ota: - platform: esphome password:`)
 - a fallback hotspot password (`wifi: ap: password:`)
+
+More detail: [Security and over-the-air updates](docs/security.md).
