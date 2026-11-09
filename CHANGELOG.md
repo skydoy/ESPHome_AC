@@ -8,14 +8,24 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.3.9] - 2026-11-09
+
 ### Added
 - Web UI: PT/EN toggle also translates diagnostic *values* (Reset Reason, AC Link
   Status, Fault Codes, Capabilities, Identity, Update Status, firmware source).
-- README: Device web page screenshots (`docs/img/webui-pt.png`, `webui-en.png`).
+- Docs: device web page screenshots on their own EN/PT pages
+  ([Device web page](docs/web-page.md) / [Página web do aparelho](docs/pagina-web.md)),
+  linked from the short README.
 - Docs: short [Security and OTA](docs/security.md) / [Segurança e OTA](docs/seguranca.md)
   (API key, Device Builder vs factory OTA, open LAN web page) and
-  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for protocol reference credits.
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for protocol reference credits
+  (includes the ESPHome GPL-3.0 runtime notice inside firmware images).
 - Device web UI: project favicon on the tab (same SVG as the installer), matching Hunter and Altherma.
+- README: short beginner-friendly overview (what it is, one image, compatibility, 3-step
+  install, six “what you get” bullets) with detailed content moved to
+  [docs/overview.md](docs/overview.md) / [docs/visao-geral.md](docs/visao-geral.md).
+- Web installer: simplified 3-step flow (pick board → connect USB → install), keeping
+  donations, PT/EN and light/dark mode.
 - README: short Automatic updates (OTA) section (EN + PT), aligned with Hunter.
 - CI: pin runners to `ubuntu-24.04` and `esphome/build-action` to the v8.1.0 commit SHA
   (same as Altherma; `ubuntu-latest` is moving to Ubuntu 26).
@@ -445,7 +455,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...HEAD
+[0.3.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.6...v0.3.7
 [0.3.6]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.5...v0.3.6
