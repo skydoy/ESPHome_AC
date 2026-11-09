@@ -92,6 +92,16 @@ Chave de API, Device Builder vs OTA de fábrica, e a página web aberta na LAN:
   (**Update Status**, **Check for Update**). Carrega em **Install** no Device Builder; a
   config já segue a `stable`, sem editar YAML.
 
+## Página web da placa
+Abre `http://<ip-da-placa>/` na tua rede local para veres os estados em direto, o esquema
+do AC e os registos (sem palavra-passe de propósito; [notas de segurança](docs/seguranca.md)).
+Língua: botão PT/EN no canto superior. Os textos de diagnóstico seguem a mesma língua.
+
+<p align="center">
+  <img src="docs/img/webui-pt.png" alt="Página web da placa em português" width="480">
+  <img src="docs/img/webui-en.png" alt="Página web da placa em inglês" width="480">
+</p>
+
 ## Alterações
 Vê o [CHANGELOG.md](CHANGELOG.md).
 
