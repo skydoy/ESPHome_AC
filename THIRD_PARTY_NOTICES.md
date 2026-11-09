@@ -29,6 +29,14 @@ Used as documentation of status bytes / behaviour only:
 - [pslawinski/esphome_airconintl](https://github.com/pslawinski/esphome_airconintl)
 - [artshevchenko/AC-Hi](https://github.com/artshevchenko/AC-Hi)
 
+## ESPHome runtime in the firmware
+The firmware `.bin` files are built with [ESPHome](https://github.com/esphome/esphome). ESPHome's
+C++ runtime, which is compiled into every image, is licensed under
+[GPL-3.0](https://github.com/esphome/esphome/blob/dev/LICENSE) (its Python tooling is MIT). That
+part keeps its own licence. The PolyForm Noncommercial 1.0.0 licence of this repository covers
+this project's own code, configuration, installer and docs: you may use, change and share them,
+but not for commercial purposes. This note is informational, not legal advice.
+
 ## Not included
 Adapter ideas for other AC brands listed in [adapters/README.md](adapters/README.md) point at
 upstream projects for future testers. No code from those projects is in this repository.
