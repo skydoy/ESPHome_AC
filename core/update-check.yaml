@@ -62,6 +62,9 @@ script:
       - if:
           condition: wifi.connected
           then:
+            - text_sensor.template.publish:
+                id: update_status
+                state: "Checking for updates"
             - http_request.get:
                 url: ${update_manifest_url}
                 capture_response: true
@@ -71,6 +74,7 @@ script:
                     - lambda: |-
                         if (response->status_code != 200) {
                           ESP_LOGW("update_check", "Manifest HTTP %d", response->status_code);
+                          id(update_status).publish_state("Update check failed");
                           return;
                         }
                         std::string latest;
@@ -81,6 +85,7 @@ script:
                         });
                         if (latest.empty()) {
                           ESP_LOGW("update_check", "Manifest has no version");
+                          id(update_status).publish_state("Update check failed");
                           return;
                         }
                         // Numeric semver compare (major.minor.patch, any suffix ignored).
@@ -107,6 +112,9 @@ script:
                         id(update_status).publish_state(newer ? "New version " + latest + " available, install from Device Builder" : "Up to date (" + current + ")");
                 on_error:
                   then:
+                    - text_sensor.template.publish:
+                        id: update_status
+                        state: "Update check failed"
                     - logger.log:
                         level: WARN
                         format: "Update check failed (no internet or GitHub Pages unreachable)"

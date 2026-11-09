@@ -8,7 +8,17 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Added
+- Device web UI: project favicon on the tab (same SVG as the installer), matching Hunter and Altherma.
+- README: short Automatic updates (OTA) section (EN + PT), aligned with Hunter.
+- CI: pin runners to `ubuntu-24.04` and `esphome/build-action` to the v8.1.0 commit SHA
+  (same as Altherma; `ubuntu-latest` is moving to Ubuntu 26).
+- Adopted update check: Update Status shows "Checking for updates" / "Update check failed".
+- `devices/.gitignore` for local ESPHome build output.
+
 ### Fixed
+- Panel light: Light On / Light Off and the AC Display switch sent the opposite command on
+  Hisense units; commands are now correct.
 - Factory OTA firmware: added a public Update Status row (current/latest, checking,
   downloading, failure), since the ESPHome web_server v3 frontend does not render update
   entities. Install Update remains a public button; adopted Device Builder builds still
