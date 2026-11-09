@@ -9,6 +9,9 @@ section below, with the factory and OTA images attached.
 ## [Unreleased]
 
 ### Added
+- Web UI: PT/EN toggle also translates diagnostic *values* (Reset Reason, AC Link
+  Status, Fault Codes, Capabilities, Identity, Update Status, firmware source).
+- README: Device web page screenshots (`docs/img/webui-pt.png`, `webui-en.png`).
 - Docs: short [Security and OTA](docs/security.md) / [Segurança e OTA](docs/seguranca.md)
   (API key, Device Builder vs factory OTA, open LAN web page) and
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for protocol reference credits.

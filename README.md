@@ -90,6 +90,16 @@ API key, Device Builder vs factory OTA, and the open LAN web page:
   (**Update Status**, **Check for Update**). Press **Install** in the Device Builder; your
   config already follows `stable`, so no YAML edit is needed.
 
+## Device web page
+Open `http://<device-ip>/` on your LAN for live states, the AC diagram and logs
+(no password by design; [security notes](docs/security.md)).
+Language: PT/EN toggle (top right). Diagnostic text values follow the same language.
+
+<p align="center">
+  <img src="docs/img/webui-pt.png" alt="Device web page in Portuguese" width="480">
+  <img src="docs/img/webui-en.png" alt="Device web page in English" width="480">
+</p>
+
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md).
 

@@ -168,26 +168,81 @@
     var sr = root(), t = sr && sr.querySelector("esp-entity-table");
     return t && t.shadowRoot ? t : null;
   }
-  // Content translations for common state strings. Keep option values and REST unchanged.
+  // Exact English text_sensor / diagnostic VALUES -> PT-PT (tu). Sources: ESPHome
+  // debug_esp32.cpp reset reasons, hisense_ac link/fault/caps strings, update YAML.
+  var VAL_PT = {
+    Searching: "A procurar", Handshake: "Negociação", Connected: "Ligado", "No response": "Sem resposta",
+    OK: "OK", None: "Nenhuma", Celsius: "Celsius", Fahrenheit: "Fahrenheit",
+    "unknown source": "origem desconhecida", "power-on event": "Ligado", "external pin": "Pino externo",
+    "software via esp_restart": "Software (esp_restart)", "exception/panic": "Exceção/pânico",
+    "interrupt watchdog": "Watchdog de interrupção", "task watchdog": "Watchdog de tarefa",
+    "other watchdogs": "Outros watchdogs", "exiting deep sleep mode": "A sair do deep sleep",
+    brownout: "Quebra de tensão", SDIO: "SDIO", "USB peripheral": "Periférico USB", JTAG: "JTAG",
+    "efuse error": "Erro de eFuse", "power glitch detected": "Oscilação de alimentação",
+    "CPU lock up": "CPU bloqueada",
+    "Checking for updates": "A verificar atualizações", "Install requested": "Instalação solicitada",
+    "Downloading firmware (do not unplug)": "A transferir o firmware (não desligues)",
+    "Installed, rebooting": "Instalado, a reiniciar",
+    "Update check failed": "Falha na verificação de atualizações",
+    "Check failed (no internet)": "Falha na verificação (sem internet)",
+    "Invalid manifest": "Manifesto inválido",
+    "Heat/Cool": "Frio/Calor", "Power Save": "Poupança de energia", Purify: "Purificar",
+    "Fan Mute": "Silenciar ventoinha", "Continuous Fan": "Ventilação contínua",
+    "8C Heat": "Aquecimento 8 °C", "Humidity Sensor": "Sensor de humidade",
+    "Indoor temperature sensor": "Sensor de temperatura interior",
+    "Indoor coil sensor": "Sensor da bateria interior",
+    "Humidity sensor": "Sensor de humidade", "Water tank full": "Depósito de água cheio",
+    "Indoor fan motor": "Motor da ventoinha interior", "Grille protection": "Proteção da grelha",
+    "Zero-cross detection": "Deteção de passagem por zero",
+    "Indoor/outdoor communication": "Comunicação interior/exterior",
+    "Display board": "Placa do ecrã", Keypad: "Teclado", "Wi-Fi module": "Módulo Wi-Fi",
+    Electrical: "Elétrica", "Indoor EEPROM": "EEPROM interior",
+    "Outdoor EEPROM": "EEPROM exterior", "Outdoor coil sensor": "Sensor da bateria exterior",
+    "Discharge sensor": "Sensor de descarga",
+    "Outdoor temperature sensor": "Sensor de temperatura exterior",
+    "Overheat/overcool protection": "Proteção contra sobreaquecimento/subarrefecimento",
+    "High discharge temperature": "Temperatura de descarga elevada"
+  };
+  var SRC_PT = { release: "release", main: "main", custom: "personalizado",
+    "self-built": "compilação própria", unknown: "desconhecido" };
+
+  function mapParts(v) {
+    return v.split(", ").map(function (p) { return VAL_PT[p] || p; }).join(", ");
+  }
+  function mapTokens(v) {
+    var keys = Object.keys(VAL_PT).sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (k.length < 2 || v.indexOf(k) === -1) continue;
+      v = v.split(k).join(VAL_PT[k]);
+    }
+    return v;
+  }
   function uiString(v) {
-    if (lang !== "pt") return v;
-    var m = /^New version (.+) available, install from Device Builder$/.exec(v);
+    if (lang !== "pt" || v == null) return v;
+    v = String(v);
+    if (VAL_PT[v]) return VAL_PT[v];
+    var m = /^Reboot request from (.+)$/.exec(v);
+    if (m) return "Pedido de reinício de " + m[1];
+    m = /^New version (.+) available, install from Device Builder$/.exec(v);
     if (m) return "Versão nova " + m[1] + " disponível, instala no Device Builder";
-    if (/^New version .+ available$/.test(v)) return v.replace("New version ", "Versão nova disponível: ").replace(" available", "");
+    if (/^New version .+ available$/.test(v))
+      return v.replace("New version ", "Versão nova ").replace(" available", " disponível");
     m = /^Up to date \((.+)\)$/.exec(v);
     if (m) return "Atualizado (" + m[1] + ")";
     m = /^Update available: (.+)$/.exec(v);
     if (m) return "Atualização disponível: " + m[1];
-    var CONTENT_PT = {
-      "Checking for updates": "A verificar atualizações",
-      "Install requested": "Instalação solicitada",
-      "Downloading firmware (do not unplug)": "A transferir o firmware (não desligues)",
-      "Installed, rebooting": "Instalado, a reiniciar",
-      "Check failed (no internet)": "Falha na verificação (sem internet)"
-    };
-    if (CONTENT_PT[v]) return CONTENT_PT[v];
     if (/^Update failed \(/.test(v)) return v.replace("Update failed", "Falha na atualização");
-    if (/^Invalid manifest$/.test(v)) return "Manifesto inválido";
+    m = /^(.+) \((release|main|custom|self-built|unknown)\)$/.exec(v);
+    if (m) return m[1] + " (" + SRC_PT[m[2]] + ")";
+    if (v.indexOf("type=") === 0 || /\bcaps=/.test(v)) {
+      return mapTokens(v.replace(/^type=/, "tipo=").replace(/\bProtocol 0x/g, "Protocolo 0x")
+        .replace(/ \(raw /g, " (bruto ").replace(/\bRaw /g, "Bruto "));
+    }
+    if (v.indexOf("Protocol 0x") === 0)
+      return v.replace("Protocol ", "Protocolo ").replace(" (raw ", " (bruto ");
+    if (v.indexOf("Raw ") === 0) return "Bruto " + v.slice(4);
+    if (v.indexOf(", ") !== -1) return mapParts(v);
     return v;
   }
 
@@ -211,22 +266,45 @@
         }
       }
     }
-    // 2) Dynamic text states (e.g. update status) inside entity action/value area.
-    sr.querySelectorAll(".entity-row").forEach(function (row) {
-      var nameEl = row.children && row.children[1], name = nameEl && nameEl.textContent;
-      if (!name) return;
-      var wanted = lang === "pt" ? "Estado da atualização" : "Update Status";
-      if (name.trim().replace(/^\[[^\]]+\]\s*/, "").trim() !== wanted) return;
-      var walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT), nodes = [], n;
-      while ((n = walker.nextNode())) nodes.push(n);
-      nodes.forEach(function (node) {
-        var txt = node.nodeValue.trim();
-        if (!txt || node.parentNode === nameEl) return;
-        if (node.__statusEn !== undefined) txt = node.__statusEn;
-        else if (/^(New version|Up to date|Checking for updates|Install requested|Downloading firmware|Installed, rebooting|Check failed|Update failed|Invalid manifest)/.test(txt)) node.__statusEn = txt;
-        if (node.__statusEn !== undefined) node.nodeValue = uiString(node.__statusEn);
-      });
-    });
+    // 2) text_sensor VALUES (Reset Reason, Link Status, Fault Codes, Identity, Update Status…).
+    // Match rows by English entity name (DOM order can differ from entities[] after grouping).
+    if (tb.entities) {
+      var byName = {};
+      for (var j = 0; j < tb.entities.length; j++) {
+        var ent = tb.entities[j];
+        if (ent && ent.name) byName[ent.name] = ent;
+      }
+      var rows2 = sr.querySelectorAll(".entity-row");
+      for (var r = 0; r < rows2.length; r++) {
+        var row = rows2[r], nameBox = row.children && row.children[1], valBox = row.children && row.children[2];
+        if (!nameBox || !valBox) continue;
+        var enName = null;
+        for (var c = 0; c < nameBox.childNodes.length; c++) {
+          var cn = nameBox.childNodes[c];
+          if (cn.nodeType === 3 && cn.__en !== undefined) { enName = cn.__en; break; }
+          if (cn.nodeType === 3 && cn.nodeValue.trim()) enName = cn.nodeValue.trim();
+        }
+        if (!enName) enName = nameBox.textContent.trim().replace(/^\[[^\]]+\]\s*/, "");
+        // If currently showing PT name, map back via ENT_PT.
+        if (!byName[enName]) {
+          Object.keys(ENT_PT).some(function (en) {
+            if (ENT_PT[en] === enName) { enName = en; return true; }
+            return false;
+          });
+        }
+        var ent2 = byName[enName];
+        if (!ent2 || ent2.domain !== "text_sensor") continue;
+        var node = null, w2 = document.createTreeWalker(valBox, NodeFilter.SHOW_TEXT), tn2;
+        while ((tn2 = w2.nextNode())) if (tn2.nodeValue.trim()) { node = tn2; break; }
+        if (!node) continue;
+        var enVal = (ent2.state != null && String(ent2.state) !== "") ? String(ent2.state) : null;
+        if (!enVal) {
+          if (node.__enVal === undefined) node.__enVal = node.nodeValue.trim();
+          enVal = node.__enVal;
+        } else node.__enVal = enVal;
+        node.nodeValue = lang === "pt" ? uiString(enVal) : enVal;
+      }
+    }
     // 2) Group headers, climate labels, option display text.
     sr.querySelectorAll(".tab-header").forEach(function (h) {
       var v = h.textContent.trim();
