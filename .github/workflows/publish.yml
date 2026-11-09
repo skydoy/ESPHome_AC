@@ -16,7 +16,7 @@ jobs:
     # GitHub Pages. The M5StickC Plus2 keeps "firmware/" so existing OTA manifest URLs keep working.
     # The installer firmware is built from the *.factory.yaml (base config + "Firmware Update"
     # entity); the version and build source live in the base config, which it includes.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -59,7 +59,7 @@ jobs:
           sed -i "s|^\(\s*firmware_source:\).*|\1 \"$src\"|" "$BASE_YAML"
           grep -n "firmware_source:\|project_version:" "$BASE_YAML"
       - id: esphome
-        uses: esphome/build-action@v8.1.0   # consider pinning to the release commit SHA
+        uses: esphome/build-action@ae5408cdbc4f70692bf8e345c4982bca05a93667 # v8.1.0
         with:
           yaml-file: ${{ env.DEVICE_YAML }}
           version: "2026.10.1"
@@ -78,7 +78,7 @@ jobs:
   pages:
     # Installer page + every device folder in one Pages artifact.
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -106,7 +106,7 @@ jobs:
     # Publish the installer and the OTA manifest only for release tags (or a manual run).
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
     needs: pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write
@@ -120,7 +120,7 @@ jobs:
     # Create (or update) the GitHub Release for a v* tag: notes from CHANGELOG.md, images attached.
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     env:
@@ -173,7 +173,7 @@ jobs:
     # devices/<board>.yaml@stable, so "Install" builds the latest release with no YAML edits.
     if: startsWith(github.ref, 'refs/tags/v')
     needs: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     env:
@@ -194,7 +194,7 @@ jobs:
     # proves @stable serves this release and its component resolves to the same tag.
     if: startsWith(github.ref, 'refs/tags/v')
     needs: stable
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:

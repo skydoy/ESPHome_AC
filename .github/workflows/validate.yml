@@ -4,13 +4,13 @@ permissions:
   contents: read
 jobs:
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: Protocol unit tests (host C++)
         run: make -C tests
   config:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +46,7 @@ jobs:
   setup-firmware:
     # Generic setup image (detects the AC, then installs the brand firmware). Built from this
     # checkout only; published nowhere yet, the binaries are kept as a workflow artifact.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -104,7 +104,7 @@ jobs:
           if-no-files-found: error
   pinned-refs:
     # Adoption follows @stable; the component is pinned to v<project_version> inside the package.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: Same version in both boards; dashboard_import and component follow it

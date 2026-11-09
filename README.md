@@ -79,6 +79,18 @@ Prices are M5Stack shop list prices, before shipping and tax. The Plus2 is end-o
 > tested on a real unit. Tried it? Please [tell us how it went](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml).
 > Other brands (Mitsubishi, Daikin, Midea, …) wait for testers with real hardware; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Automatic updates (OTA)
+The board checks for new firmware on its own (at start-up and every 6 hours). Only tested
+releases from the `stable` branch are offered.
+- **Web installer image:** Home Assistant shows **Firmware Update**. Press **Install** (or leave
+  **Auto Update** on for a night install). Wi-Fi and settings are kept.
+- **Adopted in the ESPHome Device Builder:** the board only *reports* a new version
+  (**Update Status**, **Check for Update**). Press **Install** in the Device Builder; your
+  config already follows `stable`, so no YAML edit is needed.
+
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Docs
 [Troubleshooting](docs/troubleshooting.md) · [Problemas (PT)](docs/problemas.md) ·
 [Wiring](docs/wiring.md) · [Home Assistant](docs/home-assistant.md) ·
