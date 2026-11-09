@@ -25,8 +25,21 @@
     html[data-theme=dark] { color-scheme: dark; --bg:#0b1220; --card:#131c2e; --text:#e6edf3; --muted:#9aa9bd; --line:#26334a; --accent:#4fb3ff; --warn-bg:#2b2111; --ok-bg:#0f2238; --ok:#4fb3ff; }
     html[data-theme=dark] .boards img { background:#fff; }
     esp-web-install-button { --mdc-theme-primary:#1784F7; }
-    .theme { border:1px solid #fff8; background:transparent; color:#fff; border-radius:999px; padding:.25rem .6rem; cursor:pointer; font-weight:600; line-height:1; }
     .theme:hover, .lang button:hover { background:#fff3; }
+    .lang .theme {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.275rem;   /* 36.4px at 16px root */
+      padding: 0;
+      line-height: 1;
+    }
+    .theme svg {
+      display: block;
+      width: 14px;
+      height: 14px;
+      flex: none;
+    }
     html[data-theme=dark] .theme .sun, html:not([data-theme=dark]) .theme .moon { display:none; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.55; }
@@ -39,7 +52,7 @@
     .top img { width:56px; height:56px; border-radius:14px; box-shadow: 0 2px 10px rgba(0,0,0,.2); outline:2px solid #fff6; }
     .top h1 { font-size:1.6rem; margin:0; line-height:1.1; }
     .top small { opacity:.92; font-size:.95rem; }
-    .lang { margin-left:auto; display:flex; gap:.25rem; }
+    .lang { margin-left:auto; flex:none; display:flex; gap:.25rem; }
     .lang button { border:1px solid #fff8; background:transparent; color:#fff; border-radius:999px; padding:.25rem .7rem; cursor:pointer; font-weight:600; }
     .lang button[aria-pressed=true] { background:#fff; color:#0f63c4; }
     .pitch { font-size:1.15rem; margin:1rem 0 0; max-width:40rem; }
@@ -94,7 +107,7 @@
       <div class="lang" role="group" aria-label="Language">
         <button type="button" data-set="pt">PT</button>
         <button type="button" data-set="en">EN</button>
-        <button type="button" class="theme" id="theme-toggle" aria-label="Toggle dark mode"><span class="moon" aria-hidden="true">☾</span><span class="sun" aria-hidden="true">☀</span></button>
+        <button type="button" class="theme" id="theme-toggle" aria-label="Mudar para modo escuro"><svg class="moon" aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none"/><path d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8"/></svg></button>
       </div>
     </div>
     <p class="pitch">
@@ -242,7 +255,7 @@
   const tbtn = document.getElementById('theme-toggle');
   function themeLabel() {
     const dark = root.dataset.theme === 'dark', pt = root.dataset.lang === 'pt';
-    tbtn.setAttribute('aria-pressed', dark);
+    tbtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
     tbtn.setAttribute('aria-label', pt ? (dark ? 'Mudar para modo claro' : 'Mudar para modo escuro') : (dark ? 'Switch to light mode' : 'Switch to dark mode'));
     tbtn.title = tbtn.getAttribute('aria-label');
   }
