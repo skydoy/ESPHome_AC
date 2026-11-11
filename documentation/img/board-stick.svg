@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <title>Illustration: M5StickC Plus2 with the RS485 Hat</title>
+  <rect width="360" height="200" rx="14" fill="#eef6fd"/>
+  <!-- M5StickC Plus2 body -->
+  <rect x="34" y="62" width="196" height="88" rx="16" fill="#ff7a1a"/>
+  <rect x="34" y="62" width="196" height="88" rx="16" fill="none" stroke="#c95a0b" stroke-width="2"/>
+  <rect x="58" y="76" width="118" height="60" rx="6" fill="#0b1b3f"/>
+  <text x="70" y="98" font-size="13" font-weight="700" fill="#2bd47d">OK</text>
+  <text x="70" y="124" font-size="20" font-weight="700" fill="#ffffff">23 °C</text>
+  <circle cx="202" cy="106" r="11" fill="#ffffff" stroke="#c95a0b" stroke-width="2"/>
+  <rect x="26" y="94" width="10" height="24" rx="3" fill="#6b7280"/>
+  <!-- RS485 Hat -->
+  <rect x="230" y="70" width="84" height="72" rx="8" fill="#d9dee5" stroke="#8a94a3" stroke-width="2"/>
+  <rect x="296" y="78" width="22" height="56" rx="3" fill="#1f9d55" stroke="#147a40" stroke-width="1.5"/>
+  <g fill="#c7f0d8" stroke="#147a40" stroke-width="1"><circle cx="307" cy="86" r="4"/><circle cx="307" cy="100" r="4"/><circle cx="307" cy="114" r="4"/><circle cx="307" cy="128" r="4"/></g>
+  <g font-size="10" font-weight="700" fill="#0b1b3f" text-anchor="end"><text x="292" y="90">1</text><text x="292" y="104">2</text><text x="292" y="118">3</text><text x="292" y="132">4</text></g>
+  <text x="132" y="178" text-anchor="middle" font-size="13" font-weight="600" fill="#0b1b3f">M5StickC Plus2</text>
+  <text x="272" y="178" text-anchor="middle" font-size="13" font-weight="600" fill="#0b1b3f">RS485 Hat</text>
+  <text x="180" y="36" text-anchor="middle" font-size="12" fill="#52647a">Status screen · 2 buttons</text>
+</svg>

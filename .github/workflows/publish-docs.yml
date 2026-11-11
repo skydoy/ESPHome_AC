@@ -1,0 +1,53 @@
+name: Publish documentation
+
+# Docs only. Keeps the firmware binaries, OTA manifests, and installer HTML
+# that are already on GitHub Pages, then adds the MkDocs site at /docs/.
+# A firmware release still goes through publish.yml on a v* tag. This
+# workflow does not build firmware, create a tag, or move stable.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - documentation/**
+      - mkdocs.yml
+      - overrides/**
+      - requirements-docs.txt
+      - tools/assemble-docs-site.sh
+      - .github/workflows/publish-docs.yml
+      - docs/compatibility.md
+      - docs/compatibilidade.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-docs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install MkDocs
+        run: pip install -r requirements-docs.txt
+      - name: Assemble live installer plus docs
+        run: bash tools/assemble-docs-site.sh site
+      - name: Check documentation links
+        run: python tools/check_docs_links.py site/docs
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v5
