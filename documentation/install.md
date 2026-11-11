@@ -4,7 +4,7 @@ Do this **before** you open the air conditioner.
 
 ## 1. Open the installer
 
-Open **[https://skydoy.github.io/ESPHome_AC/](https://skydoy.github.io/ESPHome_AC/)** in **Chrome or Edge** on a computer. The page has to be served over https. The installer itself is unchanged by this docs preview.
+Open **[https://skydoy.github.io/ESPHome_AC/](https://skydoy.github.io/ESPHome_AC/)** in **Chrome or Edge** on a computer. The page has to be served over https. These pages do not change the installer.
 
 ## 2. Pick your board
 

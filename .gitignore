@@ -8,7 +8,8 @@ tests/test_setup
 worker/node_modules/
 worker/.wrangler/
 
-# MkDocs preview (not published)
+# MkDocs preview and local Pages assembly (not published from git)
 .venv-docs/
 site-docs/
 preview-artifact/
+site-pages/

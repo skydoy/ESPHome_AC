@@ -4,7 +4,7 @@ Faz isto **antes** de abrires o ar condicionado.
 
 ## 1. Abre o instalador
 
-Abre **[https://skydoy.github.io/ESPHome_AC/](https://skydoy.github.io/ESPHome_AC/)** no **Chrome ou Edge** num computador. A página tem de abrir em https. Esta pré-visualização da documentação não muda o instalador.
+Abre **[https://skydoy.github.io/ESPHome_AC/](https://skydoy.github.io/ESPHome_AC/)** no **Chrome ou Edge** num computador. A página tem de abrir em https. Estas páginas não mudam o instalador.
 
 ## 2. Escolhe a placa
 

@@ -48,6 +48,6 @@ Para desligares ou protegeres a página web da placa, vê [Servidor web](configu
 
 Vê o [SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md). **Não** abras um issue público para problemas de segurança.
 
-A tabela de versões suportadas nesse ficheiro ainda diz que a mais recente é `0.2.x`. A secção de release mais nova no changelog é `0.3.9` (2026-11-09). Esta pré-visualização não altera essa política. Vê [Questões em aberto](open-questions.md#tabela-de-versoes-da-politica-de-seguranca).
+A tabela de versões suportadas nesse ficheiro ainda diz que a mais recente é `0.2.x`. A secção de release mais nova no changelog é `0.3.9` (2026-11-09). Estas páginas não alteram essa política. Vê [Questões em aberto](open-questions.md#tabela-de-versoes-da-politica-de-seguranca).
 
 O guia no GitHub: [docs/seguranca.md](https://github.com/skydoy/ESPHome_AC/blob/main/docs/seguranca.md).

@@ -21,4 +21,4 @@ São lacunas que o repositório já escreve. Esta página não as preenche.
 
 ## Tabela de versões da política de segurança
 
-O [SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md) diz que só a release mais recente é suportada, e a tabela diz que a mais recente é `0.2.x`. O [CHANGELOG.md](https://github.com/skydoy/ESPHome_AC/blob/main/CHANGELOG.md) tem uma secção de release `0.3.9` com data 2026-11-09. Esta pré-visualização não decide que versões são suportadas e não edita a política.
+O [SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md) diz que só a release mais recente é suportada, e a tabela diz que a mais recente é `0.2.x`. O [CHANGELOG.md](https://github.com/skydoy/ESPHome_AC/blob/main/CHANGELOG.md) tem uma secção de release `0.3.9` com data 2026-11-09. Estas páginas não decidem que versões são suportadas e não editam a política.

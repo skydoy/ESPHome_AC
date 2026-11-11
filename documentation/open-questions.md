@@ -21,4 +21,4 @@ These are gaps already written in the repository. This page does not fill them i
 
 ## Security policy version table
 
-[SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md) says only the latest release is supported, and its table says latest `0.2.x`. [CHANGELOG.md](https://github.com/skydoy/ESPHome_AC/blob/main/CHANGELOG.md) has a released section `0.3.9` dated 2026-11-09. This preview does not decide which versions are supported and does not edit the policy.
+[SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md) says only the latest release is supported, and its table says latest `0.2.x`. [CHANGELOG.md](https://github.com/skydoy/ESPHome_AC/blob/main/CHANGELOG.md) has a released section `0.3.9` dated 2026-11-09. These pages do not decide which versions are supported and do not edit the policy.

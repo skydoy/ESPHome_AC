@@ -9,10 +9,11 @@ section below, with the factory and OTA images attached.
 ## [Unreleased]
 
 ### Added
-- Docs preview only: MkDocs Material topic site (English and Portuguese) under
-  `documentation/`, built by the `Docs preview` workflow. Not published to
-  GitHub Pages. The README links are unchanged. The workflow artifact is
-  staged at `ESPHome_AC/docs/` so the preview URLs match a local server.
+- Documentation site (English and Portuguese) under `documentation/`.
+  `publish-docs.yml` publishes it to GitHub Pages at `/docs/` and keeps the
+  firmware binaries, OTA manifests, and installer HTML already deployed.
+  A later firmware release includes the same docs from `publish.yml`.
+  No firmware tag is cut for this.
 
 ## [0.3.9] - 2026-11-09
 
