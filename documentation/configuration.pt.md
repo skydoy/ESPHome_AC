@@ -193,7 +193,7 @@ A versão do ESPHome acima é a que está fixa em [`.github/workflows/publish.ym
 
 ## Publicar uma versão
 
-As notas de release do próprio repositório dizem: sobe `project_version` nos dois `devices/<board>.yaml` (e a tag no exemplo) e depois faz push de uma tag `vX.Y.Z` igual. O GitHub Actions compila o firmware com ESPHome 2026.10.1, publica o instalador e os manifestos, move a `stable` para a tag e verifica o YAML que o Device Builder gera. Esta pré-visualização da documentação não cria uma release e não muda esse workflow. [CONTRIBUTING.md](https://github.com/skydoy/ESPHome_AC/blob/main/CONTRIBUTING.md).
+As notas de release do próprio repositório dizem: sobe `project_version` nos dois `devices/<board>.yaml` (e a tag no exemplo) e depois faz push de uma tag `vX.Y.Z` igual. O GitHub Actions compila o firmware com ESPHome 2026.10.1, publica o instalador e os manifestos, move a `stable` para a tag e verifica o YAML que o Device Builder gera. Publicar estas páginas não cria uma release de firmware e não muda esse workflow. [CONTRIBUTING.md](https://github.com/skydoy/ESPHome_AC/blob/main/CONTRIBUTING.md).
 
 ## Segurança física
 

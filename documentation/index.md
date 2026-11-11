@@ -2,8 +2,6 @@
 
 **Your air conditioner in Home Assistant.** Plug in by USB, click Install, done. No YAML.
 
-> Preview only — not published. Proposed URLs (not live): English `https://skydoy.github.io/ESPHome_AC/docs/` · Português `https://skydoy.github.io/ESPHome_AC/docs/pt/`.
-
 <div class="hero-install" markdown="1">
 [⚡ Open the web installer](https://skydoy.github.io/ESPHome_AC/){ .md-button .md-button--primary }
 </div>

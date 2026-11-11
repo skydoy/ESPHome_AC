@@ -48,6 +48,6 @@ To turn off or password-protect the device web page, see [Web server](configurat
 
 See [SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md). Do **not** open a public issue for security problems.
 
-The policy file's supported-versions table still says latest `0.2.x`. The changelog's newest released section is `0.3.9` (2026-11-09). This preview does not change that policy. See [Open questions](open-questions.md#security-policy-version-table).
+The policy file's supported-versions table still says latest `0.2.x`. The changelog's newest released section is `0.3.9` (2026-11-09). These pages do not change that policy. See [Open questions](open-questions.md#security-policy-version-table).
 
 Repository copy: [docs/security.md](https://github.com/skydoy/ESPHome_AC/blob/main/docs/security.md).
