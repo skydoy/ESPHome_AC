@@ -28,8 +28,8 @@ The hotspot comes back on its own whenever the board cannot reach the saved Wi-F
 
 After Wi-Fi joins you should see:
 
-- **Stick:** the screen stops saying `Wi-Fi: join "ESPHome_AC Setup"` and shows an IP address. *No AC* is normal until it is wired.
-- **ATOM:** the LED turns from **blue** to **red** until the AC link is up.
+- **Stick:** the screen stops saying `Wi-Fi: join "ESPHome_AC Setup"`. *No AC* is normal until it is wired. With Wi-Fi up and no AC link, the IP address is at the bottom right for about 60 seconds. After that the same line becomes `No AC: swap A/B? G0 10k pull-up?` and the address is no longer drawn. That hint means the board is on Wi-Fi and has not heard from an AC yet. It is expected before you wire it. To read the address, look during that first minute, or restart the board and look again before 60 seconds. Home Assistant can still discover the device without that address. The USB log is **Connect → Logs & Console** in the installer.
+- **ATOM:** the LED turns from **blue** to **red** until the AC link is up. Red with Wi-Fi and no wires is expected.
 
 ## Next
 

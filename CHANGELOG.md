@@ -11,7 +11,8 @@ section below, with the factory and OTA images attached.
 ### Added
 - Docs preview only: MkDocs Material topic site (English and Portuguese) under
   `documentation/`, built by the `Docs preview` workflow. Not published to
-  GitHub Pages. The README and `docs/*.md` links are unchanged.
+  GitHub Pages. The README links are unchanged. The workflow artifact is
+  staged at `ESPHome_AC/docs/` so the preview URLs match a local server.
 
 ## [0.3.9] - 2026-11-09
 

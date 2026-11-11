@@ -14,7 +14,7 @@ Two boards are supported. They speak the same protocol; only the wiring differs.
 
 ## 1. Measure the plug
 
-With the AC powered and the original Wi-Fi module unplugged, measure the 4 wires with a multimeter. Pin order varies by model, so identify them by measurement, not by a guessed order.
+Breaker off before you open the indoor unit. Then, with the AC powered and the original Wi-Fi module unplugged, measure the 4 wires with a multimeter. Pin order varies by model, so identify them by measurement, not by a guessed order. **Switch the breaker off again** as soon as you have the reading, before you connect anything.
 
 | Wire | How to recognise it |
 |---|---|
@@ -26,6 +26,9 @@ A note in the repository lists a **typical** module order (1 = +5 V, 2 = A, 3 = 
 
 ## 2. Connect
 
+!!! warning "Breaker off"
+    The breaker is off before you connect a wire, swap A and B, or solder. Turn it back on only after the wires are in place and you are clear of the unit.
+
 | AC plug | X = 5 V | X = 12 V |
 |---|---|---|
 | A (+) | Hat terminal **2** | Hat terminal **2** |
@@ -33,7 +36,7 @@ A note in the repository lists a **typical** module order (1 = +5 V, 2 = A, 3 = 
 | GND | Hat terminal **4** | Hat terminal **4** |
 | X | Stick **5V header pin** (hat terminal 3 stays **empty**) | Hat terminal **3 (12V)**; the AOZ1282 buck makes 5 V for the Stick |
 
-A and B are signal only, never power. If they are swapped nothing breaks; the screen shows **Searching** / **No link**. Swap them.
+A and B are signal only, never power. If they are swapped nothing breaks; the screen shows **Searching** / **No link**. Breaker off, swap them, breaker on.
 
 The 12V terminal needs well above 5 V to work. Never put the 5 V wire on it.
 
@@ -42,6 +45,7 @@ The 12V terminal needs well above 5 V to work. Never put the 5 V wire on it.
 The hat's TX line is **G0**, which is also an ESP32 boot strapping pin. On some setups the Stick boots from USB but stays in download mode (blank screen, no Wi-Fi) when powered from the AC.
 
 - **Test first:** power the Stick from the AC only (USB unplugged) and check that the screen lights up and Wi-Fi connects.
+- **Then breaker off** before you solder.
 - **Fix:** solder a **10 kΩ resistor from G0 to 3.3 V** (both on the Stick header).
 - The firmware helps you spot problems:
     - the screen says `No AC: swap A/B? G0 10k pull-up?` after 60 s without a link, and the log prints the same hint;
@@ -60,8 +64,8 @@ The hat's TX line is **G0**, which is also an ESP32 boot strapping pin. On some 
 ![Wiring diagram: AC Wi-Fi port to the ATOM Tail485 and ATOM Lite](img/wiring-atom-lite.svg)
 
 1. **Flash first.** The Tail485 plugs into the ATOM's USB-C port (that is how it powers the ATOM) and its Grove port. Flash the ATOM over USB from the web installer *before* fitting the Tail485. Later updates go over the air.
-2. **Measure** the plug as in [section 1](#1-measure-the-plug).
-3. **Connect** one 4-core cable from the AC plug:
+2. **Measure** the plug as in [section 1](#1-measure-the-plug). Breaker off again before the next step.
+3. **Connect** one 4-core cable from the AC plug, with the breaker off:
 
 | AC plug | X = 5 V | X = 12 V |
 |---|---|---|
@@ -74,7 +78,7 @@ The hat's TX line is **G0**, which is also an ESP32 boot strapping pin. On some 
 
 **12 V units** are a single-cable job: all four wires go into the Tail485 terminal.
 
-If the LED stays **red** with Wi-Fi up, swap A and B. TX/RX use G26/G32, which are not boot strapping pins, so the Stick's G0 pull-up does not apply here.
+If the LED stays **red** with Wi-Fi up, switch the breaker off and swap A and B, then switch it on again. TX/RX use G26/G32, which are not boot strapping pins, so the Stick's G0 pull-up does not apply here.
 
 ### Status LED and button
 

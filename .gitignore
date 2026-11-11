@@ -11,3 +11,4 @@ worker/.wrangler/
 # MkDocs preview (not published)
 .venv-docs/
 site-docs/
+preview-artifact/

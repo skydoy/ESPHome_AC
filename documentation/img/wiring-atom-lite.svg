@@ -68,6 +68,6 @@
 <text x="805.0" y="415" text-anchor="middle" font-size="12" fill="#333">Powered by the Tail485:</text>
 <text x="805.0" y="433" text-anchor="middle" font-size="12" fill="#333">12 V → 5 V via USB-C</text>
 <rect x="20" y="490" width="880" height="56" rx="10" fill="#fff4e5" stroke="#f0a020"/>
-<text x="36" y="513" font-size="14" fill="#333"><tspan font-weight="700">Safety:</tspan> switch the AC off at the breaker before opening it. A and B are signal only, never power.</text>
+<text x="36" y="513" font-size="14" fill="#333"><tspan font-weight="700">Safety:</tspan> breaker off to open the unit, and off again before you connect, swap A/B, or solder.</text>
 <text x="36" y="535" font-size="14" fill="#333"><tspan font-weight="700">Flash first:</tspan> the Tail485 uses the ATOM's USB-C port, so flash over USB before fitting it.</text>
 </svg>

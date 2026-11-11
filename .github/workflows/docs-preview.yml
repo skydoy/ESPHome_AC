@@ -32,8 +32,10 @@ jobs:
         run: mkdocs build --strict
       - name: Check internal links
         run: python tools/check_docs_links.py site-docs
+      - name: Stage the site at ESPHome_AC/docs
+        run: bash tools/stage-docs-preview.sh
       - uses: actions/upload-artifact@v7
         with:
           name: esphome-ac-docs-preview
-          path: site-docs
+          path: preview-artifact
           if-no-files-found: error
