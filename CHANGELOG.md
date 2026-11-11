@@ -8,6 +8,11 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Added
+- Docs preview only: MkDocs Material topic site (English and Portuguese) under
+  `documentation/`, built by the `Docs preview` workflow. Not published to
+  GitHub Pages. The README and `docs/*.md` links are unchanged.
+
 ## [0.3.9] - 2026-11-09
 
 ### Added
