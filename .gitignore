@@ -7,3 +7,7 @@ tests/test_setup
 # Cloudflare Worker
 worker/node_modules/
 worker/.wrangler/
+
+# MkDocs preview (not published)
+.venv-docs/
+site-docs/

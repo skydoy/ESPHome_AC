@@ -1,0 +1,39 @@
+name: Docs preview
+
+# PREVIEW ONLY. Builds the MkDocs site and uploads a workflow artifact.
+# Does not call actions/upload-pages-artifact or actions/deploy-pages.
+# Does not use the github-pages environment.
+# Not triggered from publish.yml. Merging this workflow does not publish
+# documentation and does not move stable. Do not enable a Pages deploy
+# until the visuals are explicitly approved.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install MkDocs
+        run: pip install -r requirements-docs.txt
+      - name: Strict MkDocs build
+        run: mkdocs build --strict
+      - name: Check internal links
+        run: python tools/check_docs_links.py site-docs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: esphome-ac-docs-preview
+          path: site-docs
+          if-no-files-found: error
