@@ -1,0 +1,131 @@
+site_name: ESPHome_AC
+site_description: Hisense air conditioner in Home Assistant — docs
+site_url: https://skydoy.github.io/ESPHome_AC/docs/
+site_author: skydoy
+repo_url: https://github.com/skydoy/ESPHome_AC
+repo_name: skydoy/ESPHome_AC
+edit_uri: edit/main/documentation/
+docs_dir: documentation
+site_dir: site-docs
+copyright: PolyForm Noncommercial 1.0.0 · Independent community project
+
+# Proposed canonical URL above is NOT live. This file does not publish GitHub Pages.
+# Do not build this site from .github/workflows/publish.yml until the visuals are approved.
+#
+# Local preview (same mount as the Actions artifact and the proposed Pages path):
+#   mkdocs build --strict
+#   python3 tools/check_docs_links.py site-docs
+#   bash tools/stage-docs-preview.sh
+#   python3 -m http.server 8765 --directory preview-artifact
+#   open http://127.0.0.1:8765/ESPHome_AC/docs/ and .../docs/pt/
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/skydoy/ESPHome_AC
+    - icon: fontawesome/solid/mug-hot
+      link: https://ko-fi.com/skydoy
+    - icon: fontawesome/solid/cookie
+      link: https://buymeacoffee.com/skydoy
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  logo: img/icon.png
+  favicon: img/favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: custom/sun
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: custom/moon
+        name: Switch to light mode
+  font: false
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/theme-label.js
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: pt
+          name: Português
+          build: true
+          nav_translations:
+            Home: Início
+            Getting started: Primeiros passos
+            Install: Instalar
+            Wiring: Ligações
+            Home Assistant: Home Assistant
+            Compatibility: Compatibilidade
+            Configuration: Configuração
+            Updates: Atualizações
+            Device web page: Página web da placa
+            Troubleshooting: Problemas
+            FAQ: FAQ
+            Security: Segurança
+            Open questions: Questões em aberto
+            Licence & credits: Licença e créditos
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Install: install.md
+  - Wiring: wiring.md
+  - Home Assistant: home-assistant.md
+  - Compatibility: compatibility.md
+  - Configuration: configuration.md
+  - Updates: updates.md
+  - Device web page: web-page.md
+  - Troubleshooting: troubleshooting.md
+  - FAQ: faq.md
+  - Security: security.md
+  - Open questions: open-questions.md
+  - Licence & credits: licence.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+validation:
+  omitted_files: warn
+  absolute_links: ignore
+  unrecognized_links: warn
+  anchors: warn

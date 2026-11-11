@@ -53,6 +53,7 @@ Pictures: [Quick start](docs/quick-start.md)
 
 ## Docs & more
 
+[Documentation](https://skydoy.github.io/ESPHome_AC/docs/) ·
 [Overview (boards, OTA, credits)](docs/overview.md) ·
 [Quick start](docs/quick-start.md) ·
 [Wiring](docs/wiring.md) ·

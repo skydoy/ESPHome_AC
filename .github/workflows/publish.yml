@@ -99,6 +99,18 @@ jobs:
           grep -q '"hisense-ac-atom-esp32.ota.bin"' site/firmware/atom-lite-tail485/manifest.json
           grep -q '"esphome-ac-esp32.ota.bin"' site/install/m5stickc-plus2/manifest.json
           grep -q '"esphome-ac-atom-esp32.ota.bin"' site/install/atom-lite-tail485/manifest.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Build documentation into site/docs
+        run: |
+          pip install -r requirements-docs.txt
+          mkdocs build --strict -d site/docs
+          python tools/check_docs_links.py site/docs
+          test -f site/docs/index.html
+          test -f site/docs/pt/index.html
+          test -f site/index.html
+          test -f site/firmware/manifest.json
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site

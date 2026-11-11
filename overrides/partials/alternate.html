@@ -1,0 +1,25 @@
+{# PT | EN pills — always PT then EN, matching the web installer #}
+{% if config.extra.alternate %}
+  {% set current = i18n_page_locale if i18n_page_locale is defined else config.theme.language %}
+  {% set ns = namespace(ordered=[]) %}
+  {% for code in ['pt', 'en'] %}
+    {% for alt in config.extra.alternate %}
+      {% if alt.lang == code %}
+        {% set ns.ordered = ns.ordered + [alt] %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+  {% for alt in config.extra.alternate %}
+    {% if alt.lang not in ['pt', 'en'] %}
+      {% set ns.ordered = ns.ordered + [alt] %}
+    {% endif %}
+  {% endfor %}
+  {% for alt in ns.ordered %}
+    <a class="lang-pill"
+       href="{{ alt.link | url }}"
+       hreflang="{{ alt.lang }}"
+       lang="{{ alt.lang }}"
+       aria-pressed="{{ 'true' if alt.lang == current else 'false' }}"
+       {% if alt.lang == current %}aria-current="true"{% endif %}>{{ alt.lang | upper }}</a>
+  {% endfor %}
+{% endif %}

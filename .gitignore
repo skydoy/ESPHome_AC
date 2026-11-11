@@ -7,3 +7,9 @@ tests/test_setup
 # Cloudflare Worker
 worker/node_modules/
 worker/.wrangler/
+
+# MkDocs preview and local Pages assembly (not published from git)
+.venv-docs/
+site-docs/
+preview-artifact/
+site-pages/

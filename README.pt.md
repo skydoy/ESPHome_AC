@@ -53,6 +53,7 @@ Com imagens: [Guia rápido](docs/guia-rapido.md)
 
 ## Documentação e mais
 
+[Documentação](https://skydoy.github.io/ESPHome_AC/docs/pt/) ·
 [Visão geral (placas, OTA, créditos)](docs/visao-geral.md) ·
 [Guia rápido](docs/guia-rapido.md) ·
 [Ligações](docs/wiring.md) ·

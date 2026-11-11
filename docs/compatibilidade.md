@@ -27,14 +27,16 @@ versão do firmware, capacidades e uma trama de estado completa). Abre a página
 em `http://<ip-do-dispositivo>/`:
 
 1. Vê o **AC Identity** (resumo compacto; também aparece no log INFO).
-2. Abre ou copia **Report my AC** — é um link curto no Worker que redirecciona para o formulário
-   do GitHub já preenchido (identidade + firmware). O URL completo do GitHub fica só no log INFO
+2. Abre ou copia **Report my AC**. Com o **Auto report** ligado, o primeiro relatório com
+   sucesso guarda um link curto `/r/<8 hex>` no Worker, que redirecciona para o formulário do
+   GitHub já preenchido. O URL completo do GitHub fica só no log INFO (`Report my AC (full):`)
    para a página web da placa não partir o layout.
 3. Preenche o resto (marca/modelo, placa, resultado) e carrega em **Submit**.
 
-Podes carregar no botão **Identify AC** a qualquer momento para repetir as consultas só de
-leitura e actualizar o link. O link curto **Report my AC** continua a abrir o GitHub para
-preencheres marca/modelo.
+Se o **Auto report** estava desligado antes desse primeiro POST com sucesso, o sensor de texto
+continua a mostrar o link curto `/r/<8 hex>`, mas o Worker não tem nada guardado e responde 404.
+Usa `Report my AC (full):` no log INFO. O **Identify AC** repete as consultas só de leitura e
+volta a publicar o mesmo link curto. Não cria o mapeamento enquanto o relatório está desligado.
 
 ### Relatório automático de compatibilidade (opcional)
 

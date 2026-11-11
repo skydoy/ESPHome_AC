@@ -1,0 +1,194 @@
+/* Shared with the web installer (static/index.html). System font, no webfont. */
+:root,
+[data-md-color-scheme="default"] {
+  --md-text-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --md-code-font: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --md-primary-fg-color: #1784F7;
+  --md-primary-fg-color--light: #4fb3ff;
+  --md-primary-fg-color--dark: #0f63c4;
+  --md-accent-fg-color: #0FE3FA;
+  --md-accent-fg-color--transparent: rgba(15, 227, 250, 0.1);
+  --md-default-bg-color: #f4f8fc;
+  --md-default-fg-color: #0b1b3f;
+  --md-default-fg-color--light: #52647a;
+  --md-default-fg-color--lighter: #7b8da3;
+  --md-default-fg-color--lightest: #dce5ef;
+  --md-typeset-color: #0b1b3f;
+  --md-typeset-a-color: #1784F7;
+  --md-code-bg-color: #e7eef6;
+  --md-code-fg-color: #0b1b3f;
+  --md-footer-bg-color: #e7eef6;
+  --md-footer-fg-color: #52647a;
+  --md-footer-fg-color--light: #52647a;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #4fb3ff;
+  --md-primary-fg-color--light: #7ec9ff;
+  --md-primary-fg-color--dark: #1784F7;
+  --md-accent-fg-color: #4fb3ff;
+  --md-accent-fg-color--transparent: rgba(79, 179, 255, 0.12);
+  --md-default-bg-color: #0b1220;
+  --md-default-fg-color: #e6edf3;
+  --md-default-fg-color--light: #9aa9bd;
+  --md-default-fg-color--lighter: #9aa9bd;
+  --md-default-fg-color--lightest: #26334a;
+  --md-typeset-color: #e6edf3;
+  --md-typeset-a-color: #4fb3ff;
+  --md-code-bg-color: #131c2e;
+  --md-code-fg-color: #e6edf3;
+  --md-footer-bg-color: #0b1220;
+  --md-footer-fg-color: #9aa9bd;
+  --md-footer-fg-color--light: #9aa9bd;
+  --md-hue: 220;
+}
+
+.md-header {
+  background: linear-gradient(135deg, #0FE3FA, #1784F7);
+  color: #fff;
+}
+
+.md-typeset .md-button--primary {
+  background: linear-gradient(135deg, #0FE3FA, #1784F7);
+  border: 0;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(23, 132, 247, 0.35);
+}
+
+.md-typeset .md-button--primary:hover {
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+.hero-install {
+  text-align: center;
+  margin: 1.5rem 0 2rem;
+}
+
+.hero-install .md-button {
+  font-size: 1.05rem;
+  padding: 0.7rem 1.6rem;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg,
+.md-logo img,
+.md-logo svg {
+  width: auto !important;
+  height: 1.8rem !important;
+  max-height: 1.8rem !important;
+}
+
+.md-nav__title .md-nav__button.md-logo img,
+.md-nav__title .md-nav__button.md-logo svg {
+  height: 2.4rem !important;
+  max-height: 2.4rem !important;
+}
+
+.md-typeset img {
+  max-width: 100%;
+  height: auto;
+}
+
+.md-typeset__scrollwrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) {
+  background: #131c2e;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  background-color: #131c2e;
+}
+
+/* PT | EN | theme pills, same geometry as the installer (36.4×25, 14px icon). */
+.md-header__lang.lang {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  flex: none;
+  margin-left: .4rem;
+}
+
+.md-header__lang .lang-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff8;
+  background: transparent;
+  color: #fff;
+  border-radius: 999px;
+  padding: .25rem .7rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: .7rem;
+  line-height: 1;
+  text-decoration: none;
+  height: 25px;
+  box-sizing: border-box;
+}
+
+.md-header__lang .lang-pill:hover {
+  background: #fff3;
+  color: #fff;
+}
+
+.md-header__lang .lang-pill[aria-pressed=true],
+.md-header__lang .lang-pill[aria-current=true] {
+  background: #fff;
+  color: #0f63c4;
+}
+
+.md-header__lang .md-header__palette {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.md-header__lang .lang-theme:not([hidden]) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36.4px !important;
+  height: 25px !important;
+  min-width: 0 !important;
+  max-width: 36.4px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #fff8;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.md-header__lang .lang-theme[hidden] {
+  display: none !important;
+}
+
+.md-header__lang .lang-theme:hover {
+  background: #fff3;
+}
+
+[data-md-color-scheme="slate"] .md-header__lang .lang-theme {
+  background: #fff;
+  color: #0f63c4;
+}
+
+.md-header__lang .lang-theme svg {
+  display: block;
+  width: 14px !important;
+  height: 14px !important;
+  flex: none;
+}
+
+@media (max-width: 59.984375em) {
+  .md-header__source {
+    display: none;
+  }
+}
