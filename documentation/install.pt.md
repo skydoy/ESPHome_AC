@@ -28,8 +28,8 @@ Esta rede volta a aparecer sozinha sempre que a placa não consegue chegar ao Wi
 
 Depois de o Wi-Fi ligar, deves ver:
 
-- **Stick:** o ecrã deixa de dizer `Wi-Fi: join "ESPHome_AC Setup"` e mostra um endereço IP. *No AC* é normal até estar ligado à máquina.
-- **ATOM:** o LED passa de **azul** a **vermelho** até a ligação ao AC arrancar.
+- **Stick:** o ecrã deixa de dizer `Wi-Fi: join "ESPHome_AC Setup"`. *No AC* é normal até estar ligado à máquina. Com Wi-Fi e sem ligação ao AC, o endereço IP fica no canto inferior direito cerca de 60 segundos. Depois essa linha passa a `No AC: swap A/B? G0 10k pull-up?` e o endereço deixa de aparecer. Essa pista quer dizer que a placa está no Wi-Fi e ainda não ouviu um AC. É o esperado antes de ligares os fios. Para leres o endereço, olha nesse primeiro minuto, ou reinicia a placa e olha outra vez antes dos 60 segundos. O Home Assistant pode descobrir a placa sem esse endereço. O registo por USB é **Connect → Logs & Console** no instalador.
+- **ATOM:** o LED passa de **azul** a **vermelho** até a ligação ao AC arrancar. Vermelho com Wi-Fi e sem fios é o esperado.
 
 ## A seguir
 

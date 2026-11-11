@@ -14,7 +14,7 @@ Há duas placas. Falam o mesmo protocolo; só as ligações mudam.
 
 ## 1. Medir a ficha
 
-Com o ar condicionado ligado e o módulo Wi-Fi original desligado, mede os 4 fios com um multímetro. A ordem dos pinos varia com o modelo, por isso identifica-os pela medição, não por uma ordem adivinhada.
+Disjuntor desligado antes de abrires a unidade interior. Depois, com o ar condicionado ligado e o módulo Wi-Fi original desligado, mede os 4 fios com um multímetro. A ordem dos pinos varia com o modelo, por isso identifica-os pela medição, não por uma ordem adivinhada. **Volta a desligar o disjuntor** assim que tiveres a leitura, antes de ligares o que quer que seja.
 
 | Fio | Como o reconheces |
 |---|---|
@@ -26,6 +26,9 @@ Uma nota no repositório indica uma ordem **típica** do módulo (1 = +5 V, 2 = 
 
 ## 2. Ligar
 
+!!! warning "Disjuntor desligado"
+    O disjuntor fica desligado antes de ligares um fio, trocares o A com o B, ou soldares. Só o voltas a ligar quando os fios estão no sítio e já não estás dentro da máquina.
+
 | Ficha do AC | X = 5 V | X = 12 V |
 |---|---|---|
 | A (+) | Terminal **2** do Hat | Terminal **2** do Hat |
@@ -33,7 +36,7 @@ Uma nota no repositório indica uma ordem **típica** do módulo (1 = +5 V, 2 = 
 | GND | Terminal **4** do Hat | Terminal **4** do Hat |
 | X | **Pino 5V** do Stick (o terminal 3 do Hat fica **vazio**) | Terminal **3 (12V)** do Hat; o conversor AOZ1282 faz os 5 V do Stick |
 
-A e B são só sinal, nunca alimentação. Se os trocares, nada se estraga; o ecrã mostra **Searching** / **No link**. Troca-os.
+A e B são só sinal, nunca alimentação. Se os trocares, nada se estraga; o ecrã mostra **Searching** / **No link**. Disjuntor desligado, troca-os, disjuntor ligado.
 
 O terminal 12V precisa de bem mais do que 5 V para funcionar. Nunca ligues aí o fio de 5 V.
 
@@ -42,6 +45,7 @@ O terminal 12V precisa de bem mais do que 5 V para funcionar. Nunca ligues aí o
 A linha TX do Hat é o **G0**, que também é um pino de arranque do ESP32. Nalguns casos o Stick arranca por USB mas fica em modo de programação (ecrã apagado, sem Wi-Fi) quando é alimentado pelo ar condicionado.
 
 - **Testa primeiro:** alimenta o Stick só pelo ar condicionado (USB desligado) e confirma que o ecrã acende e o Wi-Fi liga.
+- **Depois desliga o disjuntor** antes de soldares.
 - **Correção:** solda uma **resistência de 10 kΩ entre o G0 e os 3,3 V** (os dois no conector do Stick).
 - O firmware ajuda-te a ver o problema:
     - o ecrã diz `No AC: swap A/B? G0 10k pull-up?` ao fim de 60 s sem ligação, e o registo escreve a mesma pista;
@@ -60,8 +64,8 @@ A linha TX do Hat é o **G0**, que também é um pino de arranque do ESP32. Nalg
 ![Esquema: porta Wi-Fi do ar condicionado ao ATOM Tail485 e ao ATOM Lite](img/wiring-atom-lite.svg)
 
 1. **Grava primeiro.** O Tail485 entra na porta USB-C do ATOM (é assim que o alimenta) e na porta Grove. Grava o ATOM por USB a partir do instalador web *antes* de encaixares o Tail485. As atualizações seguintes vão pelo ar.
-2. **Mede** a ficha como na [secção 1](#1-medir-a-ficha).
-3. **Liga** um cabo de 4 condutores a partir da ficha do AC:
+2. **Mede** a ficha como na [secção 1](#1-medir-a-ficha). Disjuntor outra vez desligado antes do passo seguinte.
+3. **Liga** um cabo de 4 condutores a partir da ficha do AC, com o disjuntor desligado:
 
 | Ficha do AC | X = 5 V | X = 12 V |
 |---|---|---|
@@ -74,7 +78,7 @@ A linha TX do Hat é o **G0**, que também é um pino de arranque do ESP32. Nalg
 
 **Unidades de 12 V:** os quatro fios entram no terminal do Tail485.
 
-Se o LED ficar **vermelho** com o Wi-Fi ligado, troca o A com o B. TX/RX usam G26/G32, que não são pinos de arranque, por isso o pull-up do G0 do Stick não se aplica aqui.
+Se o LED ficar **vermelho** com o Wi-Fi ligado, desliga o disjuntor, troca o A com o B e volta a ligá-lo. TX/RX usam G26/G32, que não são pinos de arranque, por isso o pull-up do G0 do Stick não se aplica aqui.
 
 ### LED e botão de estado
 

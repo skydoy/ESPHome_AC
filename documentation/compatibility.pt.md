@@ -70,10 +70,12 @@ AEH-W4A1, AEH-W4B1, AEH-W4E1, AEH-W4F1, AEH-W4G1, AEH-W4G2 e AEH-W41H1 usam o me
 Depois de a placa ligar ao AC, corre uma **identificação só de leitura** (tipo de unidade, versão do firmware, capacidades e uma trama de estado completa). Abre `http://<ip-da-placa>/`:
 
 1. Vê o **AC Identity** (resumo compacto; também aparece no log INFO).
-2. Abre ou copia **Report my AC**. É um link curto no Worker de relatórios que redireciona para o formulário do GitHub já preenchido (identidade + firmware). O URL completo do GitHub fica só no log INFO para a página web da placa continuar legível.
+2. Abre ou copia **Report my AC**. Com o **Auto report** ligado, o primeiro relatório com sucesso guarda um link curto `/r/<8 hex>` no Worker. Esse link redireciona para o formulário do GitHub já preenchido. O URL completo do GitHub fica só no log INFO, na linha `Report my AC (full):`, para a página web da placa continuar legível.
 3. Preenche o resto (marca/modelo, placa, resultado) e carrega em **Submit**.
 
-Podes carregar em **Identify AC** a qualquer momento para repetir as consultas só de leitura e atualizar o link. O link curto **Report my AC** continua a abrir o GitHub para preencheres marca e modelo. O comportamento do Worker está em [worker/README.md](https://github.com/skydoy/ESPHome_AC/blob/main/worker/README.md). Esta página não repete os passos de publicação.
+Se o **Auto report** estiver desligado antes desse primeiro POST com sucesso, o sensor de texto continua a mostrar o link curto `/r/<8 hex>`, mas o Worker não tem o mapeamento guardado e responde 404. Usa a linha `Report my AC (full):` no log INFO. Carregar em **Identify AC** repete as consultas só de leitura e volta a publicar o mesmo link curto. Não escreve o mapeamento enquanto o relatório está desligado.
+
+Com o **Auto report** ligado, **Identify AC** atualiza o link depois de um relatório novo ficar guardado. O comportamento do Worker está em [worker/README.md](https://github.com/skydoy/ESPHome_AC/blob/main/worker/README.md). Esta página não repete os passos de publicação.
 
 ### Relatório automático de compatibilidade (opcional)
 

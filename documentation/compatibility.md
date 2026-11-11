@@ -70,10 +70,12 @@ AEH-W4A1, AEH-W4B1, AEH-W4E1, AEH-W4F1, AEH-W4G1, AEH-W4G2 and AEH-W41H1 all sit
 After the board links to the AC it runs a **read-only identify** (device type, firmware version, capabilities, and one full status frame). Open `http://<device-ip>/`:
 
 1. Check **AC Identity** (compact summary, also in the INFO log).
-2. Open or copy **Report my AC**. It is a short link on the report Worker that redirects to the prefilled GitHub issue form (identity + firmware). The full GitHub URL is only in the INFO log so the device web UI stays readable.
+2. Open or copy **Report my AC**. With **Auto report** on, the first successful report stores a short `/r/<8 hex>` link on the Worker. That link redirects to the prefilled GitHub issue form. The full GitHub URL is only in the INFO log, as `Report my AC (full):`, so the device web UI stays readable.
 3. Fill the remaining fields (brand/model, board, result) and press **Submit**.
 
-You can press **Identify AC** anytime to re-run the read-only queries and refresh the link. The short **Report my AC** link still lands on GitHub for you to fill brand and model. The Worker behaviour is described in [worker/README.md](https://github.com/skydoy/ESPHome_AC/blob/main/worker/README.md). This page does not repeat deploy steps.
+If **Auto report** is off before that first successful POST, the text sensor still shows the short `/r/<8 hex>` link, but the Worker has no stored mapping and returns 404. Use the `Report my AC (full):` line in the INFO log instead. Pressing **Identify AC** runs the read-only queries again and republishes the same short link. It does not write the mapping while reporting is off.
+
+With **Auto report** on, **Identify AC** refreshes the link after a new report is stored. The Worker behaviour is described in [worker/README.md](https://github.com/skydoy/ESPHome_AC/blob/main/worker/README.md). This page does not repeat deploy steps.
 
 ### Automatic compatibility report (optional)
 

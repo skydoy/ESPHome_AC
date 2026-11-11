@@ -11,6 +11,13 @@ copyright: PolyForm Noncommercial 1.0.0 · Independent community project
 
 # Proposed canonical URL above is NOT live. This file does not publish GitHub Pages.
 # Do not build this site from .github/workflows/publish.yml until the visuals are approved.
+#
+# Local preview (same mount as the Actions artifact and the proposed Pages path):
+#   mkdocs build --strict
+#   python3 tools/check_docs_links.py site-docs
+#   bash tools/stage-docs-preview.sh
+#   python3 -m http.server 8765 --directory preview-artifact
+#   open http://127.0.0.1:8765/ESPHome_AC/docs/ and .../docs/pt/
 
 extra:
   generator: false
