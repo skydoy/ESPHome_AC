@@ -45,7 +45,7 @@ static/index.html         ESP Web Tools installer page
   in a **Compatibility report** and end up in [docs/compatibility.md](docs/compatibility.md).
 - Add a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
 - Releases: move the Unreleased entries to a new `## [x.y.z]` section, bump `project_version`
-  in both base device configs (`devices/<board>.yaml`) and the tag in
+  in all three base device configs (`devices/hisense-<board>.yaml`) and the tag in
   `examples/my-ac-livingroom.yaml`, then push a `vx.y.z` tag that matches `project_version`
   (CI fails otherwise: adopted configs fetch the component at `v<project_version>`). CI builds the firmware, publishes the
   installer and OTA manifest, and creates the GitHub Release with those notes and the images.
