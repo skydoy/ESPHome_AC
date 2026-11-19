@@ -1,0 +1,59 @@
+name: Auto release
+# Cuts a release by itself: when project_version on main has no v<version> tag yet, this
+# creates the tag on the pushed commit and starts "Build firmware & publish installer" on it
+# (installer + OTA manifests, GitHub Release, "stable" branch). So a release is just: bump
+# project_version in the three base device configs, add the CHANGELOG section, merge.
+#
+# A tag pushed with GITHUB_TOKEN does not start other workflows, so publish.yml is started
+# with workflow_dispatch on the tag ref (it then runs exactly as for a pushed v* tag).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write   # create the tag
+  actions: write    # start publish.yml
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+jobs:
+  tag:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Decide
+        id: decide
+        run: |
+          set -euo pipefail
+          ver() { grep -oP '^\s*project_version: "\K[^"]+' "$1"; }
+          v=$(ver devices/hisense-m5stickc-plus2.yaml)
+          for f in devices/hisense-atom-lite-tail485.yaml devices/hisense-m5stickc-plus.yaml; do
+            if [ "$(ver "$f")" != "$v" ]; then
+              echo "::error::$f project_version $(ver "$f") differs from $v"; exit 1; fi
+          done
+          tag="v$v"
+          echo "project_version $v"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists: nothing to release."; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Never go backwards: the new version must sort after every existing v* tag.
+          latest=$(git ls-remote --tags --refs origin 'refs/tags/v*' | sed 's#.*refs/tags/v##' | sort -V | tail -n 1)
+          if [ -n "$latest" ] && [ "$(printf '%s\n%s\n' "$latest" "$v" | sort -V | tail -n 1)" != "$v" ]; then
+            echo "::warning::project_version $v is not newer than v$latest: no release."; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if ! grep -q "^## \[$v\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$v]' section: add it, then push again."; exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "go=true" >> "$GITHUB_OUTPUT"
+      - name: Create the tag and start the release build
+        if: steps.decide.outputs.go == 'true'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA"
+          gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG"
+          echo "Created $TAG at $GITHUB_SHA and started publish.yml on it." >> "$GITHUB_STEP_SUMMARY"
