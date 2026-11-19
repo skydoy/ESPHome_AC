@@ -8,6 +8,10 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Changed
+- Releases are cut automatically: the new **Auto release** workflow creates the `v<project_version>`
+  tag when a new version reaches `main` and starts the release build on it. No manual tag needed.
+
 ## [0.4.0] - 2026-11-19
 
 ### Added

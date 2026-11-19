@@ -46,9 +46,10 @@ static/index.html         ESP Web Tools installer page
 - Add a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
 - Releases: move the Unreleased entries to a new `## [x.y.z]` section, bump `project_version`
   in all three base device configs (`devices/hisense-<board>.yaml`) and the tag in
-  `examples/my-ac-livingroom.yaml`, then push a `vx.y.z` tag that matches `project_version`
-  (CI fails otherwise: adopted configs fetch the component at `v<project_version>`). CI builds the firmware, publishes the
-  installer and OTA manifest, and creates the GitHub Release with those notes and the images.
+  `examples/my-ac-livingroom.yaml`, then merge into `main`. The **Auto release** workflow sees
+  the new version, creates the `vx.y.z` tag and starts the release build: CI builds the
+  firmware, publishes the installer and OTA manifest, and creates the GitHub Release with those
+  notes and the images. (Pushing the tag by hand still works the same way.)
 - Be kind: see the [Code of Conduct](CODE_OF_CONDUCT.md). Security problems go through
   [SECURITY.md](SECURITY.md), not public issues.
 
