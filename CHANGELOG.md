@@ -8,6 +8,8 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-19
+
 ### Added
 - New board: **M5StickC Plus / Plus SE + RS485 Hat** (ESP32-PICO-D4, 4 MB flash). Same hat
   wiring, status screen and setup flow as the Plus2. The LCD backlight, the LCD supply and the
@@ -476,7 +478,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...v0.3.8
 [0.3.7]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.6...v0.3.7
