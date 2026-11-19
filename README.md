@@ -31,7 +31,7 @@
 
 ## Compatibility
 
-**M5StickC Plus2 + RS485 Hat** or **ATOM Lite + ATOM Tail485**, on Hisense units with the **AEH-W4x / AEH-W41H1** Wi-Fi module (4-pin RS-485).  
+**M5StickC Plus2 or Plus / Plus SE + RS485 Hat** or **ATOM Lite + ATOM Tail485**, on Hisense units with the **AEH-W4x / AEH-W41H1** Wi-Fi module (4-pin RS-485).  
 Full list: [compatibility](docs/compatibility.md) · [Report my AC](https://github.com/skydoy/ESPHome_AC/issues/new?template=compatibility_report.yml)
 
 ## Install in 3 steps

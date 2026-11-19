@@ -29,6 +29,7 @@ body:
       label: Board used
       options:
         - M5StickC Plus2 + RS485 Hat
+        - M5StickC Plus / Plus SE + RS485 Hat
         - ATOM Lite + Tail485
         - Other (describe in notes)
     validations:

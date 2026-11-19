@@ -1,10 +1,10 @@
 # Wiring
 
-Two boards are supported. They speak the same protocol; only the wiring differs.
+Three boards are supported. They speak the same protocol; only the wiring differs.
 
 | Board | Section |
 |---|---|
-| M5StickC Plus2 + RS485 Hat (status screen) | [Sections 1–3](#1-measure-the-plug) below |
+| M5StickC Plus2 or Plus / Plus SE + RS485 Hat (status screen) | [Sections 1–3](#1-measure-the-plug) below |
 | M5Stack ATOM Lite + ATOM Tail485 (cheapest, status LED) | [ATOM Lite + Tail485](#atom-lite--tail485) |
 
 ![Wiring diagram](wiring.svg)
@@ -52,6 +52,7 @@ from the AC.
 | Part | Notes |
 |---|---|
 | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) | ESP32-PICO-V3-02, HOLD = G4 (kept HIGH by the firmware) |
+| [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) / [Plus SE](https://docs.m5stack.com/en/core/StickC-Plus_SE) | ESP32-PICO-D4, 4 MB flash. Backlight and battery through the AXP192 power chip (I2C G21/G22). Same hat header and wiring as the Plus2; its own firmware in the installer. Not yet hardware-tested |
 | [M5 RS485 Hat (U067)](https://docs.m5stack.com/en/hat/hat_rs485) | SP485EEN transceiver (auto direction), AOZ1282CI 12 V → 5 V buck |
 | UART | TX = **G0**, RX = **G26**, 9600 8N1 |
 
