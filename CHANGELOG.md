@@ -12,6 +12,11 @@ section below, with the factory and OTA images attached.
 - Releases are cut automatically: the new **Auto release** workflow creates the `v<project_version>`
   tag when a new version reaches `main` and starts the release build on it. No manual tag needed.
 
+### Fixed
+- The v0.4.0 installer did not go live: "Publish documentation" deployed the release commit
+  first, and GitHub Pages keeps serving the first deployment of a commit. It now skips release
+  commits (publish.yml deploys them with the firmware and the docs).
+
 ## [0.4.0] - 2026-11-19
 
 ### Added

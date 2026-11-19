@@ -29,8 +29,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  check:
+    # GitHub Pages keeps serving the FIRST deployment of a commit: a second deployment of the
+    # same commit reports success but is not served. When this commit is (or is about to be)
+    # a release, publish.yml deploys it with the new firmware and the docs, so skip here;
+    # otherwise this docs-only deployment would hide the release installer.
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      deploy: ${{ steps.decide.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: decide
+        run: |
+          v=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-m5stickc-plus2.yaml)
+          tag_sha=$(git ls-remote --tags origin "refs/tags/v$v^{}" "refs/tags/v$v" | head -n 1 | cut -f1)
+          if [ -z "$tag_sha" ]; then
+            echo "v$v is not tagged yet: Auto release will publish this commit."; echo "deploy=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --tags origin "refs/tags/v$v^{}" "refs/tags/v$v" | cut -f1 | grep -qx "$GITHUB_SHA"; then
+            echo "This commit is release v$v: publish.yml deploys it."; echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+  deploy:
+    needs: check
+    if: needs.check.outputs.deploy == 'true'
     runs-on: ubuntu-24.04
     environment:
       name: github-pages
