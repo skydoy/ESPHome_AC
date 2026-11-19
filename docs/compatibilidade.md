@@ -14,6 +14,7 @@ Legenda: ✅ Funciona · 🧪 Em teste · 🔶 Reportado com outro firmware · �
 |---|---|---|---|---|---|---|
 | Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados; potência, tensão, corrente e humidade parciais |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Por testar | Mesmo código de protocolo, ainda não testado numa máquina real |
+| Hisense | qualquer | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Por testar | Mesmo código de protocolo e ecrã do Plus2; arranque novo do chip de energia AXP192, ainda não testado numa máquina real |
 
 ## Candidatos (reportados com outro firmware, por testar aqui)
 

@@ -1,10 +1,10 @@
 # Ligações
 
-Há duas placas. Falam o mesmo protocolo; só as ligações mudam.
+Há três placas. Falam o mesmo protocolo; só as ligações mudam.
 
 | Placa | Secção |
 |---|---|
-| M5StickC Plus2 + RS485 Hat (ecrã de estado) | [Secções 1–3](#1-medir-a-ficha) |
+| M5StickC Plus2 ou Plus / Plus SE + RS485 Hat (ecrã de estado) | [Secções 1–3](#1-medir-a-ficha) |
 | M5Stack ATOM Lite + ATOM Tail485 (LED de estado) | [ATOM Lite + Tail485](#atom-lite-tail485) |
 
 ![Esquema: porta Wi-Fi do ar condicionado ao RS485 Hat e ao M5StickC Plus2](img/wiring.svg)
@@ -56,6 +56,7 @@ A linha TX do Hat é o **G0**, que também é um pino de arranque do ESP32. Nalg
 | Peça | Notas |
 |---|---|
 | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) | ESP32-PICO-V3-02, HOLD = G4 (o firmware mantém-no em HIGH) |
+| [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) / [Plus SE](https://docs.m5stack.com/en/core/StickC-Plus_SE) | ESP32-PICO-D4, flash de 4 MB. Luz do ecrã e bateria pelo chip de energia AXP192 (I2C G21/G22). Mesmo conector do hat e mesmas ligações do Plus2; tem firmware próprio no instalador. Ainda não testado em hardware |
 | [M5 RS485 Hat (U067)](https://docs.m5stack.com/en/hat/hat_rs485) | Transceiver SP485EEN (direção automática), conversor AOZ1282CI de 12 V para 5 V |
 | UART | TX = **G0**, RX = **G26**, 9600 8N1 |
 

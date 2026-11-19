@@ -18,24 +18,35 @@ download() {
 
 echo "Downloading the live installer files"
 for name in $(find "$root/static" -maxdepth 1 -type f -printf '%f\n' | sort); do
+  # A file added to static/ after the last firmware release is not live yet (404). Skip it:
+  # this script keeps what is deployed, and the next release publishes the new file.
+  code=$(curl -sSL -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 2 "$base/$name")
+  if [ "$code" = "404" ]; then
+    echo "  $name: not live yet, skipped"
+    continue
+  fi
   download "$base/$name" "$dest/$name"
 done
 
 python3 - "$dest" "$base" << 'PY'
-import hashlib, json, os, sys, urllib.request
+import hashlib, json, os, sys, urllib.error, urllib.request
 dest, base = sys.argv[1], sys.argv[2].rstrip("/")
 manifests = [
     "firmware/manifest.json",
     "firmware/atom-lite-tail485/manifest.json",
     "install/m5stickc-plus2/manifest.json",
     "install/atom-lite-tail485/manifest.json",
+    "install/m5stickc-plus/manifest.json",
 ]
 expected = {
     "firmware/manifest.json": "hisense-ac-esp32.ota.bin",
     "firmware/atom-lite-tail485/manifest.json": "hisense-ac-atom-esp32.ota.bin",
     "install/m5stickc-plus2/manifest.json": "esphome-ac-esp32.ota.bin",
     "install/atom-lite-tail485/manifest.json": "esphome-ac-atom-esp32.ota.bin",
+    "install/m5stickc-plus/manifest.json": "esphome-ac-plus-esp32.ota.bin",
 }
+# Boards added after the last firmware release: kept when live, skipped while they 404.
+optional = {"install/m5stickc-plus/manifest.json"}
 
 def sha256(path):
     h = hashlib.sha256()
@@ -57,7 +68,13 @@ def fetch(rel):
 
 paths = []
 for rel, ota_name in expected.items():
-    path = fetch(rel)
+    try:
+        path = fetch(rel)
+    except urllib.error.HTTPError as e:
+        if rel in optional and e.code == 404:
+            print(f"  {rel}: not live yet, skipped")
+            continue
+        raise
     doc = json.load(open(path))
     blob = json.dumps(doc)
     if ota_name not in blob:

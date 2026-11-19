@@ -1,0 +1,88 @@
+# Board: M5StickC Plus and M5StickC Plus SE (ESP32-PICO-D4, 4 MB flash, AXP192 power chip).
+#
+# The Plus SE is the Plus without the IMU; this firmware does not use the IMU, so one board
+# file covers both. Brand agnostic. "ac_tx_pin"/"ac_rx_pin" are the UART pins of the Hat header
+# that brand packages use to talk to the AC (same Hat RS485 pin map as the Plus2: TX = G0,
+# RX = G26). A different hat/adapter on the same pins only needs a different brand package; see
+# adapters/README.md.
+#
+# Differences from the Plus2 (core/boards/m5stickc-plus2.yaml), handled here:
+# - LCD backlight, LCD logic supply and battery reading go through the AXP192 on the internal
+#   I2C bus (G21/G22), not through GPIOs. components/m5_axp192 powers them up before the LCD.
+# - LCD DC is G23 and RST is G18 (G14 and G12 on the Plus2).
+# - No HOLD pin: the AXP192 keeps the Stick on.
+# - 4 MB flash (8 MB on the Plus2).
+substitutions:
+  board_id: m5stickc-plus
+  ac_tx_pin: GPIO0
+  ac_rx_pin: GPIO26
+  ac_tx_ignore_strapping: "true"   # G0 is a strapping pin, fixed by the Hat wiring
+  # LCD pins used by core/screen/m5stickc-plus2*.yaml (shared by both Sticks).
+  lcd_dc_pin: GPIO23
+  lcd_reset_pin: GPIO18
+  lcd_reset_ignore_strapping: "false"
+
+esp32:
+  board: esp32dev        # ESP32-PICO-D4
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+external_components:
+  - source: ${hisense_component_source}
+    components: [m5_axp192]
+    refresh: ${hisense_component_refresh}
+
+i2c:
+  id: internal_i2c
+  sda: GPIO21
+  scl: GPIO22
+  frequency: 400kHz
+  scan: false
+
+m5_axp192:
+  id: pmu
+  i2c_id: internal_i2c
+
+output:
+  # LCD backlight (AXP192 LDO2). Same id as the Plus2 PWM output, so the shared screen package
+  # drives both. Controlled by core/screen/m5stickc-plus2.yaml (auto-off after 30 s).
+  - platform: m5_axp192
+    id: lcd_backlight_pwm
+
+light:
+  - platform: monochromatic
+    id: lcd_backlight
+    name: "LCD Backlight"
+    output: lcd_backlight_pwm
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 0s
+    internal: true
+
+binary_sensor:
+  # Buttons A (front, "M5") and B (side) only wake the status screen; they never control the
+  # AC. See core/screen/m5stickc-plus2.yaml.
+  - platform: gpio
+    id: button_a
+    pin: { number: GPIO37, inverted: true }
+    name: "Button A"
+    entity_category: diagnostic
+  - platform: gpio
+    id: button_b
+    pin: { number: GPIO39, inverted: true }
+    name: "Button B"
+    entity_category: diagnostic
+
+sensor:
+  - platform: m5_axp192
+    name: "Stick Battery Voltage"
+    update_interval: 60s
+
+# Notes:
+# - Do not enable the built-in microphone (SPM1423 uses G0 as its clock) or I2S on G0/G26:
+#   those pins belong to the hat.
+# - G10 is the red LED and G9 the IR transmitter. Both are intentionally unused.
+# - G0 is a boot strapping pin. If the Stick does not boot when powered from the AC, add a
+#   10k pull-up from G0 to 3.3V (see docs/wiring.md).
+# - The power button (left side) switches the Stick off after a 4 s press; a short press
+#   switches it back on.
