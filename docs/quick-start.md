@@ -18,7 +18,7 @@ From the box to Home Assistant in about 15 minutes, no YAML. *Português: [guia-
 ## 1. Flash the firmware (2 minutes)
 Do this **before** going near the AC.
 1. Open **https://skydoy.github.io/ESPHome_AC/**.
-2. Pick your board: **ATOM Lite + Tail485** or **M5StickC Plus2 + RS485 Hat**.
+2. Pick your board: **ATOM Lite + Tail485**, **M5StickC Plus2 + RS485 Hat** or **M5StickC Plus / Plus SE + RS485 Hat** (the older Stick; same wiring as the Plus2).
 3. Plug the board into your computer by USB. ATOM: without the Tail485, it uses the same USB-C port.
 4. Press **Install**, pick the serial port → **Install**.
 
@@ -48,7 +48,7 @@ IP address (*No AC* is normal until it is wired). ATOM: the LED turns from **blu
 
 <!-- photo slot: static/photo-ac-plug.jpg (see docs/photos/README.md) -->
 
-### M5StickC Plus2 + RS485 Hat
+### M5StickC Plus2 or Plus / Plus SE + RS485 Hat
 ![Wiring: AC Wi-Fi port to RS485 Hat and M5StickC Plus2](wiring.svg)
 
 | AC plug | X = 5 V | X = 12 V |

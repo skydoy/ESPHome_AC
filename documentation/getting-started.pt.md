@@ -12,14 +12,14 @@ Cerca de 15 minutos da caixa ao Home Assistant. Sem YAML.
 
 ## Placas em resumo
 
-| | **ATOM Lite + ATOM Tail485** | **M5StickC Plus2 + RS485 Hat** |
-|---|---|---|
-| Imagem | ![Ilustração do M5Stack ATOM Lite e do ATOM Tail485](img/board-atom.svg){ width="280" } | ![Ilustração do M5StickC Plus2 e do RS485 Hat](img/board-stick.svg){ width="280" } |
-| Preço aprox. | ≈ 15 US$ (7,50 + 6,95) | ≈ 28 US$ (19,95 + ≈ 8) |
-| Estado | LED RGB e um botão | Ecrã e dois botões |
-| Fichas técnicas | [ATOM Lite](https://docs.m5stack.com/en/core/ATOM%20Lite) · [Tail485](https://docs.m5stack.com/en/atom/tail485) | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) |
+| | **ATOM Lite + ATOM Tail485** | **M5StickC Plus2 + RS485 Hat** | **M5StickC Plus / Plus SE + RS485 Hat** |
+|---|---|---|---|
+| Imagem | ![Ilustração do M5Stack ATOM Lite e do ATOM Tail485](img/board-atom.svg){ width="280" } | ![Ilustração do M5StickC Plus2 e do RS485 Hat](img/board-stick.svg){ width="280" } | ![Ilustração do M5StickC Plus ou Plus SE e do RS485 Hat](img/board-stick-plus.svg){ width="280" } |
+| Preço aprox. | ≈ 15 US$ (7,50 + 6,95) | ≈ 28 US$ (19,95 + ≈ 8) | Stick + ≈ 8 US$ do hat |
+| Estado | LED RGB e um botão | Ecrã e dois botões | Ecrã e dois botões |
+| Fichas técnicas | [ATOM Lite](https://docs.m5stack.com/en/core/ATOM%20Lite) · [Tail485](https://docs.m5stack.com/en/atom/tail485) | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) | [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) · [Plus SE](https://docs.m5stack.com/en/core/StickC-Plus_SE) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) |
 
-Preços de tabela da loja M5Stack, sem portes nem impostos. O Plus2 foi descontinuado na loja M5Stack.
+Preços de tabela da loja M5Stack, sem portes nem impostos. O Plus2 foi descontinuado na loja M5Stack. A versão para o Plus / Plus SE é nova e ainda não foi testada em hardware.
 
 !!! warning "Pino de arranque G0 no Stick"
     Se o Stick arranca por USB mas não pelo ar condicionado, solda uma resistência de 10 kΩ entre o G0 e os 3,3 V antes de fechares a máquina. [Detalhes](wiring.md#3-pino-de-arranque-g0-le-isto-antes-de-fechares-o-ar-condicionado).

@@ -40,6 +40,11 @@ jobs:
             base: devices/hisense-atom-lite-tail485.yaml
             factory: devices/esphome-ac-atom-lite-tail485.factory.yaml
             site_dir: install/atom-lite-tail485
+          # M5StickC Plus / Plus SE (AXP192): added after v0.3.0, so it has no legacy build.
+          - key: new-m5stickc-plus
+            base: devices/hisense-m5stickc-plus.yaml
+            factory: devices/esphome-ac-m5stickc-plus.factory.yaml
+            site_dir: install/m5stickc-plus
     env:
       BASE_YAML: ${{ matrix.base }}
       DEVICE_YAML: ${{ matrix.factory }}
@@ -94,11 +99,13 @@ jobs:
           test -f site/firmware/atom-lite-tail485/manifest.json
           test -f site/install/m5stickc-plus2/manifest.json
           test -f site/install/atom-lite-tail485/manifest.json
+          test -f site/install/m5stickc-plus/manifest.json
           # Legacy manifests must keep serving hisense-ac builds (no silent rename over OTA).
           grep -q '"hisense-ac-esp32.ota.bin"' site/firmware/manifest.json
           grep -q '"hisense-ac-atom-esp32.ota.bin"' site/firmware/atom-lite-tail485/manifest.json
           grep -q '"esphome-ac-esp32.ota.bin"' site/install/m5stickc-plus2/manifest.json
           grep -q '"esphome-ac-atom-esp32.ota.bin"' site/install/atom-lite-tail485/manifest.json
+          grep -q '"esphome-ac-plus-esp32.ota.bin"' site/install/m5stickc-plus/manifest.json
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
@@ -169,7 +176,7 @@ jobs:
           for f in $(find fw -name '*.factory.bin' -o -name '*.ota.bin' | sort); do
             b=$(basename "$f"); cp "$f" "assets/${b%%.*}-${TAG}.${b#*.}"
           done
-          test "$(ls assets | wc -l)" -ge 8   # factory + ota for every build (2 legacy + 2 new)
+          test "$(ls assets | wc -l)" -ge 10   # factory + ota for every build (2 legacy + 3 new)
           (cd assets && sha256sum * > SHA256SUMS.txt)
           ls -l assets && cat assets/SHA256SUMS.txt
       - name: Create or update the release
@@ -210,7 +217,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: [hisense-m5stickc-plus2, hisense-atom-lite-tail485]
+        device: [hisense-m5stickc-plus2, hisense-atom-lite-tail485, hisense-m5stickc-plus]
     steps:
       - uses: actions/setup-python@v7
         with: { python-version: "3.13" }

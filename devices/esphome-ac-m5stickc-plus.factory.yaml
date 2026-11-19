@@ -1,0 +1,17 @@
+# FACTORY firmware: M5StickC Plus or Plus SE + M5Stack RS485 Hat.
+#
+# Flashed by the web installer (https://skydoy.github.io/ESPHome_AC/). It is the base config
+# (hisense-m5stickc-plus.yaml) plus a "Firmware Update" entity that installs new releases from
+# its own OTA manifest under install/m5stickc-plus/ over HTTPS.
+#
+# Do not adopt or include this file in your own config: the update entity would replace your
+# config with the generic firmware (and drop your API encryption key). Adopting a device in the
+# ESPHome Device Builder imports the base file instead (see dashboard_import there).
+substitutions:
+  name: esphome-ac-plus
+  friendly_name: Air Conditioner
+  update_manifest_url: https://skydoy.github.io/ESPHome_AC/install/m5stickc-plus/manifest.json
+
+packages:
+  device: !include hisense-m5stickc-plus.yaml
+  auto_update: !include ../core/auto-update.yaml

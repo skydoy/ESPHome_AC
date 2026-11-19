@@ -12,14 +12,14 @@ About 15 minutes from the box to Home Assistant. No YAML.
 
 ## Boards at a glance
 
-| | **ATOM Lite + ATOM Tail485** | **M5StickC Plus2 + RS485 Hat** |
-|---|---|---|
-| Picture | ![Illustration of the M5Stack ATOM Lite and ATOM Tail485](img/board-atom.svg){ width="280" } | ![Illustration of the M5StickC Plus2 and RS485 Hat](img/board-stick.svg){ width="280" } |
-| Approx. price | ≈ US$15 (US$7.50 + US$6.95) | ≈ US$28 (US$19.95 + ≈ US$8) |
-| Status | RGB LED and a button | Screen and two buttons |
-| Shop links | [ATOM Lite](https://docs.m5stack.com/en/core/ATOM%20Lite) · [Tail485](https://docs.m5stack.com/en/atom/tail485) | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) |
+| | **ATOM Lite + ATOM Tail485** | **M5StickC Plus2 + RS485 Hat** | **M5StickC Plus / Plus SE + RS485 Hat** |
+|---|---|---|---|
+| Picture | ![Illustration of the M5Stack ATOM Lite and ATOM Tail485](img/board-atom.svg){ width="280" } | ![Illustration of the M5StickC Plus2 and RS485 Hat](img/board-stick.svg){ width="280" } | ![Illustration of the M5StickC Plus or Plus SE and RS485 Hat](img/board-stick-plus.svg){ width="280" } |
+| Approx. price | ≈ US$15 (US$7.50 + US$6.95) | ≈ US$28 (US$19.95 + ≈ US$8) | Stick + ≈ US$8 hat |
+| Status | RGB LED and a button | Screen and two buttons | Screen and two buttons |
+| Shop links | [ATOM Lite](https://docs.m5stack.com/en/core/ATOM%20Lite) · [Tail485](https://docs.m5stack.com/en/atom/tail485) | [M5StickC Plus2](https://docs.m5stack.com/en/core/M5StickC%20PLUS2) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) | [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) · [Plus SE](https://docs.m5stack.com/en/core/StickC-Plus_SE) · [RS485 Hat](https://docs.m5stack.com/en/hat/hat_rs485) |
 
-Prices are M5Stack shop list prices, before shipping and tax. The Plus2 is end-of-life at the M5Stack shop.
+Prices are M5Stack shop list prices, before shipping and tax. The Plus2 is end-of-life at the M5Stack shop. The Plus / Plus SE build is new and not yet hardware-tested.
 
 !!! warning "Stick boot pin G0"
     If the Stick boots from USB but not from the AC, add a 10 kΩ pull-up from G0 to 3.3 V before you close the unit. [Details](wiring.md#3-boot-pin-g0-read-this-before-closing-the-ac).

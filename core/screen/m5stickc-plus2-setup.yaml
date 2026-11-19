@@ -1,4 +1,5 @@
-# Setup-firmware screen for the M5StickC Plus2 LCD (240x135 landscape).
+# Setup-firmware screen for the M5StickC Plus2 LCD (240x135 landscape), also used by the
+# M5StickC Plus / Plus SE (the board sets the LCD DC/RST pins and the backlight output).
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 #
 #   +--------------------------------------+
@@ -21,7 +22,7 @@ spi:
   clk_pin: GPIO13
   mosi_pin:
     number: GPIO15
-    ignore_strapping_warning: true   # fixed LCD wiring on the Plus2
+    ignore_strapping_warning: true   # fixed LCD wiring on both Sticks
 
 globals:
   - id: screen_signature
@@ -110,10 +111,10 @@ display:
     cs_pin:
       number: GPIO5
       ignore_strapping_warning: true
-    dc_pin: GPIO14
+    dc_pin: ${lcd_dc_pin}             # set by the board (G14 Plus2, G23 Plus)
     reset_pin:
-      number: GPIO12
-      ignore_strapping_warning: true
+      number: ${lcd_reset_pin}        # set by the board (G12 Plus2, G18 Plus)
+      ignore_strapping_warning: ${lcd_reset_ignore_strapping}
     dimensions:
       width: 135
       height: 240

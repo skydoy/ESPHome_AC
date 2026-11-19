@@ -20,8 +20,9 @@ Legenda:
 |---|---|---|---|---|---|---|
 | Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados; leituras de potência, tensão, corrente e humidade parciais. [Detalhes](#aeh-w41h1-unidade-do-autor). Reportado por [@skydoy](https://github.com/skydoy). |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Por testar | O mesmo código de protocolo, ainda não experimentado numa máquina real. |
+| Hisense | qualquer | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Por testar | O mesmo código de protocolo e o mesmo ecrã do Plus2; arranque novo do chip de energia AXP192, ainda não experimentado numa máquina real. |
 
-O autor testou o M5StickC Plus2 + RS485 Hat. A versão ATOM Lite + Tail485 usa o mesmo código de protocolo e é verificada automaticamente, mas não foi testada em hardware. Os relatórios são bem-vindos.
+O autor testou o M5StickC Plus2 + RS485 Hat. As versões ATOM Lite + Tail485 e M5StickC Plus / Plus SE usam o mesmo código de protocolo e são verificadas automaticamente, mas não foram testadas em hardware. Os relatórios são bem-vindos.
 
 ### AEH-W41H1 (unidade do autor)
 

@@ -26,10 +26,11 @@ Status key:
 |---|---|---|---|---|---|---|---|
 | Hisense | maintainer's unit | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Works (2026-10-29) | Mode, temperature, fan, vertical swing confirmed; power, voltage, current, humidity readings partial. [Details](#aeh-w41h1-maintainers-unit) | [@skydoy](https://github.com/skydoy) |
 | Hisense | any | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Untested | Same protocol code, not yet tried on a real unit | – |
+| Hisense | any | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Untested | Same protocol code and screen as the Plus2; new AXP192 power setup, not yet tried on a real unit | – |
 
 Boards: the maintainer tested the M5StickC Plus2 + RS485 Hat. The ATOM Lite + Tail485 build
-(v0.2.7) uses the same protocol code but is not yet hardware-tested; reports
-welcome.
+(v0.2.7) and the M5StickC Plus / Plus SE build use the same protocol code but are not yet
+hardware-tested; reports welcome.
 
 ### AEH-W41H1 (maintainer's unit)
 Tested 2026-10-28 and 2026-10-29 (commands) on an M5StickC Plus2 + RS485 Hat, powered from the 5 V (X) wire.
