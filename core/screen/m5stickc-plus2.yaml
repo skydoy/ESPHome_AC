@@ -1,4 +1,6 @@
-# Status screen for the built-in 1.14" ST7789V LCD (240x135 landscape) of the M5StickC Plus2.
+# Status screen for the built-in 1.14" ST7789V LCD (240x135 landscape) of the M5StickC Plus2,
+# also used by the M5StickC Plus / Plus SE (same LCD; the board sets the DC/RST pins and
+# provides "lcd_backlight" / "lcd_backlight_pwm", a GPIO PWM on the Plus2 and the AXP192 on the Plus).
 #
 #   +--------------------------------------+
 #   | Hisense AC                  (o) OK   |   link: OK / Handshake / Searching / No link
@@ -48,7 +50,7 @@ spi:
   clk_pin: GPIO13
   mosi_pin:
     number: GPIO15
-    ignore_strapping_warning: true   # fixed LCD wiring on the Plus2
+    ignore_strapping_warning: true   # fixed LCD wiring on both Sticks
 
 globals:
   - id: screen_awake_until
@@ -260,10 +262,10 @@ display:
     cs_pin:
       number: GPIO5
       ignore_strapping_warning: true
-    dc_pin: GPIO14
+    dc_pin: ${lcd_dc_pin}             # set by the board (G14 Plus2, G23 Plus)
     reset_pin:
-      number: GPIO12
-      ignore_strapping_warning: true
+      number: ${lcd_reset_pin}        # set by the board (G12 Plus2, G18 Plus)
+      ignore_strapping_warning: ${lcd_reset_ignore_strapping}
     dimensions:
       width: 135
       height: 240

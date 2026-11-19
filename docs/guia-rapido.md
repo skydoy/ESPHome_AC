@@ -18,7 +18,7 @@ Da caixa ao Home Assistant em cerca de 15 minutos, sem YAML. *English: [quick-st
 ## 1. Instalar o firmware (2 minutos)
 Faz isto **antes** de mexer no ar condicionado.
 1. Abre **https://skydoy.github.io/ESPHome_AC/**.
-2. Escolhe a placa: **ATOM Lite + Tail485** ou **M5StickC Plus2 + RS485 Hat**.
+2. Escolhe a placa: **ATOM Lite + Tail485**, **M5StickC Plus2 + RS485 Hat** ou **M5StickC Plus / Plus SE + RS485 Hat** (o Stick anterior; mesmas ligações do Plus2).
 3. Liga a placa ao computador por USB. ATOM: sem o Tail485, que usa a mesma porta USB-C.
 4. Carrega em **Install**, escolhe a porta série → **Install**.
 
@@ -48,7 +48,7 @@ A porta não aparece? Stick: instala o controlador CH9102; ATOM: o controlador F
 
 <!-- photo slot: static/photo-ac-plug.jpg (see docs/photos/README.md) -->
 
-### M5StickC Plus2 + RS485 Hat
+### M5StickC Plus2 ou Plus / Plus SE + RS485 Hat
 ![Ligações: porta Wi-Fi do ar condicionado ao RS485 Hat e ao M5StickC Plus2](wiring.svg)
 
 | Ficha do AC | X = 5 V | X = 12 V |

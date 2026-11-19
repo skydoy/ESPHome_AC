@@ -9,11 +9,25 @@ section below, with the factory and OTA images attached.
 ## [Unreleased]
 
 ### Added
+- New board: **M5StickC Plus / Plus SE + RS485 Hat** (ESP32-PICO-D4, 4 MB flash). Same hat
+  wiring, status screen and setup flow as the Plus2. The LCD backlight, the LCD supply and the
+  battery reading go through the AXP192 power chip, set up by the new `m5_axp192` component
+  (same power-on values as M5Stack's own library). Web installer card, OTA manifest
+  `install/m5stickc-plus/manifest.json`, setup image and CI builds. No legacy build: it uses
+  the `esphome-ac-plus` / "Air Conditioner" names from the start. Not yet hardware-tested.
 - Documentation site (English and Portuguese) under `documentation/`.
   `publish-docs.yml` publishes it to GitHub Pages at `/docs/` and keeps the
   firmware binaries, OTA manifests, and installer HTML already deployed.
   A later firmware release includes the same docs from `publish.yml`.
   No firmware tag is cut for this.
+
+### Changed
+- The Stick screen packages (`core/screen/m5stickc-plus2*.yaml`) take the LCD DC/RST pins
+  from the board file (`lcd_dc_pin`, `lcd_reset_pin`), so the Plus2 and the Plus share them.
+  The Plus2 build is unchanged (G14 / G12).
+- `tools/assemble-docs-site.sh` skips installer files and board manifests that are not live
+  yet (added after the last release), so publishing the docs does not fail before the next
+  firmware release.
 
 ## [0.3.9] - 2026-11-09
 

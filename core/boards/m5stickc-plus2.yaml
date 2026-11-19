@@ -9,6 +9,10 @@ substitutions:
   ac_tx_pin: GPIO0
   ac_rx_pin: GPIO26
   ac_tx_ignore_strapping: "true"   # G0 is a strapping pin, fixed by the Hat wiring
+  # LCD pins used by core/screen/m5stickc-plus2*.yaml (the M5StickC Plus uses other ones).
+  lcd_dc_pin: GPIO14
+  lcd_reset_pin: GPIO12
+  lcd_reset_ignore_strapping: "true"   # G12 is a strapping pin, fixed LCD wiring
 
 esp32:
   board: esp32dev        # ESP32-PICO-V3-02; there is no dedicated PlatformIO board for the Plus2

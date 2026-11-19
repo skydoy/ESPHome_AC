@@ -6,7 +6,7 @@
 [⚡ Abrir o instalador web](https://skydoy.github.io/ESPHome_AC/){ .md-button .md-button--primary }
 </div>
 
-**M5StickC Plus2 + RS485 Hat** ou **ATOM Lite + ATOM Tail485**, em unidades Hisense com o módulo Wi-Fi **AEH-W4x / AEH-W41H1** (RS-485 de 4 pinos). Controlo só local. Há um relatório anónimo de compatibilidade opcional, que podes desligar. Sem app do fabricante.
+**M5StickC Plus2 ou Plus / Plus SE + RS485 Hat** ou **ATOM Lite + ATOM Tail485**, em unidades Hisense com o módulo Wi-Fi **AEH-W4x / AEH-W41H1** (RS-485 de 4 pinos). Controlo só local. Há um relatório anónimo de compatibilidade opcional, que podes desligar. Sem app do fabricante.
 
 ## Começa aqui
 

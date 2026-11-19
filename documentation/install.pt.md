@@ -10,6 +10,7 @@ Abre **[https://skydoy.github.io/ESPHome_AC/](https://skydoy.github.io/ESPHome_A
 
 - **ATOM Lite + Tail485** — manifesto `install/atom-lite-tail485/manifest.json`
 - **M5StickC Plus2 + RS485 Hat** — manifesto `install/m5stickc-plus2/manifest.json` (escolha predefinida no instalador)
+- **M5StickC Plus / Plus SE + RS485 Hat** — manifesto `install/m5stickc-plus/manifest.json` (o Stick anterior, com o chip de energia AXP192; escolhe este se o teu Stick não diz Plus2)
 
 Só Hisense AEH-W4x / AEH-W41H1. Outras marcas não estão no instalador.
 
