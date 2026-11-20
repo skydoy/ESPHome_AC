@@ -8,9 +8,22 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-20
+
 ### Changed
+- Web installer: new step **4. Connect to Wi-Fi**, with numbered steps for the installer
+  window (way A) and for the `ESPHome_AC Setup` hotspot at `http://192.168.4.1` (way B),
+  including how to restart each board.
+- Web installer: for both Sticks, a warning to **remove the RS485 Hat before installing**.
+  The hat holds G0 low, so after the install reset the Stick stays in download mode (black
+  screen, no Wi-Fi, empty logs).
 - Releases are cut automatically: the new **Auto release** workflow creates the `v<project_version>`
   tag when a new version reaches `main` and starts the release build on it. No manual tag needed.
+
+### Fixed
+- The v0.4.0 installer did not go live at first: "Publish documentation" deployed the release
+  commit before the release build, and GitHub Pages keeps serving the first deployment of a
+  commit. It now skips release commits (publish.yml deploys them with the firmware and docs).
 
 ## [0.4.0] - 2026-11-19
 
@@ -482,7 +495,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...v0.3.9
 [0.3.8]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.7...v0.3.8
