@@ -76,6 +76,8 @@
     .note { border-radius:10px; padding:.6rem .85rem; margin:.7rem 0; }
     .warn { background:var(--warn-bg); border-left:4px solid var(--warn); }
     .ok { background:var(--ok-bg); border-left:4px solid var(--ok); }
+    .steps { margin:.4rem 0 .6rem; } .steps li { margin:.45rem 0; }
+    .way { font-weight:700; margin:.9rem 0 .2rem; }
     ol, ul { padding-left:1.25rem; } li { margin:.25rem 0; }
     code { background: color-mix(in srgb, var(--text) 8%, transparent); padding:.05rem .35rem; border-radius:5px; }
     details { border-top:1px solid var(--line); padding:.55rem 0; }
@@ -161,6 +163,8 @@
     <p class="en">Use a USB-C <b>data</b> cable.
       <span data-board="atom">On the ATOM, do this <b>before</b> fitting the Tail485.</span>
     </p>
+    <p class="note warn" data-board="stick">⚠️ <span class="pt"><b>Tira o RS485 Hat antes de ligar o USB.</b> Instala só com o Stick. Com o hat encaixado, o Stick não arranca depois de instalar (ecrã preto, sem Wi-Fi). Só voltas a pôr o hat depois do passo 4.</span><span class="en"><b>Remove the RS485 Hat before plugging in USB.</b> Install with the Stick alone. With the hat fitted, the Stick does not start after installing (black screen, no Wi-Fi). Fit the hat again only after step 4.</span></p>
+    <p class="note warn" data-board="stick-plus">⚠️ <span class="pt"><b>Tira o RS485 Hat antes de ligar o USB.</b> Instala só com o Stick. Com o hat encaixado, o Stick não arranca depois de instalar (ecrã preto, sem Wi-Fi). Só voltas a pôr o hat depois do passo 4.</span><span class="en"><b>Remove the RS485 Hat before plugging in USB.</b> Install with the Stick alone. With the hat fitted, the Stick does not start after installing (black screen, no Wi-Fi). Fit the hat again only after step 4.</span></p>
     <details><summary><span class="pt">A placa não aparece?</span><span class="en">Board not showing up?</span></summary>
       <ul>
         <li data-board="stick"><span class="pt">M5StickC Plus2 (CH9102):</span><span class="en">M5StickC Plus2 (CH9102):</span>
@@ -187,7 +191,49 @@
       </esp-web-install-button>
       <div class="ver" id="ver"></div>
     </div>
-    <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> barra de progresso (~1 min) e <i>Installation complete</i>. Depois escolhe o Wi-Fi de <b>2,4 GHz</b> na mesma janela (ou liga-te a <code>ESPHome_AC Setup</code>).</span><span class="en"><b>You should see:</b> a progress bar (~1 min) and <i>Installation complete</i>. Then pick your <b>2.4 GHz</b> Wi-Fi in the same window (or join <code>ESPHome_AC Setup</code>).</span></p>
+    <p class="note ok">✅ <span class="pt"><b>Deves ver:</b> barra de progresso (~1 min) e depois <i>Installation complete</i>. Não feches a janela: segue para o passo 4.</span><span class="en"><b>You should see:</b> a progress bar (~1 min), then <i>Installation complete</i>. Keep the window open and go to step 4.</span></p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">4</span><span class="pt">Ligar ao Wi-Fi</span><span class="en">Connect to Wi-Fi</span></h2>
+    <p class="pt">A placa só funciona numa rede de <b>2,4 GHz</b> (não 5 GHz). Tem à mão o nome da rede e a password.</p>
+    <p class="en">The board only works on a <b>2.4 GHz</b> network (not 5 GHz). Have the network name and password ready.</p>
+
+    <p class="way pt">Forma A: na mesma janela do instalador</p>
+    <p class="way en">Way A: in the same installer window</p>
+    <ol class="steps pt">
+      <li>Em <i>Installation complete</i>, carrega em <b>Next</b>.</li>
+      <li>Se aparecer uma lista de opções, escolhe <b>Connect to Wi-Fi</b>.</li>
+      <li>Escolhe a tua rede, escreve a password e carrega em <b>Connect</b>.</li>
+      <li>Ao fim de uns segundos a janela confirma que a placa está ligada à rede. Pronto.</li>
+    </ol>
+    <ol class="steps en">
+      <li>On <i>Installation complete</i>, press <b>Next</b>.</li>
+      <li>If a list of options shows up, pick <b>Connect to Wi-Fi</b>.</li>
+      <li>Pick your network, type the password and press <b>Connect</b>.</li>
+      <li>After a few seconds the window confirms the board is on your network. Done.</li>
+    </ol>
+
+    <p class="way pt">Forma B: se não aparecer <i>Connect to Wi-Fi</i></p>
+    <p class="way en">Way B: if <i>Connect to Wi-Fi</i> does not show up</p>
+    <ol class="steps pt">
+      <li><span data-board="stick-plus">Desliga o Stick: botão do lado esquerdo durante <b>6 s</b>. Liga outra vez: mesmo botão <b>2 s</b>.</span><span data-board="stick">Tira e volta a ligar o cabo USB.</span><span data-board="atom">Tira e volta a ligar o cabo USB.</span> Espera 10 segundos.</li>
+      <li>No telemóvel, abre as definições de Wi-Fi e liga-te à rede <code>ESPHome_AC Setup</code>.</li>
+      <li>Abre-se uma página sozinha. Se não abrir, vai ao browser e escreve <code>http://192.168.4.1</code>.</li>
+      <li>Escolhe a tua rede, escreve a password e carrega em <b>Save</b>.</li>
+      <li>A placa reinicia e liga-se à tua rede; <span data-board="atom">o LED fica verde.</span><span data-board="stick">o ecrã mostra o IP em baixo.</span><span data-board="stick-plus">o ecrã mostra o IP em baixo.</span> A rede <code>ESPHome_AC Setup</code> desaparece.</li>
+    </ol>
+    <ol class="steps en">
+      <li><span data-board="stick-plus">Switch the Stick off: left side button for <b>6 s</b>. Switch it on: same button for <b>2 s</b>.</span><span data-board="stick">Unplug the USB cable and plug it back in.</span><span data-board="atom">Unplug the USB cable and plug it back in.</span> Wait 10 seconds.</li>
+      <li>On your phone, open the Wi-Fi settings and join <code>ESPHome_AC Setup</code>.</li>
+      <li>A page opens by itself. If it does not, open the browser and go to <code>http://192.168.4.1</code>.</li>
+      <li>Pick your network, type the password and press <b>Save</b>.</li>
+      <li>The board restarts and joins your network; <span data-board="atom">the LED turns green.</span><span data-board="stick">the screen shows its IP at the bottom.</span><span data-board="stick-plus">the screen shows its IP at the bottom.</span> The <code>ESPHome_AC Setup</code> network goes away.</li>
+    </ol>
+    <p class="note warn" data-board="stick">⚠️ <span class="pt">Ecrã preto e sem <code>ESPHome_AC Setup</code>? O hat estava encaixado. Tira-o e faz o passo 1 da Forma B.</span><span class="en">Black screen and no <code>ESPHome_AC Setup</code>? The hat was fitted. Remove it and do step 1 of Way B.</span></p>
+    <p class="note warn" data-board="stick-plus">⚠️ <span class="pt">Ecrã preto e sem <code>ESPHome_AC Setup</code>? O hat estava encaixado. Tira-o e faz o passo 1 da Forma B.</span><span class="en">Black screen and no <code>ESPHome_AC Setup</code>? The hat was fitted. Remove it and do step 1 of Way B.</span></p>
+    <p class="pt">Depois do Wi-Fi: <span data-board="stick">volta a encaixar o RS485 Hat e</span><span data-board="stick-plus">volta a encaixar o RS485 Hat e</span><span data-board="atom">encaixa o Tail485 e</span> segue para as ligações ao AC.</p>
+    <p class="en">After Wi-Fi: <span data-board="stick">fit the RS485 Hat again and</span><span data-board="stick-plus">fit the RS485 Hat again and</span><span data-board="atom">fit the Tail485 and</span> go on to the AC wiring.</p>
   </section>
 
   <section class="card next">
