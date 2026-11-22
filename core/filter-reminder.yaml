@@ -56,7 +56,7 @@ button:
                 data_template:
                   notification_id: "{{ nid }}"
                 variables:
-                  nid: return App.get_name() + "_filter";
+                  nid: !lambda return App.get_name() + "_filter";
             - script.execute: filter_check
           else:
             - logger.log:
@@ -134,8 +134,8 @@ script:
                   notification_id: "{{ nid }}"
                   message: "{{ msg }}"
                 variables:
-                  nid: return App.get_name() + "_filter";
-                  msg: |-
+                  nid: !lambda return App.get_name() + "_filter";
+                  msg: !lambda |-
                     char buf[200];
                     snprintf(buf, sizeof(buf),
                              "It has been %.0f days since the air filter was cleaned. After cleaning, press \"Filter Cleaned\".\n"

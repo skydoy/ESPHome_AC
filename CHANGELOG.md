@@ -8,6 +8,22 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-22
+
+### Fixed
+- "Firmware Update" / "Check for Update" failed on boards without PSRAM (M5StickC Plus / Plus SE,
+  ATOM Lite) with `esp-x509-crt-bundle: PK verify failed with error 0x4290`: the TLS handshake
+  with GitHub Pages ran out of RAM (RSA + out of memory). Bluetooth (Improv over BLE, used only
+  for the first Wi-Fi setup) is now switched off 60 s after Wi-Fi connects and back on if Wi-Fi
+  is lost, and mbedTLS allocates its buffers only while a connection is open.
+
+### Added
+- Diagnostic sensors **Free Heap** and **Largest Free Block**.
+
+### Changed
+- Filter reminder: Home Assistant action variables use the `!lambda` tag (required from
+  ESPHome 2027.3).
+
 ## [0.5.0] - 2026-11-22
 
 ### Added
@@ -509,7 +525,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...v0.4.0
