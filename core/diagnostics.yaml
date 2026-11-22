@@ -18,11 +18,19 @@ sensor:
     name: "Wi-Fi Signal"
     update_interval: 60s
     entity_category: diagnostic
+  # RAM left for HTTPS updates and the web page (boards without PSRAM run close to the limit).
+  - platform: debug
+    free:
+      name: "Free Heap"
+      entity_category: diagnostic
+    block:
+      name: "Largest Free Block"
+      entity_category: diagnostic
 
 # Reset reason ("power-on event", "brownout", ...). The status screen flags brownouts, which
 # usually mean the 5 V supply from the AC port is too weak or badly connected.
 debug:
-  update_interval: never
+  update_interval: 60s   # Free Heap / Largest Free Block
 
 text_sensor:
   - platform: debug
