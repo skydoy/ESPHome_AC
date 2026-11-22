@@ -9,6 +9,15 @@
 # The factory firmware removes these entities: its "Firmware Update" entity already does this.
 #
 # Needs the substitution update_manifest_url (set by each base device file).
+# Smaller TLS memory use: mbedTLS buffers are allocated only while a connection is open and
+# the CA bundle is released after the handshake. HTTPS to GitHub Pages needs ~40 kB of free RAM.
+esp32:
+  framework:
+    sdkconfig_options:
+      CONFIG_MBEDTLS_DYNAMIC_BUFFER: y
+      CONFIG_MBEDTLS_DYNAMIC_FREE_CONFIG_DATA: y
+      CONFIG_MBEDTLS_DYNAMIC_FREE_CA_CERT: y
+
 http_request:
   id: ac_http_request
   verify_ssl: true
