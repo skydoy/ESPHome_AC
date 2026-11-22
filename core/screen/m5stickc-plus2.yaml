@@ -213,6 +213,7 @@ interval:
           sig = mix(sig, link ? 1 : 0);
           sig = mix(sig, id(ac_fault).state ? 1 : 0);
           sig = mix_str(sig, id(ac_link_status).state);
+          sig = mix(sig, id(filter_due).state ? 1 : 0);
           if (sig != id(screen_signature)) {
             const bool first = id(screen_signature) == 0;
             id(screen_signature) = sig;
@@ -418,6 +419,8 @@ display:
         it.print(4, y, id(font_small), amber, "Brownout reset: check 5V supply");
       } else if (link_lost_long) {
         it.print(4, y, id(font_small), red, "No AC: swap A/B? G0 10k pull-up?");
+      } else if (id(filter_due).state) {
+        it.print(4, y, id(font_small), amber, "Clean the AC filter");
       } else {
         const float out = id(ac_outdoor_temperature).state;
         if (!std::isnan(out))

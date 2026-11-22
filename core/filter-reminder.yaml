@@ -1,0 +1,160 @@
+# Air filter cleaning reminder (brand agnostic), counted in calendar days.
+#
+# Home Assistant entities:
+#   select  "Filter Cleaning Interval"  Off / 30 / 60 / 90 / 182 / 365 days (default 365)
+#   button  "Filter Cleaned"            press after cleaning: the count starts again from today
+#   sensor  "Filter Last Cleaned"       date of the last cleaning (timestamp)
+#   sensor  "Filter Days Left"          days until the next cleaning (negative = overdue)
+#   binary_sensor "Filter Needs Cleaning" (problem) on when the interval has passed
+# When it turns on, the device also creates a Home Assistant notification (needs "Allow the
+# device to perform Home Assistant actions" in the ESPHome device options in HA). Pressing
+# "Filter Cleaned" dismisses it. The Stick status screen shows "Clean the AC filter".
+#
+# The date of the last cleaning survives reboots and updates. On a new device the count starts
+# the first time the clock is set (from Home Assistant, ha_time in core/diagnostics.yaml).
+# Air-filter makers usually advise washing the filter every 2-4 weeks in regular use, and
+# more often with pets; pick the interval that fits your home.
+
+globals:
+  - id: filter_cleaned_at        # Unix time of the last cleaning; 0 = not started yet
+    type: uint32_t
+    restore_value: true
+    initial_value: "0"
+  - id: filter_notified          # a notification was sent for the current overdue period
+    type: bool
+    restore_value: true
+    initial_value: "false"
+
+select:
+  - platform: template
+    id: filter_interval
+    name: "Filter Cleaning Interval"
+    icon: mdi:air-filter
+    entity_category: config
+    options: ["Off", "30 days", "60 days", "90 days", "182 days", "365 days"]
+    initial_option: "365 days"
+    optimistic: true
+    restore_value: true
+    on_value:
+      - script.execute: filter_check
+
+button:
+  - platform: template
+    name: "Filter Cleaned"
+    icon: mdi:air-filter
+    on_press:
+      - if:
+          condition:
+            lambda: return id(ha_time).now().is_valid();
+          then:
+            - lambda: |-
+                id(filter_cleaned_at) = (uint32_t) id(ha_time).now().timestamp;
+                id(filter_notified) = false;
+                ESP_LOGI("filter", "Filter cleaned: the count starts again today");
+            - homeassistant.action:
+                action: persistent_notification.dismiss
+                data_template:
+                  notification_id: "{{ nid }}"
+                variables:
+                  nid: return App.get_name() + "_filter";
+            - script.execute: filter_check
+          else:
+            - logger.log:
+                level: WARN
+                format: "Filter Cleaned ignored: the clock is not set yet (needs Home Assistant)"
+
+sensor:
+  - platform: template
+    id: filter_last_cleaned
+    name: "Filter Last Cleaned"
+    icon: mdi:calendar-check
+    device_class: timestamp
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: filter_days_left
+    name: "Filter Days Left"
+    icon: mdi:air-filter
+    unit_of_measurement: d
+    accuracy_decimals: 0
+    update_interval: never
+
+binary_sensor:
+  - platform: template
+    id: filter_due
+    name: "Filter Needs Cleaning"
+    icon: mdi:air-filter
+    device_class: problem
+
+script:
+  - id: filter_check
+    mode: restart
+    then:
+      - lambda: |-
+          static const int DAYS[] = {0, 30, 60, 90, 182, 365};
+          const int days = DAYS[id(filter_interval).active_index().value_or(5)];
+          auto now = id(ha_time).now();
+          if (!now.is_valid())
+            return;  // no clock yet: checked again on time sync and every hour
+          const uint32_t t = (uint32_t) now.timestamp;
+          if (id(filter_cleaned_at) == 0 || id(filter_cleaned_at) > t + 86400) {
+            id(filter_cleaned_at) = t;  // first start (or a clock jump back): count from today
+            ESP_LOGI("filter", "Filter reminder: counting from today");
+          }
+          id(filter_last_cleaned).publish_state(id(filter_cleaned_at));
+          if (days == 0) {
+            id(filter_days_left).publish_state(NAN);
+            id(filter_due).publish_state(false);
+            id(filter_notified) = false;
+            return;
+          }
+          const int elapsed = (int) ((t - id(filter_cleaned_at)) / 86400);
+          id(filter_days_left).publish_state(days - elapsed);
+          const bool due = elapsed >= days;
+          if (!due)
+            id(filter_notified) = false;
+          if (!id(filter_due).has_state() || id(filter_due).state != due) {
+            if (due)
+              ESP_LOGW("filter", "The AC air filter is due for cleaning (%d days since the last one)", elapsed);
+            id(filter_due).publish_state(due);
+          }
+      # One Home Assistant notification per overdue period, sent once the API is connected.
+      - if:
+          condition:
+            and:
+              - binary_sensor.is_on: filter_due
+              - lambda: return !id(filter_notified);
+              - api.connected:
+          then:
+            - homeassistant.action:
+                action: persistent_notification.create
+                data:
+                  title: "${friendly_name}: clean the air filter / limpar o filtro"
+                data_template:
+                  notification_id: "{{ nid }}"
+                  message: "{{ msg }}"
+                variables:
+                  nid: return App.get_name() + "_filter";
+                  msg: |-
+                    char buf[200];
+                    snprintf(buf, sizeof(buf),
+                             "It has been %.0f days since the air filter was cleaned. After cleaning, press \"Filter Cleaned\".\n"
+                             "Passaram %.0f dias desde a última limpeza do filtro. Depois de limpar, carrega em \"Filter Cleaned\".",
+                             (double) ((id(ha_time).now().timestamp - id(filter_cleaned_at)) / 86400),
+                             (double) ((id(ha_time).now().timestamp - id(filter_cleaned_at)) / 86400));
+                    return std::string(buf);
+            - lambda: id(filter_notified) = true;
+
+interval:
+  - interval: 1h
+    then:
+      - script.execute: filter_check
+
+api:
+  on_client_connected:
+    - script.execute: filter_check
+
+time:
+  - id: !extend ha_time
+    on_time_sync:
+      - script.execute: filter_check
