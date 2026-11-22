@@ -47,6 +47,22 @@ cards:
 
 A sensor your AC does not report shows as *unavailable*; delete its line.
 
+## Filter cleaning reminder
+
+The device counts the days since the air filter was last cleaned and warns you when it is time.
+
+| Entity | What it does |
+|---|---|
+| **Filter Cleaning Interval** | Off, 30, 60, 90, 182 or 365 days (default 365). Pick 182 or less with pets or dust. |
+| **Filter Cleaned** | Press it after cleaning the filter: the count starts again from today. |
+| **Filter Days Left** | Days until the next cleaning (negative when overdue). |
+| **Filter Needs Cleaning** | On when the interval has passed. |
+| **Filter Last Cleaned** | Date of the last cleaning. |
+
+When it is time, the Stick screen shows **Clean the AC filter** and Home Assistant gets a notification. For the notification, turn on **Allow the device to perform Home Assistant actions**: Settings → Devices & services → ESPHome → your AC → **Configure**. Pressing **Filter Cleaned** removes the notification.
+
+The count starts on the first day the device gets the time from Home Assistant, and it survives restarts and updates. Air-filter makers usually advise washing the filter every 2–4 weeks in regular use.
+
 ## Update notification
 For devices adopted in the ESPHome Device Builder (they have an **Update Available** entity):
 get a phone notification when a new release is out.

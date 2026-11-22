@@ -8,6 +8,20 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-22
+
+### Added
+- Air filter cleaning reminder (`core/filter-reminder.yaml`, all boards), counted in calendar
+  days: **Filter Cleaning Interval** (Off / 30 / 60 / 90 / 182 / 365 days, default 365),
+  **Filter Cleaned** button, **Filter Days Left**, **Filter Last Cleaned** and **Filter Needs
+  Cleaning**. When due, the Stick screen shows "Clean the AC filter" and the device creates a
+  Home Assistant notification (needs "Allow the device to perform Home Assistant actions");
+  "Filter Cleaned" dismisses it. The date survives restarts and updates.
+
+### Changed
+- Web installer, Wi-Fi way B: what to do when `http://192.168.4.1` does not open (type the
+  `http://`, turn off mobile data / unplug the network cable, Firefox "Continue to HTTP Site").
+
 ## [0.4.1] - 2026-11-20
 
 ### Changed
@@ -495,7 +509,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.9...v0.4.0
 [0.3.9]: https://github.com/skydoy/ESPHome_AC/compare/v0.3.8...v0.3.9
