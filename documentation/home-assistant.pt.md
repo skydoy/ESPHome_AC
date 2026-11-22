@@ -60,6 +60,22 @@ cards:
 
 Apaga a linha de qualquer sensor que o teu AC não envie.
 
+## Aviso de limpeza do filtro
+
+O dispositivo conta os dias desde a última limpeza do filtro de ar e avisa quando chega a altura.
+
+| Entidade | O que faz |
+|---|---|
+| **Filter Cleaning Interval** | Desligado, 30, 60, 90, 182 ou 365 dias (por defeito 365). Com animais ou pó, escolhe 182 ou menos. |
+| **Filter Cleaned** | Carrega depois de limpar o filtro: a contagem recomeça a partir de hoje. |
+| **Filter Days Left** | Dias até à próxima limpeza (negativo quando já passou). |
+| **Filter Needs Cleaning** | Liga quando o intervalo passou. |
+| **Filter Last Cleaned** | Data da última limpeza. |
+
+Quando chega a altura, o ecrã do Stick mostra **Clean the AC filter** e o Home Assistant recebe uma notificação. Para a notificação, liga **Permitir que o dispositivo execute ações do Home Assistant**: Definições → Dispositivos e serviços → ESPHome → o teu AC → **Configurar**. Carregar em **Filter Cleaned** apaga a notificação.
+
+A contagem começa no primeiro dia em que o dispositivo recebe a hora do Home Assistant e mantém-se depois de reinícios e atualizações. Os fabricantes costumam aconselhar lavar o filtro de ar a cada 2–4 semanas em uso normal.
+
 ## Aviso de atualização
 
 Para placas adotadas no ESPHome Device Builder (têm a entidade **Update Available**), importa este blueprint e cria uma automação que avisa o telemóvel quando sai uma versão nova.
