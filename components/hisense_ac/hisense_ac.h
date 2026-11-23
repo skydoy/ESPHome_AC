@@ -114,6 +114,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_room_temperature(float c);
   void set_follow_room(bool on);
   bool follow_room() const { return this->follow_room_; }
+  /// Some units swap the panel-light commands (Light On turns it off): invert what is sent.
+  void set_invert_light(bool v) { this->invert_light_ = v; }
+  bool invert_light() const { return this->invert_light_; }
   /// Room temperature from the external sensor, NAN if none or older than 4 h.
   float room_temperature() const;
   /// Temperature measured by the AC's own sensor (return air).
@@ -322,6 +325,7 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   float ext_room_{NAN};
   uint32_t ext_room_at_{0};
   bool follow_room_{false};
+  bool invert_light_{false};
   bool room_was_active_{false};
   float user_target_{NAN};
   float last_sent_sp_{NAN};

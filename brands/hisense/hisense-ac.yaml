@@ -240,6 +240,19 @@ number:
       - lambda: id(ac_climate).set_room_temperature(x);
 
 switch:
+  # Some Hisense units swap the panel-light commands: if "Light On" turns the light off,
+  # turn this on. Applies to Light On / Light Off and the AC Display switch.
+  - platform: template
+    id: invert_light_switch
+    name: "Invert Panel Light"
+    icon: mdi:swap-horizontal
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
+    lambda: return id(ac_climate).invert_light();
+    turn_on_action:
+      - lambda: id(ac_climate).set_invert_light(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_invert_light(false);
   - platform: template
     id: follow_room_switch
     name: "Follow Room Sensor"

@@ -16,6 +16,19 @@ section below, with the factory and OTA images attached.
   device with a webhook, without Home Assistant. Readings older than 4 h are ignored.
 - **AC Sensor Temperature** (the AC's own sensor), **Heating Rate** and **Cooling Rate**
   (°C per hour over the last 30 min while the AC heats or cools).
+- Schedules stored on the device (`core/schedules.yaml`, all boards): 4 schedules, each with
+  **Schedule N** (on/off), **Time**, **Days** (every day / weekdays / weekend / one day),
+  **Action** (off / cool / heat / auto / dry / fan), **Temperature** and **Fan**. They run
+  without Home Assistant: SNTP internet time with the time zone Home Assistant last sent,
+  which is now saved on the device.
+- **Invert Panel Light** switch: some Hisense units swap the panel-light commands, so
+  Light On turned the light off. Turn it on if yours does.
+
+### Changed
+- The device's web page (`http://<device-ip>/`) is served from the firmware (`local: true`)
+  instead of loading its JS/CSS from the ESPHome CDN, so it works without internet.
+- SNTP time moved from the factory-only update package to `core/diagnostics.yaml`, so every
+  build has internet time.
 
 ## [0.5.1] - 2026-11-22
 

@@ -84,6 +84,27 @@ Give the AC device a fixed IP in your router so the URL keeps working.
 
 **Heating Rate** and **Cooling Rate** show how fast the room warms up or cools down (°C per hour) while the AC is heating or cooling, from the last 30 minutes. They use the room sensor when following it, otherwise the AC's sensor (whole degrees, so the value is rougher). They stay empty while the AC is not heating or cooling, and for the first 10 minutes.
 
+## Schedules
+
+Four schedules are stored on the device, so they also run when Home Assistant is down. Each one has, under **Configuration**:
+
+| Entity | What it does |
+|---|---|
+| **Schedule N** | On = the schedule is active. |
+| **Schedule N Time** | Time of day (local time). |
+| **Schedule N Days** | Every day, Weekdays, Weekend, or one day (Monday … Sunday). |
+| **Schedule N Action** | Off, Cool, Heat, Auto, Dry or Fan. |
+| **Schedule N Temperature** | 16–32 °C (not used by Off and Fan). |
+| **Schedule N Fan** | Keep (leave as is), Auto, Low, Medium, High or Quiet. |
+
+Example: Schedule 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Schedule 2 = Weekdays, 08:30, Off.
+
+The clock comes from Home Assistant, or from internet time (SNTP) without it. The time zone is the one Home Assistant last sent, saved on the device; until the device has connected to Home Assistant once, it uses UTC.
+
+## Panel light
+
+**Light On** / **Light Off** switch the light on the indoor unit. Some Hisense units swap the two commands: if Light On turns the light off, turn on **Invert Panel Light** (Configuration).
+
 ## Filter cleaning reminder
 
 The device counts the days since the air filter was last cleaned and warns you when it is time.

@@ -84,6 +84,27 @@ Dá um IP fixo ao dispositivo do AC no router, para o URL continuar a funcionar.
 
 **Heating Rate** e **Cooling Rate** mostram quão depressa a sala aquece ou arrefece (°C por hora) enquanto o AC está a aquecer ou a arrefecer, com base nos últimos 30 minutos. Usam o sensor da sala quando o segue; senão, o sensor do AC (em graus inteiros, por isso o valor é mais grosseiro). Ficam vazios quando o AC não está a aquecer nem a arrefecer, e nos primeiros 10 minutos.
 
+## Horários
+
+Há quatro horários guardados no próprio dispositivo, por isso também funcionam com o Home Assistant em baixo. Cada um tem, em **Configuração**:
+
+| Entidade | O que faz |
+|---|---|
+| **Schedule N** | Ligado = o horário está ativo. |
+| **Schedule N Time** | Hora do dia (hora local). |
+| **Schedule N Days** | Todos os dias (Every day), dias úteis (Weekdays), fim de semana (Weekend) ou um dia (Monday … Sunday). |
+| **Schedule N Action** | Desligar (Off), arrefecer (Cool), aquecer (Heat), Auto, desumidificar (Dry) ou ventilar (Fan). |
+| **Schedule N Temperature** | 16–32 °C (não conta para Off e Fan). |
+| **Schedule N Fan** | Manter (Keep), Auto, Baixa (Low), Média (Medium), Alta (High) ou Silencioso (Quiet). |
+
+Exemplo: Horário 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Horário 2 = Weekdays, 08:30, Off.
+
+A hora vem do Home Assistant ou, sem ele, da internet (SNTP). O fuso horário é o último que o Home Assistant enviou e fica guardado no dispositivo; até o dispositivo se ligar uma vez ao Home Assistant, usa UTC.
+
+## Luz do painel
+
+**Light On** / **Light Off** ligam e desligam a luz da unidade interior. Em algumas unidades Hisense os dois comandos estão trocados: se o Light On apagar a luz, liga **Invert Panel Light** (Configuração).
+
 ## Aviso de limpeza do filtro
 
 O dispositivo conta os dias desde a última limpeza do filtro de ar e avisa quando chega a altura.
