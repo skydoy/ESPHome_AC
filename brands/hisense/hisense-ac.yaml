@@ -57,6 +57,7 @@ climate:
       name: "Outdoor Coil Temperature"
     compressor_frequency:
       name: "Compressor Frequency"
+      id: ac_compressor_frequency   # used by core/health.yaml
     compressor_target_frequency:
       name: "Compressor Target Frequency"
     # Humidity, voltage and current are only reported by some units: hidden by default,
@@ -185,3 +186,172 @@ sensor:
     power_id: ac_power
     method: left
     restore: true
+
+  # ---- Room sensor and heating / cooling rate ----
+  # Temperature measured by the AC's own sensor (return air, near the ceiling). With "Follow
+  # Room Sensor" on, the climate entity shows the room sensor instead.
+  - platform: template
+    id: ac_sensor_temperature
+    name: "AC Sensor Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 60s
+    lambda: return id(ac_climate).ac_sensor_temperature();
+  # EXPERIMENTAL: bytes 55-56 of the 160-byte status frame (W41H1-type units) as a 16-bit
+  # number. On an AEH-W41H1 unit it ramps smoothly with the compressor (2740 -> 3340 in 30 s
+  # at 45 Hz, heating), which looks like the heating / cooling output the official app showed,
+  # not the electrical power. Not confirmed yet: compare with a meter on the AC circuit.
+  - platform: template
+    id: ac_output_power
+    name: "Output Power (experimental)"
+    icon: mdi:heat-wave
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 10s
+    lambda: |-
+      if (id(ac_climate).status_len() < 160) return NAN;
+      const int v = id(ac_climate).status_u16(55);
+      return v < 0 ? NAN : (float) v;
+  - platform: template
+    name: "Output Power BTU (experimental)"
+    icon: mdi:heat-wave
+    unit_of_measurement: "BTU/h"
+    state_class: measurement
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 10s
+    lambda: |-
+      const float w = id(ac_output_power).state;
+      return std::isnan(w) ? NAN : w * 3.412f;
+  # How fast the room warms up / cools down while the AC heats / cools (°C per hour), from
+  # the last 30 min (room sensor when following it, otherwise the AC sensor). Empty while
+  # the AC is not heating / cooling or during its first 10 min of it.
+  - platform: template
+    id: heating_rate
+    name: "Heating Rate"
+    icon: mdi:thermometer-chevron-up
+    unit_of_measurement: "°C/h"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: never
+  - platform: template
+    id: cooling_rate
+    name: "Cooling Rate"
+    icon: mdi:thermometer-chevron-down
+    unit_of_measurement: "°C/h"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: never
+
+# Room temperature input. A Shelly H&T (Plus / Gen3 / Gen4) sends it straight to the device,
+# without Home Assistant, with a webhook on "Temperature change":
+#   http://<device-ip>/number/Room%20Temperature/set?value=${ev.tC}
+# Home Assistant can also set it. Readings older than 4 h are ignored.
+number:
+  - platform: template
+    id: room_temperature_input
+    name: "Room Temperature"
+    icon: mdi:home-thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    min_value: -30
+    max_value: 60
+    step: 0.1
+    mode: box
+    optimistic: true
+    entity_category: config
+    set_action:
+      - lambda: id(ac_climate).set_room_temperature(x);
+
+switch:
+  # Byte hunt: logs the whole status frame once a minute with the decoded values, and the
+  # device's web page collects those lines into a CSV to download. Used to find fields not
+  # decoded yet (e.g. heating / cooling output). Off after every restart.
+  - platform: template
+    id: byte_hunt_switch
+    name: "Byte Hunt"
+    icon: mdi:magnify-scan
+    entity_category: diagnostic
+    restore_mode: ALWAYS_OFF
+    lambda: return id(ac_climate).byte_hunt();
+    turn_on_action:
+      - lambda: id(ac_climate).set_byte_hunt(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_byte_hunt(false);
+  # Some Hisense units swap the panel-light commands: if "Light On" turns the light off,
+  # turn this on. Applies to Light On / Light Off and the AC Display switch.
+  - platform: template
+    id: invert_light_switch
+    name: "Invert Panel Light"
+    icon: mdi:swap-horizontal
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
+    lambda: return id(ac_climate).invert_light();
+    turn_on_action:
+      - lambda: id(ac_climate).set_invert_light(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_invert_light(false);
+  - platform: template
+    id: follow_room_switch
+    name: "Follow Room Sensor"
+    icon: mdi:home-thermometer-outline
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
+    lambda: return id(ac_climate).follow_room();
+    turn_on_action:
+      - lambda: id(ac_climate).set_follow_room(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_follow_room(false);
+
+interval:
+  - interval: 60s
+    then:
+      - lambda: |-
+          // 30 one-minute samples of the room temperature while the AC heats or cools.
+          static float buf[30];
+          static uint8_t n = 0, head = 0;
+          static int last_action = -1;
+          const auto action = id(ac_climate).action;
+          const float t = id(ac_climate).current_temperature;
+          const bool heating = action == climate::CLIMATE_ACTION_HEATING;
+          const bool cooling = action == climate::CLIMATE_ACTION_COOLING;
+          if ((int) action != last_action || std::isnan(t)) {
+            n = 0;
+            head = 0;
+            last_action = (int) action;
+          }
+          if (!heating && !cooling) {
+            if (!std::isnan(id(heating_rate).state)) id(heating_rate).publish_state(NAN);
+            if (!std::isnan(id(cooling_rate).state)) id(cooling_rate).publish_state(NAN);
+            return;
+          }
+          if (std::isnan(t))
+            return;
+          buf[head] = t;
+          head = (head + 1) % 30;
+          if (n < 30) n++;
+          if (n < 10)
+            return;  // need 10 min of data
+          // Least-squares slope over the samples (oldest first), in degC per hour.
+          const uint8_t start = (head + 30 - n) % 30;
+          float sx = 0, sy = 0, sxx = 0, sxy = 0;
+          for (uint8_t i = 0; i < n; i++) {
+            const float x = i, y = buf[(start + i) % 30];
+            sx += x; sy += y; sxx += x * x; sxy += x * y;
+          }
+          const float den = n * sxx - sx * sx;
+          if (den == 0) return;
+          const float per_hour = (n * sxy - sx * sy) / den * 60.0f;
+          if (heating) {
+            id(heating_rate).publish_state(per_hour);
+            if (!std::isnan(id(cooling_rate).state)) id(cooling_rate).publish_state(NAN);
+          } else {
+            id(cooling_rate).publish_state(-per_hour);
+            if (!std::isnan(id(heating_rate).state)) id(heating_rate).publish_state(NAN);
+          }

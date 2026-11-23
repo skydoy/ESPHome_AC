@@ -9,6 +9,36 @@ substitutions:
 time:
   - platform: homeassistant
     id: ha_time
+    # Keep the time zone Home Assistant sends, so local time stays right without HA.
+    on_time_sync:
+      - lambda: |-
+          const auto &tz = esphome::time::get_global_tz();
+          if (!id(saved_tz_ok) || memcmp(&tz, &id(saved_tz), sizeof(tz)) != 0) {
+            id(saved_tz) = tz;
+            id(saved_tz_ok) = true;
+            ESP_LOGI("time", "Time zone from Home Assistant saved");
+          }
+  # Internet time, for when Home Assistant is not connected (schedules, nightly update check).
+  - platform: sntp
+    id: sntp_time
+
+globals:
+  - id: saved_tz
+    type: esphome::time::ParsedTimezone
+    restore_value: true
+    initial_value: "esphome::time::ParsedTimezone{}"
+  - id: saved_tz_ok
+    type: bool
+    restore_value: true
+    initial_value: "false"
+
+esphome:
+  on_boot:
+    - priority: 600
+      then:
+        - lambda: |-
+            if (id(saved_tz_ok))
+              esphome::time::set_global_tz(id(saved_tz));
 
 sensor:
   - platform: uptime

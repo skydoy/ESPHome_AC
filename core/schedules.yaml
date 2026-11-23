@@ -1,0 +1,392 @@
+# Schedules stored on the device (brand agnostic: drives the climate entity "ac_climate").
+#
+# 4 schedules, each with these Home Assistant entities (category Configuration):
+#   switch   "Schedule N"              on = active
+#   time     "Schedule N Time"         HH:MM, local time
+#   select   "Schedule N Days"         Every day / Weekdays / Weekend / Monday ... Sunday
+#   select   "Schedule N Action"       Off / Cool / Heat / Auto / Dry / Fan
+#   number   "Schedule N Temperature"  16-32 degC (not used by Off and Fan)
+#   select   "Schedule N Fan"          Keep / Auto / Low / Medium / High / Quiet
+# They run without Home Assistant: the clock comes from Home Assistant or, without it, from
+# internet time (SNTP) with the time zone Home Assistant last sent (core/diagnostics.yaml).
+# Everything is kept across restarts and updates. A schedule fires once, at its minute.
+#
+# Early start ("Schedule Early Start" switch, off by default): Heat and Cool schedules start
+# early so the room is at the temperature AT the schedule time. The device learns how fast the
+# room heats / cools ("Learned Heating / Cooling Rate", from Heating / Cooling Rate) and starts
+# (degrees to go / rate) before, at most "Early Start Max" minutes (default 60).
+
+globals:
+  - id: learned_heat_rate
+    type: float
+    restore_value: true
+    initial_value: "0"
+  - id: learned_cool_rate
+    type: float
+    restore_value: true
+    initial_value: "0"
+
+sensor:
+  - platform: template
+    id: learned_heat
+    name: "Learned Heating Rate"
+    icon: mdi:school-outline
+    unit_of_measurement: "°C/h"
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: learned_cool
+    name: "Learned Cooling Rate"
+    icon: mdi:school-outline
+    unit_of_measurement: "°C/h"
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    update_interval: never
+
+switch:
+  - platform: template
+    id: early_start_switch
+    name: "Schedule Early Start"
+    icon: mdi:clock-fast
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched1_on
+    name: "Schedule 1"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched2_on
+    name: "Schedule 2"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched3_on
+    name: "Schedule 3"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched4_on
+    name: "Schedule 4"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+datetime:
+  - platform: template
+    id: sched1_time
+    name: "Schedule 1 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00"
+  - platform: template
+    id: sched2_time
+    name: "Schedule 2 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "09:00"
+  - platform: template
+    id: sched3_time
+    name: "Schedule 3 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "18:00"
+  - platform: template
+    id: sched4_time
+    name: "Schedule 4 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "23:00"
+
+select:
+  - platform: template
+    id: sched1_days
+    name: "Schedule 1 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched1_action
+    name: "Schedule 1 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Cool"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched1_fan
+    name: "Schedule 1 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_days
+    name: "Schedule 2 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_action
+    name: "Schedule 2 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Off"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_fan
+    name: "Schedule 2 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_days
+    name: "Schedule 3 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_action
+    name: "Schedule 3 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Cool"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_fan
+    name: "Schedule 3 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_days
+    name: "Schedule 4 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_action
+    name: "Schedule 4 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Off"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_fan
+    name: "Schedule 4 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+
+number:
+  - platform: template
+    id: early_start_max
+    name: "Early Start Max"
+    icon: mdi:clock-fast
+    unit_of_measurement: "min"
+    entity_category: config
+    min_value: 0
+    max_value: 180
+    step: 5
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+  - platform: template
+    id: sched1_temp
+    name: "Schedule 1 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched2_temp
+    name: "Schedule 2 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched3_temp
+    name: "Schedule 3 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched4_temp
+    name: "Schedule 4 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+
+interval:
+  - interval: 15s
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          if (!now.is_valid())
+            now = id(sntp_time).now();
+          if (!now.is_valid())
+            return;
+          struct Sched {
+            switch_::Switch *on;
+            datetime::TimeEntity *time;
+            select::Select *days;
+            select::Select *action;
+            number::Number *temp;
+            select::Select *fan;
+          };
+          static const Sched S[4] = {
+              {id(sched1_on), id(sched1_time), id(sched1_days), id(sched1_action), id(sched1_temp), id(sched1_fan)},
+              {id(sched2_on), id(sched2_time), id(sched2_days), id(sched2_action), id(sched2_temp), id(sched2_fan)},
+              {id(sched3_on), id(sched3_time), id(sched3_days), id(sched3_action), id(sched3_temp), id(sched3_fan)},
+              {id(sched4_on), id(sched4_time), id(sched4_days), id(sched4_action), id(sched4_temp), id(sched4_fan)}
+          };
+          // Learn how fast the room heats / cools (degC per hour), slowly (EMA), for early start.
+          static uint32_t learn_tick = 0;
+          if (++learn_tick % 4 == 0) {   // once a minute
+            const float hr = id(heating_rate).state, cr = id(cooling_rate).state;
+            if (!std::isnan(hr) && hr > 0.2f && hr < 15.0f)
+              id(learned_heat_rate) = id(learned_heat_rate) <= 0 ? hr : id(learned_heat_rate) * 0.97f + hr * 0.03f;
+            if (!std::isnan(cr) && cr > 0.2f && cr < 15.0f)
+              id(learned_cool_rate) = id(learned_cool_rate) <= 0 ? cr : id(learned_cool_rate) * 0.97f + cr * 0.03f;
+            if (id(learned_heat_rate) > 0) id(learned_heat).publish_state(id(learned_heat_rate));
+            if (id(learned_cool_rate) > 0) id(learned_cool).publish_state(id(learned_cool_rate));
+          }
+          static uint32_t fired_on[4] = {0, 0, 0, 0};   // minute-epoch of the occurrence already run
+          const uint32_t now_min = (uint32_t) (now.timestamp / 60);
+          const int now_mod = now.hour * 60 + now.minute;
+          const float room = id(ac_climate).current_temperature;
+          for (int i = 0; i < 4; i++) {
+            const Sched &s = S[i];
+            if (!s.on->state || !s.time->has_state())
+              continue;
+            const int a = s.action->active_index().value_or(0);
+            // Early start (Heat / Cool only): lead time = degrees to go / learned rate.
+            int lead = 0;
+            if (id(early_start_switch).state && !std::isnan(room) && (a == 1 || a == 2)) {
+              const float rate = a == 2 ? id(learned_heat_rate) : id(learned_cool_rate);
+              const float diff = a == 2 ? s.temp->state - room : room - s.temp->state;
+              if (rate > 0 && diff > 0)
+                lead = std::min((int) lroundf(diff / rate * 60.0f), (int) id(early_start_max).state);
+            }
+            // Minutes until the next occurrence of this schedule's time (0 = now).
+            int until = s.time->hour * 60 + s.time->minute - now_mod;
+            if (until < 0)
+              until += 1440;
+            if (until > lead)
+              continue;
+            const uint32_t occurrence = now_min + until;
+            if (fired_on[i] == occurrence)
+              continue;
+            // Days of the occurrence: 0 every day, 1 weekdays, 2 weekend, 3..9 Monday..Sunday.
+            // ESPTime day_of_week: 1 = Sunday ... 7 = Saturday.
+            const int d = s.days->active_index().value_or(0);
+            int dow = now.day_of_week;
+            if (now_mod + until >= 1440)
+              dow = dow % 7 + 1;  // the occurrence is tomorrow
+            const bool weekend = dow == 1 || dow == 7;
+            const int monday_based = dow == 1 ? 7 : dow - 1;  // 1 = Monday ... 7 = Sunday
+            bool today = d == 0 || (d == 1 && !weekend) || (d == 2 && weekend) || (d >= 3 && d - 2 == monday_based);
+            if (!today)
+              continue;
+            fired_on[i] = occurrence;
+            if (until > 0)
+              ESP_LOGI("schedule", "Schedule %d: early start, %d min before %02d:%02d", i + 1, until,
+                       s.time->hour, s.time->minute);
+            auto call = id(ac_climate).make_call();
+            static const climate::ClimateMode MODES[] = {
+                climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_COOL, climate::CLIMATE_MODE_HEAT,
+                climate::CLIMATE_MODE_AUTO, climate::CLIMATE_MODE_DRY, climate::CLIMATE_MODE_FAN_ONLY};
+            call.set_mode(MODES[a]);
+            if (a != 0 && a != 5)
+              call.set_target_temperature(s.temp->state);
+            const int f = s.fan->active_index().value_or(0);
+            if (a != 0 && f != 0) {
+              static const climate::ClimateFanMode FANS[] = {
+                  climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,
+                  climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH, climate::CLIMATE_FAN_QUIET};
+              call.set_fan_mode(FANS[f]);
+            }
+            ESP_LOGI("schedule", "Schedule %d: %s %s, %.0f degC, fan %s", i + 1,
+                     s.days->current_option().c_str(), s.action->current_option().c_str(),
+                     s.temp->state, s.fan->current_option().c_str());
+            call.perform();
+          }

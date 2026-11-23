@@ -38,6 +38,13 @@
 # button A or B, or when something changes (mode, set point, link state, fault). The buttons
 # only wake the screen; they never control the AC. During the first 5 minutes after boot the
 # screen stays on while Wi-Fi or the AC link is down, so problems are visible while installing.
+#
+# Brightness and night mode (Home Assistant / web page, category Configuration):
+#   "Screen Brightness"               day brightness (default 60 %)
+#   "Screen Night Mode"               on = night rules between "Screen Night Start" and
+#                                     "Screen Night End" (default 23:00-07:00)
+#   "Screen Night Brightness"         brightness at night (default 15 %)
+#   "Screen Night Wake on Changes"    off (default) = at night only the buttons wake the screen
 substitutions:
   screen_timeout_ms: "30000"
   screen_brightness: 60%
@@ -53,6 +60,23 @@ spi:
     ignore_strapping_warning: true   # fixed LCD wiring on both Sticks
 
 globals:
+  # true while the night window is active ("Screen Night Mode" on and the clock inside it)
+  - id: screen_is_night
+    type: std::function<bool()>
+    initial_value: |-
+      []() -> bool {
+        if (!id(screen_night_switch).state)
+          return false;
+        auto t = id(ha_time).now();
+        if (!t.is_valid())
+          t = id(sntp_time).now();
+        if (!t.is_valid() || !id(screen_night_start).has_state() || !id(screen_night_end).has_state())
+          return false;
+        const int m = t.hour * 60 + t.minute;
+        const int s = id(screen_night_start).hour * 60 + id(screen_night_start).minute;
+        const int e = id(screen_night_end).hour * 60 + id(screen_night_end).minute;
+        return s <= e ? (m >= s && m < e) : (m >= s || m < e);
+      }
   - id: screen_awake_until
     type: uint32_t
     initial_value: "0"
@@ -115,7 +139,9 @@ script:
       - lambda: id(screen_awake_until) = millis() + ${screen_timeout_ms};
       - light.turn_on:
           id: lcd_backlight
-          brightness: ${screen_brightness}
+          brightness: !lambda |-
+            const float day = id(screen_brightness_day).state / 100.0f;
+            return id(screen_is_night)() ? id(screen_brightness_night).state / 100.0f : (std::isnan(day) ? 0.6f : day);
       - component.update: lcd
 
 esphome:
@@ -217,7 +243,8 @@ interval:
           if (sig != id(screen_signature)) {
             const bool first = id(screen_signature) == 0;
             id(screen_signature) = sig;
-            if (!first) {
+            const bool quiet_night = id(screen_is_night)() && !id(screen_night_wake).state;
+            if (!first && !quiet_night) {
               id(wake_screen).execute();
               return;  // wake_screen just redrew everything
             }
@@ -427,3 +454,63 @@ display:
           it.printf(4, y, id(font_small), grey, "Out %.0f°", out);
         it.print(W - 4, y, id(font_small), grey, TextAlign::TOP_RIGHT, id(wifi_ip).state.c_str());
       }
+
+number:
+  - platform: template
+    id: screen_brightness_day
+    name: "Screen Brightness"
+    icon: mdi:brightness-6
+    unit_of_measurement: "%"
+    entity_category: config
+    min_value: 10
+    max_value: 100
+    step: 5
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+  - platform: template
+    id: screen_brightness_night
+    name: "Screen Night Brightness"
+    icon: mdi:brightness-4
+    unit_of_measurement: "%"
+    entity_category: config
+    min_value: 5
+    max_value: 100
+    step: 5
+    optimistic: true
+    restore_value: true
+    initial_value: 15
+
+switch:
+  - platform: template
+    id: screen_night_switch
+    name: "Screen Night Mode"
+    icon: mdi:weather-night
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: screen_night_wake
+    name: "Screen Night Wake on Changes"
+    icon: mdi:bell-sleep-outline
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+datetime:
+  - platform: template
+    id: screen_night_start
+    name: "Screen Night Start"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "23:00"
+  - platform: template
+    id: screen_night_end
+    name: "Screen Night End"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00"

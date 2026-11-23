@@ -48,7 +48,11 @@ Pictures: [Quick start](docs/quick-start.md)
 - Sensors: outdoor & coil temps, compressor Hz, humidity, voltage, power, energy (when the unit reports them)
 - AC Link / Fault, panel light, Eco / Super / Fan Mute / Sleep
 - One-click firmware updates (or Auto Update at night)
-- Device web page on your LAN (`http://<device-ip>/`) — [screenshots](docs/web-page.md)
+- Device web page on your LAN (`http://<device-ip>/`), works without internet — [screenshots](docs/web-page.md)
+- Schedules, room sensor (Shelly), solar surplus boost, electricity cost, filter reminder, compressor health and fault history — [details](docs/home-assistant.md)
+- Optional MQTT for non-Home-Assistant systems
+
+> ⚠️ **MQTT is only available on the M5StickC Plus2.** It does not work on the **ATOM Lite** or the **M5StickC Plus / Plus SE**: they have no PSRAM and need that memory for firmware updates.
 - Local control only — no cloud for control; optional anonymous compatibility report
 
 ## Docs & more
