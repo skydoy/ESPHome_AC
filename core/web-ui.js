@@ -513,6 +513,7 @@
         try { localStorage.setItem(KEY, lang); } catch (e) {}
         paint();
         translateTable();
+        if (window.__acRoomPaint) window.__acRoomPaint();
       };
     }
     paint();
@@ -549,6 +550,144 @@
 
   var es = new EventSource("/events");
   es.addEventListener("state", onState);
+
+  // --- 4) Room sensor panel: where the room temperature comes from, the URL to give the
+  // Shelly, the last reading and its age, and the Follow Room Sensor / Solar Boost switches.
+  (function roomPanel() {
+    var R = { room: NaN, age: NaN, ac: NaN, follow: null, grid: NaN, solar: null, solarOn: null };
+    var SRC_KEY = "esphome_ac_room_src";
+    var src = "shelly";
+    try { src = localStorage.getItem(SRC_KEY) || "shelly"; } catch (e) {}
+    function T(pt, en) { return lang === "pt" ? pt : en; }
+    function f1(v) { return isNaN(v) ? "—" : (+v).toFixed(1) + " °C"; }
+    function ago(m) {
+      if (isNaN(m)) return T("ainda nenhuma leitura desde o arranque", "no reading since boot yet");
+      m = Math.round(m);
+      return m < 1 ? T("agora mesmo", "just now") : m < 60 ? T("há " + m + " min", m + " min ago") :
+        T("há " + Math.round(m / 60) + " h", Math.round(m / 60) + " h ago");
+    }
+    var base = location.protocol + "//" + location.host;
+    var URLS = {
+      shelly: base + "/set?room_temp=${ev.tC}",
+      gen1: base + "/set?room_temp=$temperature",
+      other: base + "/set?room_temp=21.5"
+    };
+    var CSS2 = "#acr{margin:8px 16px 16px;padding:12px 14px;border:1px solid rgba(127,127,127,.3);border-radius:12px;" +
+      "font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif}" +
+      "#acr h3{margin:0 0 8px;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}" +
+      "#acr .chip{padding:2px 9px;border-radius:999px;font-weight:600;font-size:12px;background:rgba(23,132,247,.12)}" +
+      "#acr .chip.ok{background:rgba(30,160,90,.15);color:#137a45}#acr .chip.warn{background:rgba(230,120,0,.15);color:#b55a00}" +
+      "#acr .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0}" +
+      "#acr select,#acr input{padding:6px 8px;border:1px solid #c9ccd1;border-radius:8px;font:inherit}" +
+      "#acr input[type=number]{width:90px}" +
+      "#acr code{display:block;background:rgba(127,127,127,.12);padding:6px 8px;border-radius:8px;word-break:break-all;font-size:12px;margin:4px 0}" +
+      "#acr button{padding:6px 12px;border-radius:999px;border:1px solid #c9ccd1;background:#fff;color:#111;font-weight:600;cursor:pointer}" +
+      "#acr button.pri{background:linear-gradient(135deg,#0FE3FA,#1784F7);color:#fff;border:0}" +
+      "#acr .hint{color:#777;font-size:12px;margin:4px 0}#acr details{margin-top:8px}" +
+      "#acr summary{cursor:pointer;font-weight:600}" +
+      "@media (prefers-color-scheme: dark){#acr button{background:#2a2d33;color:#eee;border-color:#444}#acr .hint{color:#aab}}";
+    function post(path) { return fetch(path, { method: "POST" }).catch(function () {}); }
+    function sw(name, on) { return post("/switch/" + encodeURIComponent(name) + "/" + (on ? "turn_on" : "turn_off")); }
+    function el() { var sr = root(); return sr && sr.getElementById("acr"); }
+    function html() {
+      var fresh = !isNaN(R.age) && R.age < 240;
+      var state = R.follow ? (fresh ? '<span class="chip ok">' + T("A seguir o sensor da sala", "Following the room sensor") + "</span>" :
+        '<span class="chip warn">' + T("Ligado, sem leitura recente: usa o sensor do AC", "On, no recent reading: using the AC sensor") + "</span>") :
+        '<span class="chip">' + T("Desligado: usa o sensor do AC", "Off: using the AC sensor") + "</span>";
+      var url = URLS[src] || URLS.shelly;
+      var how = {
+        shelly: T("Na app Shelly (ou na página do H&T): Ações → nova ação → evento <b>Temperatura mudou</b> (temperature.change) → este URL:",
+          "In the Shelly app (or the H&T's page): Actions → new action → event <b>Temperature changed</b> (temperature.change) → this URL:"),
+        gen1: T("Shelly H&T 1.ª geração: Definições → Ações → <b>Report sensor values</b> → este URL:",
+          "Shelly H&T Gen1: Settings → Actions → <b>Report sensor values</b> → this URL:"),
+        other: T("Qualquer aparelho ou script: um pedido GET com a temperatura em °C, por exemplo:",
+          "Any device or script: a GET request with the temperature in °C, for example:")
+      }[src];
+      var opt = function (v, l) { return '<option value="' + v + '"' + (src === v ? " selected" : "") + ">" + l + "</option>"; };
+      return '<h3>' + T("🌡️ Sensor da sala", "🌡️ Room sensor") + " " + state + "</h3>" +
+        '<div class="row"><span>' + T("Sala", "Room") + ": <b>" + f1(R.room) + "</b> · " + ago(R.age) + "</span>" +
+        "<span>" + T("Sensor do AC", "AC sensor") + ": <b>" + f1(R.ac) + "</b></span></div>" +
+        '<div class="row"><button type="button" class="pri" data-a="follow">' +
+        (R.follow ? T("Deixar de seguir", "Stop following") : T("Seguir o sensor da sala", "Follow the room sensor")) + "</button></div>" +
+        '<div class="hint">' + T("A ligar, o AC corrige a temperatura pedida (até ±3 °C, no máximo a cada 5 min) até a sala chegar ao teu objetivo. Sem leitura durante 4 h volta ao sensor do AC.",
+          "When on, the AC shifts its set point (up to ±3 °C, at most every 5 min) until the room reaches your target. With no reading for 4 h it goes back to the AC sensor.") + "</div>" +
+        "<details" + (isNaN(R.age) ? " open" : "") + "><summary>" + T("Configurar o sensor", "Set up the sensor") + "</summary>" +
+        '<div class="row"><label>' + T("Sensor", "Sensor") + ' <select data-a="src">' +
+        opt("shelly", "Shelly H&T Plus / Gen3 / Gen4") + opt("gen1", T("Shelly H&T 1.ª geração", "Shelly H&T Gen1")) +
+        opt("other", T("Outro aparelho / script (HTTP)", "Other device / script (HTTP)")) + "</select></label></div>" +
+        '<div class="hint">' + how + "</div><code>" + url.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</code>" +
+        '<div class="row"><button type="button" data-a="copy">' + T("Copiar URL", "Copy URL") + "</button></div>" +
+        '<div class="hint">' + T("Dá um IP fixo a esta placa no router, para o URL continuar a funcionar. O H&T a pilhas só envia quando a temperatura muda.",
+          "Give this board a fixed IP in your router so the URL keeps working. A battery H&T only sends when the temperature changes.") + "</div>" +
+        '<div class="row">' + T("Testar", "Test") + ': <input type="number" step="0.1" id="acr-t" placeholder="21.5"> °C ' +
+        '<button type="button" data-a="send">' + T("Enviar", "Send") + "</button></div></details>" +
+        (R.solar === null ? "" : "<details><summary>" + T("☀️ Excedente solar", "☀️ Solar surplus") + "</summary>" +
+          '<div class="row">' + T("Rede", "Grid") + ": <b>" + (isNaN(R.grid) ? "—" : Math.round(R.grid) + " W") + "</b> " +
+          (R.solarOn ? '<span class="chip ok">' + T("a aproveitar", "boosting") + "</span>" : "") + "</div>" +
+          '<div class="hint">' + T("O contador ou o inversor envia a potência da rede (negativo = a injetar) para:", "The meter or inverter sends the grid power (negative = exporting) to:") + "</div>" +
+          "<code>" + base + "/set?grid_power=-1200</code>" +
+          '<div class="row"><button type="button" data-a="solar">' + (R.solar ? T("Desligar Solar Boost", "Turn Solar Boost off") : T("Ligar Solar Boost", "Turn Solar Boost on")) + "</button></div></details>");
+    }
+    function paint() {
+      var e = el();
+      if (!e) return;
+      var open = Array.prototype.map.call(e.querySelectorAll("details"), function (d) { return d.open; });
+      var typed = e.querySelector("#acr-t") ? e.querySelector("#acr-t").value : "";
+      e.innerHTML = html();
+      Array.prototype.forEach.call(e.querySelectorAll("details"), function (d, i) { if (open[i] !== undefined) d.open = open[i]; });
+      if (typed && e.querySelector("#acr-t")) e.querySelector("#acr-t").value = typed;
+    }
+    function mountRoom() {
+      var sr = root(), acd = sr && sr.getElementById("acd");
+      if (!acd) return false;
+      if (!sr.getElementById("acr")) {
+        var st = document.createElement("style");
+        st.textContent = CSS2;
+        sr.appendChild(st);
+        var e = document.createElement("section");
+        e.id = "acr";
+        acd.parentNode.insertBefore(e, acd.nextSibling);
+        e.addEventListener("click", function (ev) {
+          var a = ev.target && ev.target.getAttribute && ev.target.getAttribute("data-a");
+          if (a === "follow") sw("Follow Room Sensor", !R.follow);
+          else if (a === "solar") sw("Solar Boost", !R.solar);
+          else if (a === "copy") {
+            var u = URLS[src] || URLS.shelly;
+            if (navigator.clipboard) navigator.clipboard.writeText(u).catch(function () {});
+            ev.target.textContent = T("Copiado ✓", "Copied ✓");
+          } else if (a === "send") {
+            var v = parseFloat((e.querySelector("#acr-t") || {}).value);
+            if (!isNaN(v)) fetch("/set?room_temp=" + v).catch(function () {});
+          }
+        });
+        e.addEventListener("change", function (ev) {
+          if (ev.target.getAttribute("data-a") !== "src") return;
+          src = ev.target.value;
+          try { localStorage.setItem(SRC_KEY, src); } catch (x) {}
+          paint();
+        });
+      }
+      paint();
+      return true;
+    }
+    var FIELDS = {
+      "Room Temperature": ["room", "num"], "Room Sensor Age": ["age", "num"],
+      "AC Sensor Temperature": ["ac", "num"], "Follow Room Sensor": ["follow", "bool"],
+      "Grid Power": ["grid", "num"], "Solar Boost": ["solar", "bool"], "Solar Boost Active": ["solarOn", "bool"]
+    };
+    es.addEventListener("state", function (e) {
+      var d;
+      try { d = JSON.parse(e.data); } catch (x) { return; }
+      var name = d.name || String(d.name_id || "").replace(/^[a-z_]+\//, "");
+      var f = FIELDS[name];
+      if (!f) return;
+      if (f[1] === "bool") R[f[0]] = d.value === true || d.state === "ON";
+      else R[f[0]] = d.value === null || d.value === undefined ? NaN : +d.value;
+      paint();
+    });
+    var k = 0, tm = setInterval(function () { if (mountRoom() || ++k > 80) clearInterval(tm); }, 250);
+    window.__acRoomPaint = paint;
+  })();
 
   // --- 3) Byte hunt collector: keeps the "BYTEHUNT," log lines (Byte Hunt switch) in this
   // browser and offers them as a CSV download. Keep the page open while collecting.

@@ -177,6 +177,16 @@ sensor:
   # ---- Room sensor and heating / cooling rate ----
   # Temperature measured by the AC's own sensor (return air, near the ceiling). With "Follow
   # Room Sensor" on, the climate entity shows the room sensor instead.
+  # Minutes since the room sensor last sent a reading (empty until the first one).
+  - platform: template
+    id: room_sensor_age
+    name: "Room Sensor Age"
+    icon: mdi:timer-sand
+    unit_of_measurement: "min"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 60s
+    lambda: return id(ac_climate).room_temperature_age_min();
   - platform: template
     id: ac_sensor_temperature
     name: "AC Sensor Temperature"

@@ -8,6 +8,13 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Added
+- **Room sensor panel** on the device's web page, below the AC diagram: the room and AC
+  readings, how long ago the room sensor last reported, a button for Follow Room Sensor, the
+  URL to give a Shelly H&T (Plus / Gen3 / Gen4 or Gen1) or any HTTP device, with Copy and a
+  test field, and the solar surplus input with its switch.
+- **Room Sensor Age** (minutes since the last room reading).
+
 ### Fixed
 - The device's web page shows the AC diagram again, with the PT/EN switch, the favicon and the
   Byte Hunt CSV button. Since 0.6.0 the page was served from the firmware (`local: true`), and

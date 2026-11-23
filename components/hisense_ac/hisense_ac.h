@@ -128,6 +128,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   bool invert_light() const { return this->invert_light_; }
   /// Room temperature from the external sensor, NAN if none or older than 4 h.
   float room_temperature() const;
+  /// Minutes since the last external room reading, NAN if none since boot.
+  float room_temperature_age_min() const {
+    return this->ext_room_at_ == 0 ? NAN : (millis() - this->ext_room_at_) / 60000.0f;
+  }
   /// Temperature measured by the AC's own sensor (return air).
   float ac_sensor_temperature() const { return this->ac_room_; }
   /// Solar boost: 0 = off, else degrees added to the set point in Heat / removed in Cool (max 2).
