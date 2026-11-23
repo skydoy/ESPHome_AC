@@ -241,6 +241,20 @@ number:
       - lambda: id(ac_climate).set_room_temperature(x);
 
 switch:
+  # Byte hunt: logs the whole status frame once a minute with the decoded values, and the
+  # device's web page collects those lines into a CSV to download. Used to find fields not
+  # decoded yet (e.g. heating / cooling output). Off after every restart.
+  - platform: template
+    id: byte_hunt_switch
+    name: "Byte Hunt"
+    icon: mdi:magnify-scan
+    entity_category: diagnostic
+    restore_mode: ALWAYS_OFF
+    lambda: return id(ac_climate).byte_hunt();
+    turn_on_action:
+      - lambda: id(ac_climate).set_byte_hunt(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_byte_hunt(false);
   # Some Hisense units swap the panel-light commands: if "Light On" turns the light off,
   # turn this on. Applies to Light On / Light Off and the AC Display switch.
   - platform: template

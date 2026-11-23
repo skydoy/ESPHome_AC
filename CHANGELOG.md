@@ -32,6 +32,9 @@ section below, with the factory and OTA images attached.
   Starts Last Hour, Compressor Short Cycling, AC Struggling, Last Fault, Fault History (last 10
   with date), Clear Fault History.
 - **Screen brightness and night mode** on the Sticks, all adjustable.
+- **Byte Hunt** switch (diagnostic): once a minute logs the whole status frame with the
+  decoded values; the web page collects the lines into a CSV to download. To find fields not
+  decoded yet, such as the heating / cooling output.
 - **Optional MQTT** (`core/mqtt.yaml`), off by default, configured at runtime (broker, port,
   login) from the web page or Home Assistant.
 - **Invert Panel Light** switch: some Hisense units swap the panel-light commands, so
@@ -40,6 +43,8 @@ section below, with the factory and OTA images attached.
 ### Changed
 - The device's web page (`http://<device-ip>/`) is served from the firmware (`local: true`)
   instead of loading its JS/CSS from the ESPHome CDN, so it works without internet.
+- **Filter Last Cleaned** is now a date (`YYYY-MM-DD`) instead of a timestamp, which the web
+  page showed as a raw number.
 - SNTP time moved from the factory-only update package to `core/diagnostics.yaml`, so every
   build has internet time.
 
