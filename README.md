@@ -48,7 +48,7 @@ Pictures: [Quick start](docs/quick-start.md)
 - Sensors: outdoor & coil temps, compressor Hz, humidity, voltage, heating output (when the unit reports them)
 - AC Link / Fault, panel light, Eco / Super / Fan Mute / Sleep
 - One-click firmware updates (or Auto Update at night)
-- Device web page on your LAN (`http://<device-ip>/`), works without internet — [screenshots](docs/web-page.md)
+- Device web page on your LAN (`http://<device-ip>/`), with a live AC diagram — [screenshots](docs/web-page.md)
 - Schedules, room sensor (Shelly), solar surplus boost, filter reminder, compressor health and fault history — [details](docs/home-assistant.md)
 - Optional MQTT for non-Home-Assistant systems
 

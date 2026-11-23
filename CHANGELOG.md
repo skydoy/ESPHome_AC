@@ -8,6 +8,12 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Fixed
+- The device's web page shows the AC diagram again, with the PT/EN switch, the favicon and the
+  Byte Hunt CSV button. Since 0.6.0 the page was served from the firmware (`local: true`), and
+  in that mode ESPHome's built-in page never loads `web-ui.js`. The page loads its JS/CSS from
+  the ESPHome CDN again, so the browser needs internet, as before 0.6.0.
+
 ## [0.7.0] - 2026-11-23
 
 ### Removed

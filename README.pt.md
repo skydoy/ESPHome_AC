@@ -48,7 +48,7 @@ Com imagens: [Guia rápido](docs/guia-rapido.md)
 - Sensores: temps exterior e serpentinas, Hz do compressor, humidade, tensão, potência de aquecimento (quando a máquina os envia)
 - AC Link / Fault, luz do painel, Eco / Super / Fan Mute / Sleep
 - Atualizações de firmware com um clique (ou Auto Update de madrugada)
-- Página web da placa na tua LAN (`http://<ip-da-placa>/`), funciona sem internet — [capturas](docs/pagina-web.md)
+- Página web da placa na tua LAN (`http://<ip-da-placa>/`), com o esquema do AC em direto — [capturas](docs/pagina-web.md)
 - Horários, sensor da sala (Shelly), excedente solar, aviso do filtro, saúde do compressor e histórico de avarias — [detalhes](documentation/home-assistant.pt.md)
 - MQTT opcional, para sistemas sem Home Assistant
 

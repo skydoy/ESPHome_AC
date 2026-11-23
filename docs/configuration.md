@@ -212,8 +212,7 @@ encryption key empty (if neither is offered, delete the device there and add it 
 ### Web server
 Both device configs include [`core/web-server.yaml`](../core/web-server.yaml): open
 `http://<device-ip>/` on your LAN to see every entity, control them and read the live log
-(ESPHome web server v3, port 80). The page's JS/CSS is stored in the firmware, so it works
-without internet.
+(ESPHome web server v3, port 80). The page's JS/CSS loads from the ESPHome CDN, so the browser needs internet access; the firmware itself does not.
 
 **It has no password:** anyone on your network can view and control the AC. Keep the device on
 a trusted network. To add a login, add this to your own device YAML (it merges with the package):
