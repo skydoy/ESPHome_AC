@@ -118,6 +118,11 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   /// "BYTEHUNT," CSV line (collected by the web page) to find undecoded fields.
   void set_byte_hunt(bool on) { this->byte_hunt_ = on; this->byte_hunt_at_ = 0; }
   bool byte_hunt() const { return this->byte_hunt_; }
+  /// Big-endian 16-bit word at byte `hi` of the last status frame, -1 if the frame is shorter.
+  int status_u16(size_t hi) const {
+    return hi + 1 < this->last_status_len_ ? (this->last_status_frame_[hi] << 8) | this->last_status_frame_[hi + 1] : -1;
+  }
+  size_t status_len() const { return this->last_status_len_; }
   /// Some units swap the panel-light commands (Light On turns it off): invert what is sent.
   void set_invert_light(bool v) { this->invert_light_ = v; }
   bool invert_light() const { return this->invert_light_; }
