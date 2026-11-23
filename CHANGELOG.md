@@ -8,6 +8,15 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Added
+- Room sensor: **Room Temperature** input and **Follow Room Sensor** switch. While following,
+  the set point sent to the AC is shifted by (AC sensor − room), at most ±3 °C and at most
+  every 5 min, until the room reaches the target; the climate entity shows the target and the
+  room temperature. A Shelly H&T (Plus / Gen3 / Gen4) can send the reading straight to the
+  device with a webhook, without Home Assistant. Readings older than 4 h are ignored.
+- **AC Sensor Temperature** (the AC's own sensor), **Heating Rate** and **Cooling Rate**
+  (°C per hour over the last 30 min while the AC heats or cools).
+
 ## [0.5.1] - 2026-11-22
 
 ### Fixed
