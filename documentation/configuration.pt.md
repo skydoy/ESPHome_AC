@@ -141,7 +141,7 @@ Se uma placa com chave receber o firmware de fábrica (sem chave), o Home Assist
 
 ### Servidor web
 
-As duas configs de placa incluem [`core/web-server.yaml`](https://github.com/skydoy/ESPHome_AC/blob/main/core/web-server.yaml). Abre `http://<ip-da-placa>/` na tua LAN para veres cada entidade, as controlares e leres o registo em direto (servidor web ESPHome v3, porta 80). O JS/CSS da página vem da CDN do ESPHome, por isso o navegador precisa de internet. O firmware em si não precisa.
+As duas configs de placa incluem [`core/web-server.yaml`](https://github.com/skydoy/ESPHome_AC/blob/main/core/web-server.yaml). Abre `http://<ip-da-placa>/` na tua LAN para veres cada entidade, as controlares e leres o registo em direto (servidor web ESPHome v3, porta 80). O JS/CSS da página está guardado no firmware, por isso a página funciona sem internet.
 
 **Não tem palavra-passe.** Quem estiver na tua rede pode ver e controlar o AC. Mantém a placa numa rede de confiança. Para pores um login, acrescenta isto ao teu YAML (funde-se com o pacote):
 
