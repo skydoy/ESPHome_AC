@@ -3,7 +3,7 @@
 # Home Assistant entities:
 #   select  "Filter Cleaning Interval"  Off / 30 / 60 / 90 / 182 / 365 days (default 365)
 #   button  "Filter Cleaned"            press after cleaning: the count starts again from today
-#   sensor  "Filter Last Cleaned"       date of the last cleaning (timestamp)
+#   text    "Filter Last Cleaned"       date of the last cleaning (YYYY-MM-DD)
 #   sensor  "Filter Days Left"          days until the next cleaning (negative = overdue)
 #   binary_sensor "Filter Needs Cleaning" (problem) on when the interval has passed
 # When it turns on, the device also creates a Home Assistant notification (needs "Allow the
@@ -65,18 +65,20 @@ button:
 
 sensor:
   - platform: template
-    id: filter_last_cleaned
-    name: "Filter Last Cleaned"
-    icon: mdi:calendar-check
-    device_class: timestamp
-    entity_category: diagnostic
-    update_interval: never
-  - platform: template
     id: filter_days_left
     name: "Filter Days Left"
     icon: mdi:air-filter
     unit_of_measurement: d
     accuracy_decimals: 0
+    update_interval: never
+
+text_sensor:
+  # Date of the last cleaning as YYYY-MM-DD (a timestamp sensor showed a raw number on the web page).
+  - platform: template
+    id: filter_last_cleaned
+    name: "Filter Last Cleaned"
+    icon: mdi:calendar-check
+    entity_category: diagnostic
     update_interval: never
 
 binary_sensor:
@@ -101,7 +103,13 @@ script:
             id(filter_cleaned_at) = t;  // first start (or a clock jump back): count from today
             ESP_LOGI("filter", "Filter reminder: counting from today");
           }
-          id(filter_last_cleaned).publish_state(id(filter_cleaned_at));
+          {
+            const ESPTime d = ESPTime::from_epoch_local(id(filter_cleaned_at));
+            char date[12];
+            snprintf(date, sizeof(date), "%04d-%02d-%02d", d.year, d.month, d.day_of_month);
+            if (id(filter_last_cleaned).state != date)
+              id(filter_last_cleaned).publish_state(date);
+          }
           if (days == 0) {
             id(filter_days_left).publish_state(NAN);
             id(filter_due).publish_state(false);

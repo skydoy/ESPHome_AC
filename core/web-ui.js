@@ -550,6 +550,49 @@
   var es = new EventSource("/events");
   es.addEventListener("state", onState);
 
+  // --- 3) Byte hunt collector: keeps the "BYTEHUNT," log lines (Byte Hunt switch) in this
+  // browser and offers them as a CSV download. Keep the page open while collecting.
+  (function byteHunt() {
+    var KEY = "esphome_ac_bytehunt", MAX = 5000, rows = [];
+    try { rows = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { rows = []; }
+    var box = document.createElement("div");
+    box.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:9999;display:none;gap:6px;" +
+      "font:13px system-ui,sans-serif";
+    function btn(label, fn) {
+      var b = document.createElement("button");
+      b.textContent = label; b.onclick = fn;
+      b.style.cssText = "padding:8px 12px;border-radius:8px;border:0;background:#1784F7;color:#fff;cursor:pointer";
+      box.appendChild(b); return b;
+    }
+    var dl = btn("", function () {
+      var head = "time,uptime_s,mode,action,setpoint,ac_room,coil,outdoor,compressor_hz,power_w,frame_hex\n";
+      var blob = new Blob([head + rows.join("\n") + "\n"], { type: "text/csv" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "esphome_ac_bytehunt_" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".csv";
+      document.body.appendChild(a); a.click(); a.remove();
+    });
+    btn("✕", function () {
+      if (!confirm("Apagar os dados recolhidos? / Delete the collected data?")) return;
+      rows = []; save(); paint();
+    });
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(rows)); } catch (e) {} }
+    function paint() {
+      box.style.display = rows.length ? "flex" : "none";
+      dl.textContent = "Byte Hunt: " + rows.length + " ⬇ CSV";
+    }
+    (document.body || document.documentElement).appendChild(box);
+    paint();
+    es.addEventListener("log", function (e) {
+      var t = String(e.data || ""), i = t.indexOf("BYTEHUNT,");
+      if (i < 0) return;
+      var line = t.slice(i + 9).replace(/\u001b\[[0-9;]*m/g, "").trim();
+      rows.push(new Date().toISOString() + "," + line);
+      if (rows.length > MAX) rows.shift();
+      save(); paint();
+    });
+  })();
+
   var n = 0, logOk = false, dOk = false, timer = setInterval(function () {
     logOk = logOk || fixLog();
     dOk = dOk || mount();

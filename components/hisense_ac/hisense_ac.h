@@ -114,6 +114,10 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_room_temperature(float c);
   void set_follow_room(bool on);
   bool follow_room() const { return this->follow_room_; }
+  /// Byte hunt: once a minute, log the whole status frame with the decoded values as a
+  /// "BYTEHUNT," CSV line (collected by the web page) to find undecoded fields.
+  void set_byte_hunt(bool on) { this->byte_hunt_ = on; this->byte_hunt_at_ = 0; }
+  bool byte_hunt() const { return this->byte_hunt_; }
   /// Some units swap the panel-light commands (Light On turns it off): invert what is sent.
   void set_invert_light(bool v) { this->invert_light_ = v; }
   bool invert_light() const { return this->invert_light_; }
@@ -334,6 +338,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint32_t ext_room_at_{0};
   bool follow_room_{false};
   bool invert_light_{false};
+  bool byte_hunt_{false};
+  uint32_t byte_hunt_at_{0};
+  void log_byte_hunt_(const uint8_t *f, size_t len);
   bool room_was_active_{false};
   float user_target_{NAN};
   float last_sent_sp_{NAN};

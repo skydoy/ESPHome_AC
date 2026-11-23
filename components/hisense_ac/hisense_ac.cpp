@@ -546,6 +546,8 @@ void HisenseAC::handle_frame_(const uint8_t *f, size_t len) {
             this->last_status_len_ = len;
           }
           this->apply_status_(s);
+          if (this->byte_hunt_)
+            this->log_byte_hunt_(f, len);
         }
       }
       break;
@@ -908,6 +910,31 @@ void HisenseAC::room_compensate_(uint32_t now) {
   ESP_LOGI(TAG, "Target %.0f (room %.1f, AC sensor %.1f, solar boost %.0f): set point %.0f -> %.0f",
            this->user_target_, follow ? this->ext_room_ : NAN, this->ac_room_, this->boost_, this->ac_setpoint_, sp);
   this->send_setpoint_(sp, now);
+}
+
+void HisenseAC::log_byte_hunt_(const uint8_t *f, size_t len) {
+  const uint32_t now = millis();
+  if (this->byte_hunt_at_ != 0 && !reached(now, this->byte_hunt_at_))
+    return;
+  this->byte_hunt_at_ = now + 60000;
+  static const char HEX[] = "0123456789ABCDEF";
+  char hex[2 * 200 + 1];
+  size_t n = len > 200 ? 200 : len;
+  for (size_t i = 0; i < n; i++) {
+    hex[2 * i] = HEX[f[i] >> 4];
+    hex[2 * i + 1] = HEX[f[i] & 0x0F];
+  }
+  hex[2 * n] = 0;
+  float power = NAN, hz = NAN, outdoor = NAN, coil = NAN;
+#ifdef USE_SENSOR
+  if (this->power_ != nullptr) power = this->power_->state;
+  if (this->compressor_hz_ != nullptr) hz = this->compressor_hz_->state;
+  if (this->outdoor_temp_ != nullptr) outdoor = this->outdoor_temp_->state;
+  if (this->indoor_coil_temp_ != nullptr) coil = this->indoor_coil_temp_->state;
+#endif
+  // uptime_s,mode,action,setpoint,ac_room,coil,outdoor,compressor_hz,power_w,frame_hex
+  ESP_LOGI(TAG, "BYTEHUNT,%" PRIu32 ",%d,%d,%.0f,%.1f,%.1f,%.1f,%.0f,%.0f,%s", now / 1000, (int) this->mode,
+           (int) this->action, this->ac_setpoint_, this->ac_room_, coil, outdoor, hz, power, hex);
 }
 
 climate::ClimateTraits HisenseAC::traits() {
