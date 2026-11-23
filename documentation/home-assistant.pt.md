@@ -60,6 +60,30 @@ cards:
 
 Apaga a linha de qualquer sensor que o teu AC não envie.
 
+## Sensor da sala (Shelly H&T)
+
+O AC mede a temperatura junto ao teto, onde o ar volta a entrar, por isso costuma marcar mais do que a sala. O barramento RS-485 não tem campo para lhe enviar uma temperatura da sala (o iFeel só funciona por infravermelhos). Em vez disso, o dispositivo pode seguir um sensor da sala, ajustando a temperatura que pede ao AC.
+
+| Entidade | O que faz |
+|---|---|
+| **Room Temperature** | A temperatura da sala. Um Shelly envia-a diretamente (abaixo), ou o Home Assistant define-a. É ignorada se tiver mais de 4 h. |
+| **Follow Room Sensor** | Ligado: a temperatura pedida ao AC é corrigida em (sensor do AC − sala), no máximo ±3 °C e no máximo a cada 5 min, até a sala chegar ao teu objetivo. O cartão do AC mostra o teu objetivo e a temperatura da sala. |
+| **AC Sensor Temperature** | O que o sensor do próprio AC mede. |
+
+Se mudares a temperatura no AC (comando ou painel), esse passa a ser o novo objetivo. Sem leitura durante 4 h, o AC volta a usar o sensor dele.
+
+**Shelly H&T (Plus / Gen3 / Gen4), sem Home Assistant:** na app do Shelly ou na página dele, abre **Ações** (ou **Webhooks**), cria uma em **Temperature change** com este URL e grava:
+
+```
+http://<IP do dispositivo do AC>/number/Room%20Temperature/set?value=${ev.tC}
+```
+
+Dá um IP fixo ao dispositivo do AC no router, para o URL continuar a funcionar.
+
+## Velocidade de aquecimento e arrefecimento
+
+**Heating Rate** e **Cooling Rate** mostram quão depressa a sala aquece ou arrefece (°C por hora) enquanto o AC está a aquecer ou a arrefecer, com base nos últimos 30 minutos. Usam o sensor da sala quando o segue; senão, o sensor do AC (em graus inteiros, por isso o valor é mais grosseiro). Ficam vazios quando o AC não está a aquecer nem a arrefecer, e nos primeiros 10 minutos.
+
 ## Aviso de limpeza do filtro
 
 O dispositivo conta os dias desde a última limpeza do filtro de ar e avisa quando chega a altura.
