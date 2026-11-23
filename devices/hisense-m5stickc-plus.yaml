@@ -14,7 +14,7 @@
 substitutions:
   name: esphome-ac-plus
   friendly_name: Air Conditioner
-  project_version: "0.7.0"
+  project_version: "0.8.0"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "self-built"

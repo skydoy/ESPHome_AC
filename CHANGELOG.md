@@ -8,6 +8,8 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-23
+
 ### Added
 - **Room sensor panel** on the device's web page, below the AC diagram: the room and AC
   readings, how long ago the room sensor last reported, a button for Follow Room Sensor, the
@@ -626,7 +628,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
