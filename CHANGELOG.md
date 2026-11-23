@@ -8,6 +8,10 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Changed
+- The device's web page (`http://<device-ip>/`) is served from the firmware (`local: true`)
+  instead of loading its JS/CSS from the ESPHome CDN, so it works without internet.
+
 ## [0.5.1] - 2026-11-22
 
 ### Fixed
