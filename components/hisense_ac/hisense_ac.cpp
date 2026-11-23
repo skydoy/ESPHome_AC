@@ -749,7 +749,7 @@ proto::Command HisenseAC::base_cmd_() const {
 void HisenseAC::set_display(bool on) {
   proto::Command c = this->base_cmd_();
   c.has_display = true;
-  c.display = on;
+  c.display = on != this->invert_light_;
   this->enqueue_(c, false);
 }
 
