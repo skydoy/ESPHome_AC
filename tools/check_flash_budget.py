@@ -69,6 +69,9 @@ def find_build(yaml: Path, name: str) -> Path:
     found = [p for root in roots if root.is_dir() for p in root.iterdir() if p.is_dir()]
     if len(found) == 1:
         return found[0]
+    if found and not name:
+        # Name comes from a package (legacy configs): use the build that just ran.
+        return max(found, key=lambda p: p.stat().st_mtime)
     raise SystemExit(f"build directory for {name!r} not found (looked in {roots})")
 
 
@@ -94,9 +97,6 @@ def main() -> int:
         return 2
     yaml = Path(sys.argv[1]).resolve()
     name = device_name(yaml)
-    if not name:
-        print(f"could not read the esphome name from {yaml}", file=sys.stderr)
-        return 2
     build = find_build(yaml, name)
     tables = list(build.rglob("partitions.csv"))
     if not tables:
