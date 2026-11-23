@@ -141,7 +141,7 @@ If a device with a key gets the factory firmware (no key), Home Assistant keeps 
 
 ### Web server
 
-Both device configs include [`core/web-server.yaml`](https://github.com/skydoy/ESPHome_AC/blob/main/core/web-server.yaml). Open `http://<device-ip>/` on your LAN to see every entity, control them and read the live log (ESPHome web server v3, port 80). The page's JS/CSS loads from the ESPHome CDN, so the browser needs internet access. The firmware itself does not.
+Both device configs include [`core/web-server.yaml`](https://github.com/skydoy/ESPHome_AC/blob/main/core/web-server.yaml). Open `http://<device-ip>/` on your LAN to see every entity, control them and read the live log (ESPHome web server v3, port 80). The page's JS/CSS is stored in the firmware, so the page works without internet.
 
 **It has no password.** Anyone on your network can view and control the AC. Keep the device on a trusted network. To add a login, add this to your own device YAML (it merges with the package):
 

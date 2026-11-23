@@ -8,6 +8,52 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-23
+
+### Added
+- Room sensor: **Room Temperature** input and **Follow Room Sensor** switch. While following,
+  the set point sent to the AC is shifted by (AC sensor − room), at most ±3 °C and at most
+  every 5 min, until the room reaches the target; the climate entity shows the target and the
+  room temperature. A Shelly H&T (Plus / Gen3 / Gen4) can send the reading straight to the
+  device with a webhook, without Home Assistant. Readings older than 4 h are ignored.
+- **AC Sensor Temperature** (the AC's own sensor), **Heating Rate** and **Cooling Rate**
+  (°C per hour over the last 30 min while the AC heats or cools).
+- Schedules stored on the device (`core/schedules.yaml`, all boards): 4 schedules, each with
+  **Schedule N** (on/off), **Time**, **Days** (every day / weekdays / weekend / one day),
+  **Action** (off / cool / heat / auto / dry / fan), **Temperature** and **Fan**. They run
+  without Home Assistant: SNTP internet time with the time zone Home Assistant last sent,
+  which is now saved on the device.
+- Schedule **early start**: learns how fast the room heats / cools and starts Heat / Cool
+  schedules early so the room is at temperature at the schedule time (off by default).
+- **Electricity cost** (`core/energy.yaml`): Simple / Bi-hourly / Tri-hourly tariff with
+  editable prices and periods (defaults: Portugal daily cycle); Cost Today, Cost This Month,
+  Energy This Month, Tariff Period.
+- **Solar surplus boost** (`core/energy.yaml`): Grid Power input over HTTP from any meter;
+  while exporting more than a threshold, the set point goes up (Heat) / down (Cool) by 1–2 °C.
+- **Compressor health and fault history** (`core/health.yaml`): Compressor Hours / Starts /
+  Starts Last Hour, Compressor Short Cycling, AC Struggling, Last Fault, Fault History (last 10
+  with date), Clear Fault History.
+- **Screen brightness and night mode** on the Sticks, all adjustable.
+- **Output Power (experimental)** and **Output Power BTU (experimental)**: bytes 55–56 of the
+  160-byte status frame, which ramp with the compressor like the heating / cooling output the
+  official app showed. Not confirmed yet.
+- **Byte Hunt** switch (diagnostic): once a minute logs the whole status frame with the
+  decoded values; the web page collects the lines into a CSV to download. To find fields not
+  decoded yet, such as the heating / cooling output.
+- **Optional MQTT** (`core/mqtt.yaml`), off by default, configured at runtime (broker, port,
+  login) from the web page or Home Assistant. **M5StickC Plus2 only**: the M5StickC Plus /
+  Plus SE and the ATOM Lite (no PSRAM) do not include it, to keep RAM for HTTPS updates.
+- **Invert Panel Light** switch: some Hisense units swap the panel-light commands, so
+  Light On turned the light off. Turn it on if yours does.
+
+### Changed
+- The device's web page (`http://<device-ip>/`) is served from the firmware (`local: true`)
+  instead of loading its JS/CSS from the ESPHome CDN, so it works without internet.
+- **Filter Last Cleaned** is now a date (`YYYY-MM-DD`) instead of a timestamp, which the web
+  page showed as a raw number.
+- SNTP time moved from the factory-only update package to `core/diagnostics.yaml`, so every
+  build has internet time.
+
 ## [0.5.1] - 2026-11-22
 
 ### Fixed
@@ -525,7 +571,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1

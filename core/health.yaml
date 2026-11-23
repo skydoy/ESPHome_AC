@@ -1,0 +1,202 @@
+# Compressor health and fault history (needs the brand's "ac_compressor_frequency" sensor,
+# "ac_fault_codes" text sensor and the climate entity "ac_climate").
+#
+#   sensor "Compressor Hours"            total running hours (kept across restarts)
+#   sensor "Compressor Starts"           total starts (kept across restarts)
+#   sensor "Compressor Starts Last Hour"
+#   binary "Compressor Short Cycling"    more than 6 starts in the last hour: oversized unit,
+#                                        badly placed sensor or a refrigerant problem
+#   binary "AC Struggling"               heating / cooling for 2 h without getting within 2 degC
+#                                        of the target: dirty filter, low refrigerant, door open
+#   text   "Last Fault", "Fault History" last 10 fault codes with date and time (newest first),
+#                                        taken from "AC Fault Codes" when "AC Fault" turns on
+#   button "Clear Fault History"
+
+globals:
+  - id: comp_seconds                    # running seconds (RAM), saved every 15 min
+    type: uint32_t
+    initial_value: "0"
+  - id: comp_starts
+    type: uint32_t
+    initial_value: "0"
+  - id: comp_saved                      # {seconds, starts}
+    type: std::array<uint32_t, 2>
+    restore_value: true
+    initial_value: "std::array<uint32_t, 2>{0, 0}"
+  - id: fault_log                       # 10 entries "YYYY-MM-DD HH:MM code", newest first
+    type: std::array<std::array<char, 48>, 10>
+    restore_value: true
+    initial_value: "std::array<std::array<char, 48>, 10>{}"
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(comp_seconds) = id(comp_saved)[0];
+            id(comp_starts) = id(comp_saved)[1];
+        - script.execute: fault_publish
+  on_shutdown:
+    - then:
+        - lambda: id(comp_saved) = {id(comp_seconds), id(comp_starts)};
+
+sensor:
+  - platform: template
+    id: compressor_hours
+    name: "Compressor Hours"
+    icon: mdi:timer-cog-outline
+    unit_of_measurement: "h"
+    state_class: total_increasing
+    accuracy_decimals: 1
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: compressor_starts
+    name: "Compressor Starts"
+    icon: mdi:counter
+    state_class: total_increasing
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: compressor_starts_hour
+    name: "Compressor Starts Last Hour"
+    icon: mdi:counter
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: never
+
+binary_sensor:
+  - platform: template
+    id: compressor_short_cycling
+    name: "Compressor Short Cycling"
+    device_class: problem
+    entity_category: diagnostic
+  - platform: template
+    id: ac_struggling
+    name: "AC Struggling"
+    device_class: problem
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: template
+    id: last_fault
+    name: "Last Fault"
+    icon: mdi:alert-circle-outline
+    entity_category: diagnostic
+    update_interval: never
+  - platform: template
+    id: fault_history
+    name: "Fault History"
+    icon: mdi:history
+    entity_category: diagnostic
+    update_interval: never
+
+button:
+  - platform: template
+    name: "Clear Fault History"
+    icon: mdi:delete-sweep
+    entity_category: config
+    on_press:
+      - lambda: |-
+          std::array<std::array<char, 48>, 10> empty{};
+          id(fault_log) = empty;
+      - script.execute: fault_publish
+
+script:
+  - id: fault_publish
+    then:
+      - lambda: |-
+          const auto &log = id(fault_log);
+          std::string all;
+          for (const auto &e : log) {
+            if (e[0] == 0)
+              continue;
+            if (!all.empty())
+              all += " | ";
+            all += std::string(e.data());
+          }
+          if (all.size() > 250)  // Home Assistant state limit 255
+            all = all.substr(0, 249) + "~";
+          id(last_fault).publish_state(log[0][0] ? std::string(log[0].data()) : std::string("None"));
+          id(fault_history).publish_state(all.empty() ? std::string("None") : all);
+
+interval:
+  - interval: 10s
+    then:
+      - lambda: |-
+          static bool was_running = false;
+          static uint32_t starts_at[16] = {0};   // millis() of the last starts (ring)
+          static uint8_t head = 0;
+          static uint32_t struggle_since = 0;
+          static uint8_t tick = 0;
+          const uint32_t now = millis();
+          const float hz = id(ac_compressor_frequency).state;
+          const bool running = !std::isnan(hz) && hz > 0;
+          if (running) {
+            id(comp_seconds) += 10;
+            if (!was_running) {
+              id(comp_starts)++;
+              starts_at[head] = now ? now : 1;
+              head = (head + 1) % 16;
+            }
+          }
+          was_running = running;
+          // New fault code: add it to the history with the date and time.
+          static std::string last_code;
+          if (id(ac_fault_codes).has_state() && id(ac_fault_codes).state != last_code) {
+            last_code = id(ac_fault_codes).state;
+            if (id(ac_fault).state && !last_code.empty() && last_code != "OK") {
+              auto t = id(ha_time).now();
+              if (!t.is_valid())
+                t = id(sntp_time).now();
+              char line[48];
+              if (t.is_valid())
+                snprintf(line, sizeof(line), "%04d-%02d-%02d %02d:%02d %s", t.year, t.month, t.day_of_month,
+                         t.hour, t.minute, last_code.c_str());
+              else
+                snprintf(line, sizeof(line), "(no clock) %s", last_code.c_str());
+              auto log = id(fault_log);
+              for (int i = 9; i > 0; i--)
+                log[i] = log[i - 1];
+              log[0].fill(0);
+              strncpy(log[0].data(), line, log[0].size() - 1);
+              id(fault_log) = log;
+              ESP_LOGW("health", "Fault recorded: %s", line);
+              id(fault_publish).execute();
+            }
+          }
+          // AC struggling: heating / cooling for 2 h and still more than 2 degC from the target.
+          const auto act = id(ac_climate).action;
+          const float cur = id(ac_climate).current_temperature, tgt = id(ac_climate).target_temperature;
+          const bool far = !std::isnan(cur) && !std::isnan(tgt) &&
+              ((act == climate::CLIMATE_ACTION_HEATING && tgt - cur > 2.0f) ||
+               (act == climate::CLIMATE_ACTION_COOLING && cur - tgt > 2.0f));
+          if (!far)
+            struggle_since = 0;
+          else if (struggle_since == 0)
+            struggle_since = now ? now : 1;
+          const bool struggling = struggle_since != 0 && now - struggle_since >= 2UL * 3600 * 1000;
+          if (++tick % 6 != 0)
+            return;  // publish once a minute
+          int last_hour = 0;
+          for (uint32_t t : starts_at)
+            if (t != 0 && now - t < 3600UL * 1000)
+              last_hour++;
+          id(compressor_hours).publish_state(id(comp_seconds) / 3600.0f);
+          id(compressor_starts).publish_state(id(comp_starts));
+          id(compressor_starts_hour).publish_state(last_hour);
+          const bool short_cycling = last_hour > 6;
+          if (!id(compressor_short_cycling).has_state() || id(compressor_short_cycling).state != short_cycling) {
+            if (short_cycling)
+              ESP_LOGW("health", "Compressor short cycling: %d starts in the last hour", last_hour);
+            id(compressor_short_cycling).publish_state(short_cycling);
+          }
+          if (!id(ac_struggling).has_state() || id(ac_struggling).state != struggling) {
+            if (struggling)
+              ESP_LOGW("health", "The AC has not reached the target in 2 h (filter? refrigerant? window?)");
+            id(ac_struggling).publish_state(struggling);
+          }
+  - interval: 15min
+    then:
+      - lambda: id(comp_saved) = {id(comp_seconds), id(comp_starts)};

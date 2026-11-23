@@ -14,7 +14,7 @@
 substitutions:
   name: esphome-ac-plus
   friendly_name: Air Conditioner
-  project_version: "0.5.1"
+  project_version: "0.6.0"
   # Build source shown in "Firmware Version": CI sets "release" (tags) or "main @<commit>";
   # "self-built" means built from the github:// package (Device Builder adoption) or a checkout.
   firmware_source: "self-built"
@@ -48,5 +48,9 @@ packages:
   provisioning: !include ../core/provisioning.yaml
   diagnostics: !include ../core/diagnostics.yaml
   filter_reminder: !include ../core/filter-reminder.yaml   # "Filter Needs Cleaning"
+  schedules: !include ../core/schedules.yaml   # 4 schedules stored on the device
+  energy: !include ../core/energy.yaml   # electricity cost, solar surplus boost
+  health: !include ../core/health.yaml   # compressor health, fault history
+  # No MQTT on this board: it has no PSRAM and needs the RAM for HTTPS updates (M5StickC Plus2 only).
   web_server: !include ../core/web-server.yaml
   update_check: !include ../core/update-check.yaml   # reports new releases, never installs
