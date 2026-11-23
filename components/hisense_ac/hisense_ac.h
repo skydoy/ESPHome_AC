@@ -106,6 +106,21 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void dump_config() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
 
+  // ---- Room sensor (external room temperature, e.g. a Shelly H&T) ----
+  // The F4F5 bus has no field for a remote temperature (iFeel is infrared only), so with
+  // "follow room" on, the set point sent to the AC is shifted by (AC sensor - room sensor),
+  // at most +-3 degC and at most every 5 min, until the room reaches the target. The climate
+  // entity keeps showing the user's target and the room temperature.
+  void set_room_temperature(float c);
+  void set_follow_room(bool on);
+  bool follow_room() const { return this->follow_room_; }
+  /// Room temperature from the external sensor, NAN if none or older than 4 h.
+  float room_temperature() const;
+  /// Temperature measured by the AC's own sensor (return air).
+  float ac_sensor_temperature() const { return this->ac_room_; }
+  /// Set point actually sent to the AC (differs from the target while following the room).
+  float ac_setpoint() const { return this->ac_setpoint_; }
+
   // ---- Configuration ----
   void set_horizontal_swing(bool v) { this->horizontal_swing_ = v; }
   void set_sleep_profile(uint8_t v) { this->sleep_profile_ = v; }
@@ -297,6 +312,21 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint32_t last_checksum_errors_{0};
   uint32_t last_framing_errors_{0};
   uint32_t next_bus_errors_check_{0};
+  // Room sensor
+  bool room_follow_active_() const;
+  float room_setpoint_(float target) const;
+  void room_compensate_(uint32_t now);
+  void send_setpoint_(float c, uint32_t now);
+  float ac_room_{NAN};
+  float ac_setpoint_{NAN};
+  float ext_room_{NAN};
+  uint32_t ext_room_at_{0};
+  bool follow_room_{false};
+  bool room_was_active_{false};
+  float user_target_{NAN};
+  float last_sent_sp_{NAN};
+  uint32_t last_comp_ms_{0};
+  uint32_t next_room_check_{0};
 #endif
 #ifdef USE_BINARY_SENSOR
   binary_sensor::BinarySensor *connected_{nullptr};

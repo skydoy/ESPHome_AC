@@ -8,6 +8,17 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-23
+
+### Added
+- Room sensor: **Room Temperature** input and **Follow Room Sensor** switch. While following,
+  the set point sent to the AC is shifted by (AC sensor − room), at most ±3 °C and at most
+  every 5 min, until the room reaches the target; the climate entity shows the target and the
+  room temperature. A Shelly H&T (Plus / Gen3 / Gen4) can send the reading straight to the
+  device with a webhook, without Home Assistant. Readings older than 4 h are ignored.
+- **AC Sensor Temperature** (the AC's own sensor), **Heating Rate** and **Cooling Rate**
+  (°C per hour over the last 30 min while the AC heats or cools).
+
 ## [0.5.1] - 2026-11-22
 
 ### Fixed
@@ -525,7 +536,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1

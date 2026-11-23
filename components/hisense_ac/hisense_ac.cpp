@@ -430,6 +430,7 @@ void HisenseAC::loop() {
   this->read_uart_();
   const uint32_t now = millis();
   this->maybe_auto_report_();
+  this->room_compensate_(now);
 #ifdef USE_SENSOR
   if (reached(now, this->next_bus_errors_check_)) {
     this->next_bus_errors_check_ = now + BUS_ERRORS_CHECK_MS;
@@ -773,6 +774,121 @@ float HisenseAC::get_outdoor_temperature() const {
 }
 
 // ---- Climate ----------------------------------------------------------------------------------
+// ---- Room sensor ----
+
+static const uint32_t ROOM_STALE_MS = 4UL * 60 * 60 * 1000;   // external reading older: ignored
+static const uint32_t ROOM_STEP_MS = 5UL * 60 * 1000;         // at most one set-point change
+static const float ROOM_MAX_SHIFT = 3.0f;                     // max distance from the target
+
+void HisenseAC::set_room_temperature(float c) {
+  if (std::isnan(c) || c < -30.0f || c > 60.0f) {
+    ESP_LOGW(TAG, "Room temperature %.1f ignored (out of range)", c);
+    return;
+  }
+  const bool first = std::isnan(this->room_temperature());
+  this->ext_room_ = c;
+  this->ext_room_at_ = millis();
+  if (first)
+    this->next_room_check_ = 0;
+}
+
+float HisenseAC::room_temperature() const {
+  if (std::isnan(this->ext_room_) || millis() - this->ext_room_at_ > ROOM_STALE_MS)
+    return NAN;
+  return this->ext_room_;
+}
+
+void HisenseAC::set_follow_room(bool on) {
+  if (on == this->follow_room_)
+    return;
+  this->follow_room_ = on;
+  ESP_LOGI(TAG, "Follow room sensor %s", on ? "on" : "off");
+  if (on) {
+    if (std::isnan(this->user_target_))
+      this->user_target_ = this->target_temperature;
+    this->last_sent_sp_ = NAN;
+    this->last_comp_ms_ = 0;
+    this->next_room_check_ = 0;
+    return;
+  }
+  // Off: give the AC the plain target again and show its own sensor.
+  if (this->room_was_active_ && !std::isnan(this->user_target_) && this->user_target_ != this->ac_setpoint_)
+    this->send_setpoint_(this->user_target_, millis());
+  this->room_was_active_ = false;
+  if (!std::isnan(this->ac_room_)) {
+    this->current_temperature = this->ac_room_;
+    this->publish_state();
+  }
+}
+
+bool HisenseAC::room_follow_active_() const {
+  return this->follow_room_ && !std::isnan(this->room_temperature());
+}
+
+float HisenseAC::room_setpoint_(float target) const {
+  if (!this->room_follow_active_() || std::isnan(this->ac_room_))
+    return target;
+  switch (this->mode) {
+    case climate::CLIMATE_MODE_COOL:
+    case climate::CLIMATE_MODE_HEAT:
+    case climate::CLIMATE_MODE_DRY:
+    case climate::CLIMATE_MODE_AUTO:
+    case climate::CLIMATE_MODE_HEAT_COOL:
+      break;
+    default:
+      return target;
+  }
+  float sp = roundf(target + (this->ac_room_ - this->ext_room_));
+  sp = std::max(target - ROOM_MAX_SHIFT, std::min(target + ROOM_MAX_SHIFT, sp));
+  return std::max(16.0f, std::min(32.0f, sp));
+}
+
+void HisenseAC::send_setpoint_(float c, uint32_t now) {
+  proto::Command cmd = this->base_cmd_();
+  cmd.beep = false;  // automatic adjustment: no beep every few minutes
+  cmd.has_setpoint = true;
+  cmd.setpoint = this->to_panel_temp_(c);
+  if (this->enqueue_(cmd, false)) {
+    this->last_sent_sp_ = c;
+    this->last_comp_ms_ = now;
+  }
+}
+
+void HisenseAC::room_compensate_(uint32_t now) {
+  if (!this->follow_room_ || !reached(now, this->next_room_check_))
+    return;
+  this->next_room_check_ = now + 60000;
+  if (!this->room_follow_active_()) {
+    if (this->room_was_active_) {
+      ESP_LOGW(TAG, "No room temperature for 4 h: back to the AC's own sensor");
+      this->room_was_active_ = false;
+      if (!std::isnan(this->user_target_) && this->user_target_ != this->ac_setpoint_)
+        this->send_setpoint_(this->user_target_, now);
+      if (!std::isnan(this->ac_room_)) {
+        this->current_temperature = this->ac_room_;
+        this->publish_state();
+      }
+    }
+    return;
+  }
+  if (!this->room_was_active_) {
+    this->room_was_active_ = true;
+    ESP_LOGI(TAG, "Following the room sensor (%.1f degC)", this->ext_room_);
+  }
+  if (this->current_temperature != this->ext_room_) {
+    this->current_temperature = this->ext_room_;
+    this->publish_state();
+  }
+  if (this->mode == climate::CLIMATE_MODE_OFF || std::isnan(this->user_target_) || std::isnan(this->ac_setpoint_))
+    return;
+  const float sp = this->room_setpoint_(this->user_target_);
+  if (sp == this->ac_setpoint_ || !reached(now, this->last_comp_ms_ + ROOM_STEP_MS))
+    return;
+  ESP_LOGI(TAG, "Room %.1f, AC sensor %.1f, target %.0f: set point %.0f -> %.0f", this->ext_room_, this->ac_room_,
+           this->user_target_, this->ac_setpoint_, sp);
+  this->send_setpoint_(sp, now);
+}
+
 climate::ClimateTraits HisenseAC::traits() {
   climate::ClimateTraits t;
   t.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE | climate::CLIMATE_SUPPORTS_ACTION);
@@ -846,10 +962,14 @@ void HisenseAC::control(const climate::ClimateCall &call) {
       t = 16.0f;
     if (t > 32.0f)
       t = 32.0f;
-    normal.has_setpoint = true;
-    normal.setpoint = this->to_panel_temp_(t);
-    has_normal = true;
     this->target_temperature = roundf(t);
+    this->user_target_ = this->target_temperature;
+    const float sp = this->room_setpoint_(this->target_temperature);
+    normal.has_setpoint = true;
+    normal.setpoint = this->to_panel_temp_(sp);
+    has_normal = true;
+    this->last_sent_sp_ = sp;
+    this->last_comp_ms_ = now;
   }
 
   // ---- Fan ----
@@ -1037,12 +1157,30 @@ void HisenseAC::apply_status_(const proto::Status &s) {
   }
   if (s.setpoint > 0) {
     const float t = roundf(this->from_panel_temp_(s.setpoint));
-    if (t != this->target_temperature) {
-      this->target_temperature = t;
+    this->ac_setpoint_ = t;
+    float shown = t;
+    if (this->room_follow_active_() && !std::isnan(this->user_target_)) {
+      const bool settling = !reached(millis(), this->last_comp_ms_ + 30000);
+      if (std::isnan(this->last_sent_sp_) || t == this->last_sent_sp_ || settling) {
+        shown = this->user_target_;
+      } else {
+        // Changed at the AC (remote or panel): that is the new target.
+        ESP_LOGI(TAG, "Set point changed at the AC to %.0f: new room target", t);
+        this->user_target_ = t;
+        this->last_sent_sp_ = NAN;
+        this->next_room_check_ = 0;
+      }
+    } else {
+      this->user_target_ = t;
+    }
+    if (shown != this->target_temperature) {
+      this->target_temperature = shown;
       changed = true;
     }
   }
-  const float room = this->from_panel_temp_(s.room_temp);
+  const float ac_room = this->from_panel_temp_(s.room_temp);
+  this->ac_room_ = ac_room;
+  const float room = this->room_follow_active_() ? this->ext_room_ : ac_room;
   if (std::isnan(this->current_temperature) || room != this->current_temperature) {
     this->current_temperature = room;
     changed = true;

@@ -47,6 +47,30 @@ cards:
 
 A sensor your AC does not report shows as *unavailable*; delete its line.
 
+## Room sensor (Shelly H&T)
+
+The AC measures the temperature near the ceiling, where its air comes back in, so it often reads warmer than the room. The RS-485 bus has no field to send it a room temperature (iFeel only works over infrared). Instead, the device can follow a room sensor by adjusting the set point it sends to the AC.
+
+| Entity | What it does |
+|---|---|
+| **Room Temperature** | The room reading. A Shelly sends it directly (below), or Home Assistant sets it. Ignored when older than 4 h. |
+| **Follow Room Sensor** | On: the AC set point is shifted by (AC sensor − room), at most ±3 °C and at most every 5 min, until the room reaches your target. The AC card shows your target and the room temperature. |
+| **AC Sensor Temperature** | What the AC's own sensor reads. |
+
+A set point changed at the AC (remote or panel) becomes the new target. Without a reading for 4 h, the AC goes back to its own sensor.
+
+**Shelly H&T (Plus / Gen3 / Gen4), without Home Assistant:** in the Shelly app or its web page, open **Actions** (or **Webhooks**), add one on **Temperature change** with this URL, and save:
+
+```
+http://<AC device IP>/number/Room%20Temperature/set?value=${ev.tC}
+```
+
+Give the AC device a fixed IP in your router so the URL keeps working.
+
+## Heating and cooling rate
+
+**Heating Rate** and **Cooling Rate** show how fast the room warms up or cools down (°C per hour) while the AC is heating or cooling, from the last 30 minutes. They use the room sensor when following it, otherwise the AC's sensor (whole degrees, so the value is rougher). They stay empty while the AC is not heating or cooling, and for the first 10 minutes.
+
 ## Filter cleaning reminder
 
 The device counts the days since the air filter was last cleaned and warns you when it is time.
