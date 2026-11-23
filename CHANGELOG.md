@@ -21,6 +21,19 @@ section below, with the factory and OTA images attached.
   **Action** (off / cool / heat / auto / dry / fan), **Temperature** and **Fan**. They run
   without Home Assistant: SNTP internet time with the time zone Home Assistant last sent,
   which is now saved on the device.
+- Schedule **early start**: learns how fast the room heats / cools and starts Heat / Cool
+  schedules early so the room is at temperature at the schedule time (off by default).
+- **Electricity cost** (`core/energy.yaml`): Simple / Bi-hourly / Tri-hourly tariff with
+  editable prices and periods (defaults: Portugal daily cycle); Cost Today, Cost This Month,
+  Energy This Month, Tariff Period.
+- **Solar surplus boost** (`core/energy.yaml`): Grid Power input over HTTP from any meter;
+  while exporting more than a threshold, the set point goes up (Heat) / down (Cool) by 1–2 °C.
+- **Compressor health and fault history** (`core/health.yaml`): Compressor Hours / Starts /
+  Starts Last Hour, Compressor Short Cycling, AC Struggling, Last Fault, Fault History (last 10
+  with date), Clear Fault History.
+- **Screen brightness and night mode** on the Sticks, all adjustable.
+- **Optional MQTT** (`core/mqtt.yaml`), off by default, configured at runtime (broker, port,
+  login) from the web page or Home Assistant.
 - **Invert Panel Light** switch: some Hisense units swap the panel-light commands, so
   Light On turned the light off. Turn it on if yours does.
 

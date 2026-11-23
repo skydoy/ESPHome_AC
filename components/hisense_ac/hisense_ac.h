@@ -121,6 +121,11 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   float room_temperature() const;
   /// Temperature measured by the AC's own sensor (return air).
   float ac_sensor_temperature() const { return this->ac_room_; }
+  /// Solar boost: 0 = off, else degrees added to the set point in Heat / removed in Cool (max 2).
+  void set_setpoint_boost(float degrees);
+  float setpoint_boost() const { return this->boost_; }
+  /// The target the user asked for (the climate entity's target).
+  float user_target() const { return this->user_target_; }
   /// Set point actually sent to the AC (differs from the target while following the room).
   float ac_setpoint() const { return this->ac_setpoint_; }
 
@@ -317,6 +322,9 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   uint32_t next_bus_errors_check_{0};
   // Room sensor
   bool room_follow_active_() const;
+  bool managed_() const;
+  float boost_{0.0f};
+  bool boost_was_{false};
   float room_setpoint_(float target) const;
   void room_compensate_(uint32_t now);
   void send_setpoint_(float c, uint32_t now);

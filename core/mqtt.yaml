@@ -1,0 +1,103 @@
+# Optional MQTT, for Node-RED, ioBroker, Domoticz, openHAB... (Home Assistant keeps using the
+# native API). OFF by default: set it up on the device's web page or in Home Assistant, then
+# turn on "MQTT". Nothing to recompile.
+#
+#   text   "MQTT Broker"     host name or IP of the broker
+#   number "MQTT Port"       default 1883
+#   text   "MQTT Username", "MQTT Password"  (empty = no login)
+#   switch "MQTT"            on = connect (kept across restarts)
+#
+# Topics: <device name>/<component>/<entity>/state and .../command (ESPHome MQTT layout).
+# Home Assistant MQTT discovery is off, so entities do not appear twice in Home Assistant.
+# On boards without PSRAM (M5StickC Plus / Plus SE, ATOM Lite) MQTT uses some of the RAM the
+# HTTPS update needs: watch "Free Heap" after turning it on.
+mqtt:
+  id: mqtt_client
+  broker: "0.0.0.0"          # replaced at runtime by "MQTT Broker"
+  enable_on_boot: false
+  discovery: false
+  log_topic: null
+
+text:
+  - platform: template
+    id: mqtt_broker
+    name: "MQTT Broker"
+    icon: mdi:server-network
+    entity_category: config
+    mode: text
+    max_length: 64
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: mqtt_username
+    name: "MQTT Username"
+    icon: mdi:account
+    entity_category: config
+    mode: text
+    max_length: 64
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: mqtt_password
+    name: "MQTT Password"
+    icon: mdi:form-textbox-password
+    entity_category: config
+    mode: password
+    max_length: 64
+    optimistic: true
+    restore_value: true
+
+number:
+  - platform: template
+    id: mqtt_port
+    name: "MQTT Port"
+    icon: mdi:numeric
+    entity_category: config
+    min_value: 1
+    max_value: 65535
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 1883
+
+script:
+  - id: mqtt_apply
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: return id(mqtt_switch).state && !id(mqtt_broker).state.empty();
+          then:
+            - lambda: |-
+                id(mqtt_client).set_broker_address(id(mqtt_broker).state);
+                id(mqtt_client).set_broker_port((uint16_t) id(mqtt_port).state);
+                id(mqtt_client).set_username(id(mqtt_username).state);
+                id(mqtt_client).set_password(id(mqtt_password).state);
+                ESP_LOGI("mqtt", "MQTT on: %s:%u", id(mqtt_broker).state.c_str(), (unsigned) id(mqtt_port).state);
+            - mqtt.disable:
+                id: mqtt_client
+            - mqtt.enable:
+                id: mqtt_client
+          else:
+            - mqtt.disable:
+                id: mqtt_client
+
+switch:
+  - platform: template
+    id: mqtt_switch
+    name: "MQTT"
+    icon: mdi:lan-connect
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - script.execute: mqtt_apply
+    on_turn_off:
+      - script.execute: mqtt_apply
+
+esphome:
+  on_boot:
+    - priority: -200
+      then:
+        - script.execute: mqtt_apply
