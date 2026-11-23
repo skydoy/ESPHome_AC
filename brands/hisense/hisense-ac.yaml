@@ -185,3 +185,116 @@ sensor:
     power_id: ac_power
     method: left
     restore: true
+
+  # ---- Room sensor and heating / cooling rate ----
+  # Temperature measured by the AC's own sensor (return air, near the ceiling). With "Follow
+  # Room Sensor" on, the climate entity shows the room sensor instead.
+  - platform: template
+    id: ac_sensor_temperature
+    name: "AC Sensor Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    update_interval: 60s
+    lambda: return id(ac_climate).ac_sensor_temperature();
+  # How fast the room warms up / cools down while the AC heats / cools (°C per hour), from
+  # the last 30 min (room sensor when following it, otherwise the AC sensor). Empty while
+  # the AC is not heating / cooling or during its first 10 min of it.
+  - platform: template
+    id: heating_rate
+    name: "Heating Rate"
+    icon: mdi:thermometer-chevron-up
+    unit_of_measurement: "°C/h"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: never
+  - platform: template
+    id: cooling_rate
+    name: "Cooling Rate"
+    icon: mdi:thermometer-chevron-down
+    unit_of_measurement: "°C/h"
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: never
+
+# Room temperature input. A Shelly H&T (Plus / Gen3 / Gen4) sends it straight to the device,
+# without Home Assistant, with a webhook on "Temperature change":
+#   http://<device-ip>/number/Room%20Temperature/set?value=${ev.tC}
+# Home Assistant can also set it. Readings older than 4 h are ignored.
+number:
+  - platform: template
+    id: room_temperature_input
+    name: "Room Temperature"
+    icon: mdi:home-thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    min_value: -30
+    max_value: 60
+    step: 0.1
+    mode: box
+    optimistic: true
+    entity_category: config
+    set_action:
+      - lambda: id(ac_climate).set_room_temperature(x);
+
+switch:
+  - platform: template
+    id: follow_room_switch
+    name: "Follow Room Sensor"
+    icon: mdi:home-thermometer-outline
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_OFF
+    lambda: return id(ac_climate).follow_room();
+    turn_on_action:
+      - lambda: id(ac_climate).set_follow_room(true);
+    turn_off_action:
+      - lambda: id(ac_climate).set_follow_room(false);
+
+interval:
+  - interval: 60s
+    then:
+      - lambda: |-
+          // 30 one-minute samples of the room temperature while the AC heats or cools.
+          static float buf[30];
+          static uint8_t n = 0, head = 0;
+          static int last_action = -1;
+          const auto action = id(ac_climate).action;
+          const float t = id(ac_climate).current_temperature;
+          const bool heating = action == climate::CLIMATE_ACTION_HEATING;
+          const bool cooling = action == climate::CLIMATE_ACTION_COOLING;
+          if ((int) action != last_action || std::isnan(t)) {
+            n = 0;
+            head = 0;
+            last_action = (int) action;
+          }
+          if (!heating && !cooling) {
+            if (!std::isnan(id(heating_rate).state)) id(heating_rate).publish_state(NAN);
+            if (!std::isnan(id(cooling_rate).state)) id(cooling_rate).publish_state(NAN);
+            return;
+          }
+          if (std::isnan(t))
+            return;
+          buf[head] = t;
+          head = (head + 1) % 30;
+          if (n < 30) n++;
+          if (n < 10)
+            return;  // need 10 min of data
+          // Least-squares slope over the samples (oldest first), in degC per hour.
+          const uint8_t start = (head + 30 - n) % 30;
+          float sx = 0, sy = 0, sxx = 0, sxy = 0;
+          for (uint8_t i = 0; i < n; i++) {
+            const float x = i, y = buf[(start + i) % 30];
+            sx += x; sy += y; sxx += x * x; sxy += x * y;
+          }
+          const float den = n * sxx - sx * sx;
+          if (den == 0) return;
+          const float per_hour = (n * sxy - sx * sy) / den * 60.0f;
+          if (heating) {
+            id(heating_rate).publish_state(per_hour);
+            if (!std::isnan(id(cooling_rate).state)) id(cooling_rate).publish_state(NAN);
+          } else {
+            id(cooling_rate).publish_state(-per_hour);
+            if (!std::isnan(id(heating_rate).state)) id(heating_rate).publish_state(NAN);
+          }
