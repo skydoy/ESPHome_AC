@@ -22,11 +22,11 @@ globals:
   - id: comp_saved                      # {seconds, starts}
     type: std::array<uint32_t, 2>
     restore_value: true
-    initial_value: "{0, 0}"
+    initial_value: "std::array<uint32_t, 2>{0, 0}"
   - id: fault_log                       # 10 entries "YYYY-MM-DD HH:MM code", newest first
     type: std::array<std::array<char, 48>, 10>
     restore_value: true
-    initial_value: "{}"
+    initial_value: "std::array<std::array<char, 48>, 10>{}"
 
 esphome:
   on_boot:

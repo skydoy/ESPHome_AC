@@ -39,7 +39,7 @@ globals:
   - id: cost_saved
     type: std::array<float, 3>          # today EUR, month EUR, month kWh
     restore_value: true
-    initial_value: "{0, 0, 0}"
+    initial_value: "std::array<float, 3>{0, 0, 0}"
   - id: cost_day_key                    # year*1000 + day of year of the "today" totals
     type: int
     restore_value: true
