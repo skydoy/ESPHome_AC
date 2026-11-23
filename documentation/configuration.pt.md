@@ -15,16 +15,16 @@ O componente `hisense_ac` ([`components/hisense_ac`](https://github.com/skydoy/E
 | Interruptores | LED do visor, Eco, Super (turbo), Fan Mute (silencioso), beep ao comando, AC frame logging (diagnóstico) |
 | Select | Sleep Mode: Off, Sleep 1–4 |
 | Botões | Light On, Light Off |
-| Sensores | Sala (temperatura atual do clima), exterior, serpentina interior e serpentina exterior, frequência real e alvo do compressor, humidade interior, tensão de alimentação, potência, corrente, energia de hoje |
+| Sensores | Sala (temperatura atual do clima), exterior, serpentina interior e serpentina exterior, frequência real e alvo do compressor, humidade interior, tensão de alimentação, potência de aquecimento (BTU/h, modo de aquecimento) |
 | Diagnóstico | AC link (ligado), texto do estado da ligação, fault (problema), texto dos códigos de avaria, aquecimento auxiliar, um sensor de problema por cada bit de avaria (19, ver abaixo), AC Firmware Version, AC Bus Checksum Errors / AC Bus Framing Errors (contadores desde o arranque). Escondidos por predefinição: Humidity Set Point, AC Panel Unit (Celsius/Fahrenheit), AC Capabilities, AC Device Type. De `core/diagnostics.yaml`: Firmware Version, ESPHome Version, Reset Reason, Uptime, Wi-Fi Signal |
 
 Eco, Super, Fan Mute e Sleep Mode enviam os mesmos comandos que as predefinições do clima e o modo de ventilação Quiet, e seguem o estado que a máquina reporta, por isso as duas vistas ficam sincronizadas. Eco, Super e Sleep são predefinições exclusivas: ligar uma desliga as outras.
 
 Sensores por avaria (todos opcionais, nomes como em [hisense-ac.yaml](https://github.com/skydoy/ESPHome_AC/blob/main/brands/hisense/hisense-ac.yaml)): `fault_indoor_temperature_sensor`, `fault_indoor_coil_sensor`, `fault_indoor_humidity_sensor`, `fault_water_tank_full`, `fault_indoor_fan_motor`, `fault_grille_protection`, `fault_zero_crossing`, `fault_indoor_outdoor_communication` (byte 39); `fault_display_communication`, `fault_keypad_communication`, `fault_wifi_communication`, `fault_electrical`, `fault_indoor_eeprom` (byte 40); `fault_outdoor_eeprom`, `fault_outdoor_coil_sensor`, `fault_discharge_sensor`, `fault_outdoor_temperature_sensor` (byte 64); `fault_overheat_protection`, `fault_high_discharge_temperature` (byte 66).
 
-Face à app ou integração ConnectLife, isto **não** está no barramento RS-485: a capacidade de frio/calor (BTU/h) e a definição "electricity reporting mode" (lado da nuvem). A energia diária é o sensor "Energy Today" (integrado a partir da potência) e a corrente é reportada em A. As notas de protocolo estimam a corrente como `P / (V × 0.95)`. Vê [Questões em aberto](open-questions.md).
+A potência de aquecimento (BTU/h) são os bytes 55–56 de uma trama de estado longa, publicada no modo de aquecimento. Face à app ConnectLife, a potência de arrefecimento e a definição "electricity reporting mode" **não** estão no barramento RS-485. Vê [Questões em aberto](open-questions.md).
 
-Unidades sem bloco elétrico, sensor de humidade ou bloco exterior deixam esses sensores indisponíveis. Humidade, tensão de alimentação e corrente só são publicadas quando o AC envia um valor real, e a config incluída adiciona-as desligadas por predefinição.
+Unidades sem trama de estado longa, sensor de humidade ou bloco exterior deixam esses sensores indisponíveis. Humidade e tensão de alimentação só são publicadas quando o AC envia um valor real, e a config incluída adiciona-as desligadas por predefinição.
 
 O "AC Firmware Version" vem da resposta do AC ao pedido de versão `07`, enviado uma vez no arranque (`handshake: true`). O formato ainda não está confirmado. Vê [protocol.md](https://github.com/skydoy/ESPHome_AC/blob/main/brands/hisense/protocol.md).
 
@@ -61,7 +61,7 @@ Para trabalho de descodificação e calibração. Quando está ligado, o compone
 - cada comando que envia (`TX command frame`) e a resposta de estado seguinte;
 - uma resposta de estado (`RX status frame`) por `debug_frames_interval` (predefinição 10 s);
 - respostas de capacidades (`RX capabilities frame`);
-- uma linha `key:` com os bytes ainda em calibração, em decimal (sala, serpentina interior, humidade, compressor, exterior, tensão, potência).
+- uma linha `key:` com os bytes ainda em calibração, em decimal (sala, serpentina interior, humidade, compressor, exterior, tensão, bytes da potência de aquecimento).
 
 Cada trama é impressa em hexadecimal, 16 bytes por linha, com o offset do byte à frente.
 
@@ -207,7 +207,7 @@ As notas de release do próprio repositório dizem: sobe `project_version` nos d
 
 O componente é uma implementação original (PolyForm Noncommercial 1.0.0, vê a [LICENSE](https://github.com/skydoy/ESPHome_AC/blob/main/LICENSE)). Não foi copiado código-fonte dos projetos abaixo. Serviram como documentação do protocolo e do comportamento real:
 
-- [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1) (MIT): arranque da ligação W41H1, modelos de tramas, mapa de estado de 160 bytes e calibração da potência.
+- [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1) (MIT): arranque da ligação W41H1, modelos de tramas e o mapa de estado de 160 bytes.
 - [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome) (MIT segundo o README): documentação do protocolo e disposição dos comandos.
 - Só factos: [Druidblack/AC-Hisense](https://github.com/Druidblack/AC-Hisense), [pio2398/W4G2](https://github.com/pio2398/W4G2) (GPL-3.0), [straga/scrivo_project](https://github.com/straga/scrivo_project), vins.vins (4pda), [zoffypal/esphome_hisence_ac](https://github.com/zoffypal/esphome_hisence_ac), [pslawinski/esphome_airconintl](https://github.com/pslawinski/esphome_airconintl), [artshevchenko/AC-Hi](https://github.com/artshevchenko/AC-Hi).
 

@@ -45,14 +45,14 @@ Com imagens: [Guia rápido](docs/guia-rapido.md)
 ## O que obténs
 
 - Clima: Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades, swing, Eco / Boost / Sleep
-- Sensores: temps exterior e serpentinas, Hz do compressor, humidade, tensão, potência, energia (quando a máquina os envia)
+- Sensores: temps exterior e serpentinas, Hz do compressor, humidade, tensão, potência de aquecimento (quando a máquina os envia)
 - AC Link / Fault, luz do painel, Eco / Super / Fan Mute / Sleep
 - Atualizações de firmware com um clique (ou Auto Update de madrugada)
 - Página web da placa na tua LAN (`http://<ip-da-placa>/`), funciona sem internet — [capturas](docs/pagina-web.md)
-- Horários, sensor da sala (Shelly), excedente solar, custo da eletricidade, aviso do filtro, saúde do compressor e histórico de avarias — [detalhes](documentation/home-assistant.pt.md)
+- Horários, sensor da sala (Shelly), excedente solar, aviso do filtro, saúde do compressor e histórico de avarias — [detalhes](documentation/home-assistant.pt.md)
 - MQTT opcional, para sistemas sem Home Assistant
 
-> ⚠️ **O MQTT só existe no M5StickC Plus2.** Não funciona no **ATOM Lite** nem no **M5StickC Plus / Plus SE**: não têm PSRAM e precisam dessa memória para as atualizações de firmware.
+> ⚠️ **O MQTT só existe no M5StickC Plus2**, que liga os 2 MB de PSRAM. Não funciona no **ATOM Lite** nem no **M5StickC Plus / Plus SE**: não têm PSRAM e precisam dessa memória para as atualizações de firmware.
 - Controlo só local — sem nuvem para o controlo; relatório anónimo de compatibilidade opcional
 
 ## Documentação e mais

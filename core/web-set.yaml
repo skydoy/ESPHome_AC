@@ -1,0 +1,14 @@
+# Plain GET for the room sensor and the solar grid reading.
+# ESPHome 2026.10 only applies /number/<name>/set on POST. Shelly H&T webhooks are GET, so
+# they use these URLs (no extra login, same as the rest of the device web page):
+#   http://<device-ip>/set?room_temp=21.5
+#   http://<device-ip>/set?room_temp=${ev.tC}     Shelly H&T, on "Temperature change"
+#   http://<device-ip>/set?grid_power=-1200       positive = importing, negative = exporting
+external_components:
+  - source: ${hisense_component_source}
+    components: [web_set]
+    refresh: ${hisense_component_refresh}
+
+web_set:
+  room_temperature: room_temperature_input
+  grid_power: grid_power

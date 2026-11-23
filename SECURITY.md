@@ -6,7 +6,7 @@ Only the latest release receives fixes. Devices update themselves over the air t
 
 | Version | Supported |
 |---|---|
-| latest `0.2.x` | ✅ |
+| latest `0.6.x` | ✅ |
 | older | ❌ |
 
 ## Reporting a vulnerability

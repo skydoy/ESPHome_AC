@@ -18,7 +18,7 @@ Free for personal and non-commercial use. Forks welcome. Commercial use is not p
 | Entity | What it does |
 |---|---|
 | **Air Conditioner** | Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 fan speeds incl. Quiet, swing, presets Eco, Boost, Sleep and 8 °C frost protection. |
-| **Sensors** | Outdoor and coil temperatures, compressor frequency, humidity, voltage, power, current, energy today (when the unit reports them). |
+| **Sensors** | Outdoor and coil temperatures, compressor frequency, humidity, voltage, heating output in BTU/h (Heat mode), when the unit reports them. |
 | **AC Link**, **AC Fault** | Whether the link to the unit is up, and its fault codes. |
 | **AC Display**, **Eco**, **Super**, **Fan Mute**, **Sleep Mode** | Panel light and the unit's own extra modes. |
 | **Firmware Update**, **Auto Update** | New versions in one click, or by themselves at night. |

@@ -12,7 +12,7 @@ Legenda: ✅ Funciona · 🧪 Em teste · 🔶 Reportado com outro firmware · �
 
 | Marca | Unidade interior | Módulo Wi-Fi | Placa testada | Alimentação | Estado | Notas |
 |---|---|---|---|---|---|---|
-| Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados; potência, tensão, corrente e humidade parciais |
+| Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados. A potência de aquecimento são os bytes 55–56 no modo de aquecimento. Tensão e humidade não vistas nesta unidade |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Por testar | Mesmo código de protocolo, ainda não testado numa máquina real |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Por testar | Mesmo código de protocolo e ecrã do Plus2; arranque novo do chip de energia AXP192, ainda não testado numa máquina real |
 

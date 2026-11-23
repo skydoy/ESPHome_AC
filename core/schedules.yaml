@@ -29,6 +29,7 @@ globals:
 sensor:
   - platform: template
     id: learned_heat
+    disabled_by_default: true
     name: "Learned Heating Rate"
     icon: mdi:school-outline
     unit_of_measurement: "°C/h"
@@ -37,6 +38,7 @@ sensor:
     update_interval: never
   - platform: template
     id: learned_cool
+    disabled_by_default: true
     name: "Learned Cooling Rate"
     icon: mdi:school-outline
     unit_of_measurement: "°C/h"
@@ -47,6 +49,7 @@ sensor:
 switch:
   - platform: template
     id: early_start_switch
+    disabled_by_default: true
     name: "Schedule Early Start"
     icon: mdi:clock-fast
     entity_category: config
@@ -54,6 +57,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: template
     id: sched1_on
+    disabled_by_default: true
     name: "Schedule 1"
     icon: mdi:calendar-clock
     entity_category: config
@@ -61,6 +65,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: template
     id: sched2_on
+    disabled_by_default: true
     name: "Schedule 2"
     icon: mdi:calendar-clock
     entity_category: config
@@ -68,6 +73,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: template
     id: sched3_on
+    disabled_by_default: true
     name: "Schedule 3"
     icon: mdi:calendar-clock
     entity_category: config
@@ -75,6 +81,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: template
     id: sched4_on
+    disabled_by_default: true
     name: "Schedule 4"
     icon: mdi:calendar-clock
     entity_category: config
@@ -84,6 +91,7 @@ switch:
 datetime:
   - platform: template
     id: sched1_time
+    disabled_by_default: true
     name: "Schedule 1 Time"
     type: time
     entity_category: config
@@ -92,6 +100,7 @@ datetime:
     initial_value: "07:00"
   - platform: template
     id: sched2_time
+    disabled_by_default: true
     name: "Schedule 2 Time"
     type: time
     entity_category: config
@@ -100,6 +109,7 @@ datetime:
     initial_value: "09:00"
   - platform: template
     id: sched3_time
+    disabled_by_default: true
     name: "Schedule 3 Time"
     type: time
     entity_category: config
@@ -108,6 +118,7 @@ datetime:
     initial_value: "18:00"
   - platform: template
     id: sched4_time
+    disabled_by_default: true
     name: "Schedule 4 Time"
     type: time
     entity_category: config
@@ -118,6 +129,7 @@ datetime:
 select:
   - platform: template
     id: sched1_days
+    disabled_by_default: true
     name: "Schedule 1 Days"
     icon: mdi:calendar-week
     entity_category: config
@@ -127,6 +139,7 @@ select:
     restore_value: true
   - platform: template
     id: sched1_action
+    disabled_by_default: true
     name: "Schedule 1 Action"
     icon: mdi:air-conditioner
     entity_category: config
@@ -136,6 +149,7 @@ select:
     restore_value: true
   - platform: template
     id: sched1_fan
+    disabled_by_default: true
     name: "Schedule 1 Fan"
     icon: mdi:fan
     entity_category: config
@@ -145,6 +159,7 @@ select:
     restore_value: true
   - platform: template
     id: sched2_days
+    disabled_by_default: true
     name: "Schedule 2 Days"
     icon: mdi:calendar-week
     entity_category: config
@@ -154,6 +169,7 @@ select:
     restore_value: true
   - platform: template
     id: sched2_action
+    disabled_by_default: true
     name: "Schedule 2 Action"
     icon: mdi:air-conditioner
     entity_category: config
@@ -163,6 +179,7 @@ select:
     restore_value: true
   - platform: template
     id: sched2_fan
+    disabled_by_default: true
     name: "Schedule 2 Fan"
     icon: mdi:fan
     entity_category: config
@@ -172,6 +189,7 @@ select:
     restore_value: true
   - platform: template
     id: sched3_days
+    disabled_by_default: true
     name: "Schedule 3 Days"
     icon: mdi:calendar-week
     entity_category: config
@@ -181,6 +199,7 @@ select:
     restore_value: true
   - platform: template
     id: sched3_action
+    disabled_by_default: true
     name: "Schedule 3 Action"
     icon: mdi:air-conditioner
     entity_category: config
@@ -190,6 +209,7 @@ select:
     restore_value: true
   - platform: template
     id: sched3_fan
+    disabled_by_default: true
     name: "Schedule 3 Fan"
     icon: mdi:fan
     entity_category: config
@@ -199,6 +219,7 @@ select:
     restore_value: true
   - platform: template
     id: sched4_days
+    disabled_by_default: true
     name: "Schedule 4 Days"
     icon: mdi:calendar-week
     entity_category: config
@@ -208,6 +229,7 @@ select:
     restore_value: true
   - platform: template
     id: sched4_action
+    disabled_by_default: true
     name: "Schedule 4 Action"
     icon: mdi:air-conditioner
     entity_category: config
@@ -217,6 +239,7 @@ select:
     restore_value: true
   - platform: template
     id: sched4_fan
+    disabled_by_default: true
     name: "Schedule 4 Fan"
     icon: mdi:fan
     entity_category: config
@@ -228,6 +251,7 @@ select:
 number:
   - platform: template
     id: early_start_max
+    disabled_by_default: true
     name: "Early Start Max"
     icon: mdi:clock-fast
     unit_of_measurement: "min"
@@ -241,6 +265,7 @@ number:
     initial_value: 60
   - platform: template
     id: sched1_temp
+    disabled_by_default: true
     name: "Schedule 1 Temperature"
     icon: mdi:thermometer
     unit_of_measurement: "°C"
@@ -255,6 +280,7 @@ number:
     initial_value: 24
   - platform: template
     id: sched2_temp
+    disabled_by_default: true
     name: "Schedule 2 Temperature"
     icon: mdi:thermometer
     unit_of_measurement: "°C"
@@ -269,6 +295,7 @@ number:
     initial_value: 24
   - platform: template
     id: sched3_temp
+    disabled_by_default: true
     name: "Schedule 3 Temperature"
     icon: mdi:thermometer
     unit_of_measurement: "°C"
@@ -283,6 +310,7 @@ number:
     initial_value: 24
   - platform: template
     id: sched4_temp
+    disabled_by_default: true
     name: "Schedule 4 Temperature"
     icon: mdi:thermometer
     unit_of_measurement: "°C"

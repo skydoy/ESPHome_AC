@@ -1,5 +1,5 @@
 # Common diagnostics for every device (brand agnostic).
-# Also provides the time source "ha_time" that brand packages may use (e.g. daily energy).
+# Also provides the time sources "ha_time" and "sntp_time" (schedules, filter reminder).
 substitutions:
   # Where this firmware was built from, shown next to the version in "Firmware Version".
   # The device config / CI override it: "release" for tagged builds, "main" for Device Builder

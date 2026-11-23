@@ -27,6 +27,10 @@ globals:
     type: std::array<std::array<char, 48>, 10>
     restore_value: true
     initial_value: "std::array<std::array<char, 48>, 10>{}"
+  - id: fault_last_code                 # last code already written to the log (so a reboot does not write it again)
+    type: std::string
+    restore_value: true
+    initial_value: '""'
 
 esphome:
   on_boot:
@@ -43,6 +47,7 @@ esphome:
 sensor:
   - platform: template
     id: compressor_hours
+    disabled_by_default: true
     name: "Compressor Hours"
     icon: mdi:timer-cog-outline
     unit_of_measurement: "h"
@@ -52,6 +57,7 @@ sensor:
     update_interval: never
   - platform: template
     id: compressor_starts
+    disabled_by_default: true
     name: "Compressor Starts"
     icon: mdi:counter
     state_class: total_increasing
@@ -60,6 +66,7 @@ sensor:
     update_interval: never
   - platform: template
     id: compressor_starts_hour
+    disabled_by_default: true
     name: "Compressor Starts Last Hour"
     icon: mdi:counter
     accuracy_decimals: 0
@@ -69,11 +76,13 @@ sensor:
 binary_sensor:
   - platform: template
     id: compressor_short_cycling
+    disabled_by_default: true
     name: "Compressor Short Cycling"
     device_class: problem
     entity_category: diagnostic
   - platform: template
     id: ac_struggling
+    disabled_by_default: true
     name: "AC Struggling"
     device_class: problem
     entity_category: diagnostic
@@ -81,12 +90,14 @@ binary_sensor:
 text_sensor:
   - platform: template
     id: last_fault
+    disabled_by_default: true
     name: "Last Fault"
     icon: mdi:alert-circle-outline
     entity_category: diagnostic
     update_interval: never
   - platform: template
     id: fault_history
+    disabled_by_default: true
     name: "Fault History"
     icon: mdi:history
     entity_category: diagnostic
@@ -94,6 +105,7 @@ text_sensor:
 
 button:
   - platform: template
+    disabled_by_default: true
     name: "Clear Fault History"
     icon: mdi:delete-sweep
     entity_category: config
@@ -143,9 +155,17 @@ interval:
           }
           was_running = running;
           // New fault code: add it to the history with the date and time.
+          // Seed from the saved code so the fault that was already active is not written again
+          // on every boot.
           static std::string last_code;
+          static bool seeded = false;
+          if (!seeded) {
+            last_code = id(fault_last_code);
+            seeded = true;
+          }
           if (id(ac_fault_codes).has_state() && id(ac_fault_codes).state != last_code) {
             last_code = id(ac_fault_codes).state;
+            id(fault_last_code) = last_code;
             if (id(ac_fault).state && !last_code.empty() && last_code != "OK") {
               auto t = id(ha_time).now();
               if (!t.is_valid())

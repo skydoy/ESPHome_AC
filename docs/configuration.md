@@ -12,7 +12,7 @@ The `hisense_ac` component (in [`components/hisense_ac`](../components/hisense_a
 | Switches | AC display LED, Eco, Super (turbo), Fan Mute (quiet), beep on command, AC frame logging (diagnostic) |
 | Select | Sleep Mode: Off, Sleep 1–4 |
 | Buttons | Light On, Light Off |
-| Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, power, current, energy today |
+| Sensors | Room (climate current temperature), outdoor, indoor coil and outdoor coil temperatures, compressor actual and target frequency, indoor humidity, supply voltage, heating output (BTU/h, Heat mode) |
 | Diagnostics | AC link (connected), link status text, fault (problem), fault codes text, auxiliary heater, one problem sensor per fault bit (19, see below), AC Firmware Version, AC Bus Checksum Errors / AC Bus Framing Errors (counters since boot); hidden by default: Humidity Set Point, AC Panel Unit (Celsius/Fahrenheit), AC Capabilities, AC Device Type; from `core/diagnostics.yaml`: Firmware Version, ESPHome Version, Reset Reason, Uptime, Wi-Fi Signal |
 
 Eco, Super, Fan Mute and Sleep Mode drive the same commands as the climate presets and the Quiet
@@ -28,12 +28,12 @@ Per-fault sensors (all optional, names as in [hisense-ac.yaml](../brands/hisense
 `fault_outdoor_coil_sensor`, `fault_discharge_sensor`, `fault_outdoor_temperature_sensor`
 (byte 64); `fault_overheat_protection`, `fault_high_discharge_temperature` (byte 66).
 
-Compared with the ConnectLife app/integration, these are **not** available on the RS-485 bus:
-cooling/heating capacity (BTU/h) and the "electricity reporting mode" setting (cloud side).
-Daily energy is the "Energy Today" sensor (integrated from power) and current is reported in A.
+Heating output (BTU/h) is bytes 55–56 of a long status frame, published in Heat mode. Compared
+with the ConnectLife app, cooling output and the "electricity reporting mode" setting are
+**not** on the RS-485 bus.
 
-Units without an electrical block, humidity sensor or outdoor block simply leave those sensors
-unavailable. Humidity, supply voltage and current are not published at all until the AC sends a
+Units without a long status frame, a humidity sensor or an outdoor block simply leave those
+sensors unavailable. Humidity and supply voltage are not published at all until the AC sends a
 real value, and the bundled config adds them disabled by default.
 "AC Firmware Version" comes from the AC's reply to the `07` version request sent once at boot
 (`handshake: true`); its layout is not confirmed yet, see [protocol.md](../brands/hisense/protocol.md#version-reply-class-07-unconfirmed).
@@ -71,7 +71,7 @@ For decoding and calibration work. When on, the component logs at DEBUG level:
 - one status reply (`RX status frame`) per `debug_frames_interval` (default 10 s);
 - capability replies (`RX capabilities frame`);
 - a `key:` line with the bytes still being calibrated in decimal (room, indoor coil, humidity,
-  compressor, outdoor, voltage, power).
+  compressor, outdoor, voltage, heating-output bytes).
 
 Each frame is printed as hex, 16 bytes per line with the byte offset in front.
 
@@ -286,7 +286,7 @@ The component is an original implementation (PolyForm Noncommercial 1.0.0, see [
 below; they were used as documentation of the protocol and of real-world behaviour:
 
 - [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1) (MIT): W41H1 link
-  bring-up, frame templates, 160-byte status map and power calibration. Also a good
+  bring-up, frame templates and the 160-byte status map. Also a good
   alternative component if this one does not fit your unit.
 - [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome) (MIT per its README):
   protocol documentation and command layout.

@@ -24,7 +24,7 @@ Status key:
 
 | Brand | Indoor unit | Wi-Fi module | Board tested | Supply | Status | Notes | Reported by |
 |---|---|---|---|---|---|---|---|
-| Hisense | maintainer's unit | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Works (2026-10-29) | Mode, temperature, fan, vertical swing confirmed; power, voltage, current, humidity readings partial. [Details](#aeh-w41h1-maintainers-unit) | [@skydoy](https://github.com/skydoy) |
+| Hisense | maintainer's unit | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Works (2026-10-29) | Mode, temperature, fan, vertical swing confirmed. Heating output is bytes 55–56 in Heat mode. Voltage and humidity not seen on this unit. [Details](#aeh-w41h1-maintainers-unit) | [@skydoy](https://github.com/skydoy) |
 | Hisense | any | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Untested | Same protocol code, not yet tried on a real unit | – |
 | Hisense | any | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Untested | Same protocol code and screen as the Plus2; new AXP192 power setup, not yet tried on a real unit | – |
 
@@ -43,11 +43,11 @@ Confirmed (reported state and physically):
   temperature and room temperature all plausible.
 
 Pending calibration (help welcome, see [debug logging](configuration.md#raw-frame-logging)):
-- **Power:** decodes as `4.15 × b55²` like the reference, so at low load it moves in coarse
-  steps (b55 = 4 → 66.4 W, 5 → 103.75 W). Not yet compared with a meter.
+- **Heating output:** bytes 55–56 of a long status frame, big-endian BTU/h, published in Heat
+  mode. That is the official meaning of those bytes. It is not electrical power.
 - **Indoor coil temperature** (byte 21): stayed at room temperature (27–28 °C) during about
   2 minutes of Cool, so the byte may mean something else on this unit.
-- **Supply voltage, current, humidity:** this unit has not reported them so far; they are
+- **Supply voltage and humidity:** this unit has not reported them so far; they are
   hidden by default and stay "unknown".
 
 ## Reported working with other firmware (untested here)

@@ -51,5 +51,17 @@ Passo a passo: [API encryption and OTA password](configuration.md#api-encryption
 Para desligar ou proteger a página web da placa, vê
 [Web server](configuration.md#web-server).
 
+## O que qualquer pessoa na LAN consegue fazer
+
+A API nativa do firmware pré-compilado **não tem encriptação**. Quem estiver na tua rede e fale essa API lê todas as entidades, incluindo **MQTT Password**.
+
+Estes controlos mudam o ar condicionado sem login extra, pela página web, por `GET /set` e pela API nativa:
+
+- a entidade de clima e os horários
+- **Room Temperature** e **Follow Room Sensor** (`http://<ip-da-placa>/set?room_temp=21.5`)
+- **Grid Power** e **Solar Boost** (`http://<ip-da-placa>/set?grid_power=-1200`)
+
+Acrescenta uma chave de encriptação da API e, se quiseres, uma palavra-passe na página web, quando outras pessoas partilham a rede.
+
 ## Reportar uma vulnerabilidade
 Vê o [SECURITY.md](../SECURITY.md). **Não** abras um issue público para problemas de segurança.

@@ -5,6 +5,7 @@
 #include <cinttypes>
 #include <cmath>
 #include <cstring>
+#include <ctime>
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
@@ -17,6 +18,12 @@ namespace esphome {
 namespace hisense_ac {
 
 static const char *const TAG = "hisense_ac";
+
+// Last external room reading kept in flash (temperature + unix time it was taken).
+struct ExtRoomSaved {
+  float c;
+  uint32_t epoch;
+};
 
 // Silence between the end of one transaction and the next frame we put on the bus.
 static const uint32_t INTER_FRAME_GAP_MS = 40;
@@ -231,7 +238,7 @@ void HisenseAC::log_frame_(const char *what, const uint8_t *f, size_t len) {
     ESP_LOGD(TAG, "  key: room b20=%d coil b21=%d b22=%d b23=%d | comp b41=%d b42=%d b43=%d | out b44=%d b45=%d",
              sb(20), sb(21), b(22), b(23), b(41), b(42), b(43), sb(44), sb(45));
     if (len >= 150)
-      ESP_LOGD(TAG, "  key: V b50=%d b51=%d | P b55=%d b56=%d b60=%d b71=%d | b144=%d b145=%d", b(50), b(51), b(55),
+      ESP_LOGD(TAG, "  key: V b50=%d b51=%d | heat b55=%d b56=%d b60=%d b71=%d | b144=%d b145=%d", b(50), b(51), b(55),
                b(56), b(60), b(71), b(144), b(145));
   }
 }
@@ -370,6 +377,16 @@ void HisenseAC::setup() {
   uint32_t stored = 0;
   if (this->auto_report_hash_pref_.load(&stored))
     this->last_reported_identity_hash_ = stored;
+
+  // Last external room temperature, so Follow Room Sensor still has it after a reboot.
+  this->ext_room_pref_ = global_preferences->make_preference<ExtRoomSaved>(fnv1_hash("hisense_ac_ext_room"));
+  ExtRoomSaved room{};
+  if (this->ext_room_pref_.load(&room) && room.epoch >= 1700000000u && !std::isnan(room.c) && room.c >= -30.0f &&
+      room.c <= 60.0f) {
+    this->ext_room_ = room.c;
+    this->ext_room_epoch_ = room.epoch;
+    ESP_LOGI(TAG, "Restored room temperature %.1f degC (checked against the clock once it is set)", room.c);
+  }
 }
 
 void HisenseAC::dump_config() {
@@ -429,6 +446,7 @@ void HisenseAC::set_link_(LinkState s) {
 void HisenseAC::loop() {
   this->read_uart_();
   const uint32_t now = millis();
+  this->stamp_ext_room_();
   this->maybe_auto_report_();
   this->room_compensate_(now);
 #ifdef USE_SENSOR
@@ -782,6 +800,30 @@ static const uint32_t ROOM_STALE_MS = 4UL * 60 * 60 * 1000;   // external readin
 static const uint32_t ROOM_STEP_MS = 5UL * 60 * 1000;         // at most one set-point change
 static const float ROOM_MAX_SHIFT = 3.0f;                     // max distance from the target
 
+// A unix time before 2023-11 means the clock has not been set yet (SNTP or Home Assistant).
+static bool clock_is_set_(time_t now) { return now >= 1700000000; }
+
+void HisenseAC::save_ext_room_() {
+  ExtRoomSaved saved{this->ext_room_, this->ext_room_epoch_};
+  this->ext_room_pref_.save(&saved);
+}
+
+void HisenseAC::stamp_ext_room_() {
+  if (!this->ext_room_stamp_pending_ || std::isnan(this->ext_room_))
+    return;
+  const time_t now = ::time(nullptr);
+  if (!clock_is_set_(now))
+    return;
+  const uint32_t age_s = (millis() - this->ext_room_at_) / 1000;
+  if (age_s > 4 * 3600) {
+    this->ext_room_stamp_pending_ = false;
+    return;
+  }
+  this->ext_room_epoch_ = static_cast<uint32_t>(now) - age_s;
+  this->ext_room_stamp_pending_ = false;
+  this->save_ext_room_();
+}
+
 void HisenseAC::set_room_temperature(float c) {
   if (std::isnan(c) || c < -30.0f || c > 60.0f) {
     ESP_LOGW(TAG, "Room temperature %.1f ignored (out of range)", c);
@@ -789,13 +831,35 @@ void HisenseAC::set_room_temperature(float c) {
   }
   const bool first = std::isnan(this->room_temperature());
   this->ext_room_ = c;
-  this->ext_room_at_ = millis();
+  this->ext_room_at_ = millis() ? millis() : 1;
+  const time_t now = ::time(nullptr);
+  if (clock_is_set_(now)) {
+    this->ext_room_epoch_ = static_cast<uint32_t>(now);
+    this->ext_room_stamp_pending_ = false;
+    this->save_ext_room_();
+  } else {
+    this->ext_room_epoch_ = 0;
+    this->ext_room_stamp_pending_ = true;
+  }
   if (first)
     this->next_room_check_ = 0;
 }
 
 float HisenseAC::room_temperature() const {
-  if (std::isnan(this->ext_room_) || millis() - this->ext_room_at_ > ROOM_STALE_MS)
+  if (std::isnan(this->ext_room_))
+    return NAN;
+  constexpr uint32_t STALE_S = 4 * 60 * 60;
+  if (this->ext_room_epoch_ != 0) {
+    const time_t now = ::time(nullptr);
+    if (!clock_is_set_(now))
+      return NAN;  // saved reading: wait until the clock can check the 4 h limit
+    if (now < static_cast<time_t>(this->ext_room_epoch_))
+      return NAN;
+    if (static_cast<uint32_t>(now) - this->ext_room_epoch_ > STALE_S)
+      return NAN;
+    return this->ext_room_;
+  }
+  if (this->ext_room_at_ == 0 || millis() - this->ext_room_at_ > ROOM_STALE_MS)
     return NAN;
   return this->ext_room_;
 }
@@ -925,16 +989,17 @@ void HisenseAC::log_byte_hunt_(const uint8_t *f, size_t len) {
     hex[2 * i + 1] = HEX[f[i] & 0x0F];
   }
   hex[2 * n] = 0;
-  float power = NAN, hz = NAN, outdoor = NAN, coil = NAN;
+  float heat_btu = NAN, hz = NAN, outdoor = NAN, coil = NAN;
+  if (len >= 150)
+    heat_btu = static_cast<float>((f[55] << 8) | f[56]);
 #ifdef USE_SENSOR
-  if (this->power_ != nullptr) power = this->power_->state;
   if (this->compressor_hz_ != nullptr) hz = this->compressor_hz_->state;
   if (this->outdoor_temp_ != nullptr) outdoor = this->outdoor_temp_->state;
   if (this->indoor_coil_temp_ != nullptr) coil = this->indoor_coil_temp_->state;
 #endif
-  // uptime_s,mode,action,setpoint,ac_room,coil,outdoor,compressor_hz,power_w,frame_hex
+  // uptime_s,mode,action,setpoint,ac_room,coil,outdoor,compressor_hz,heat_btu,frame_hex
   ESP_LOGI(TAG, "BYTEHUNT,%" PRIu32 ",%d,%d,%.0f,%.1f,%.1f,%.1f,%.0f,%.0f,%s", now / 1000, (int) this->mode,
-           (int) this->action, this->ac_setpoint_, this->ac_room_, coil, outdoor, hz, power, hex);
+           (int) this->action, this->ac_setpoint_, this->ac_room_, coil, outdoor, hz, heat_btu, hex);
 }
 
 climate::ClimateTraits HisenseAC::traits() {
@@ -1370,21 +1435,16 @@ void HisenseAC::publish_sensors_(const proto::Status &s) {
   pub(this->outdoor_coil_temp_, od ? static_cast<float>(s.outdoor_coil_temp) : NAN);
   pub(this->compressor_hz_, s.has_outdoor ? static_cast<float>(s.compressor_hz) : NAN);
   pub(this->compressor_target_hz_, s.has_outdoor ? static_cast<float>(s.compressor_target_hz) : NAN);
-  // Humidity, voltage and current are optional: many units never report them. Until a real value
+  // Humidity and voltage are optional: many units never report them. Until a real value
   // arrives nothing is published, so they stay "unknown" instead of flapping NaN updates.
   const bool hum_ok = s.has_humidity && (!this->caps_.valid || this->caps_.humidity);
   this->seen_humidity_ |= hum_ok;
   if (this->seen_humidity_)
     pub(this->humidity_, hum_ok ? static_cast<float>(s.humidity) : NAN);
-  const float watts = proto::power_watts(s);
-  const bool watts_ok = watts >= 0 && watts <= 6000.0f;
   const bool volts_ok = s.has_electrical && s.voltage >= 50;
   this->seen_voltage_ |= volts_ok;
-  if (this->seen_voltage_) {
+  if (this->seen_voltage_)
     pub(this->voltage_, volts_ok ? static_cast<float>(s.voltage) : NAN);
-    pub(this->current_, (volts_ok && watts_ok) ? watts / (s.voltage * 0.95f) : NAN);
-  }
-  pub(this->power_, watts_ok ? watts : NAN);
   // Desired humidity (byte 22): 0 on units without humidity control, so it stays "unknown" there.
   const bool hset_ok = s.humidity_setting > 0 && s.humidity_setting <= 100;
   this->seen_humidity_setpoint_ |= hset_ok;

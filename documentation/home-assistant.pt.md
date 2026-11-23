@@ -13,7 +13,7 @@ Se não aparecer, adiciona-o à mão: **Adicionar integração → ESPHome**, o 
 | Entidade | Para que serve |
 |---|---|
 | **Air Conditioner** | Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades incluindo silenciosa, swing, predefinições Eco, Boost, Sleep e proteção anti-gelo a 8 °C. |
-| **Sensores** | Temperaturas exterior e das serpentinas, frequência do compressor, humidade, tensão, potência, corrente, energia de hoje (quando a máquina os envia). |
+| **Sensores** | Temperaturas exterior e das serpentinas, frequência do compressor, humidade, tensão, potência de aquecimento em BTU/h (modo de aquecimento), quando a máquina os envia. |
 | **AC Link**, **AC Fault** | Se a ligação à máquina está bem, e os códigos de avaria. |
 | **AC Display**, **Eco**, **Super**, **Fan Mute**, **Sleep Mode** | Luz do painel e os modos extra da própria máquina. |
 | **Firmware Update**, **Auto Update** | Novas versões com um clique, ou sozinhas de madrugada. |
@@ -40,10 +40,8 @@ cards:
     entities:
       - entity: sensor.hisense_ac_b04d18_outdoor_temperature
         name: Outdoor
-      - entity: sensor.hisense_ac_b04d18_power
-        name: Power
-      - entity: sensor.hisense_ac_b04d18_energy_today
-        name: Energy today
+      - entity: sensor.hisense_ac_b04d18_heating_output
+        name: Heating output
       - entity: binary_sensor.hisense_ac_b04d18_ac_link
         name: AC link
       - entity: binary_sensor.hisense_ac_b04d18_ac_fault
@@ -66,7 +64,7 @@ O AC mede a temperatura junto ao teto, onde o ar volta a entrar, por isso costum
 
 | Entidade | O que faz |
 |---|---|
-| **Room Temperature** | A temperatura da sala. Um Shelly envia-a diretamente (abaixo), ou o Home Assistant define-a. É ignorada se tiver mais de 4 h. |
+| **Room Temperature** | A temperatura da sala. Um Shelly envia-a diretamente (abaixo), ou o Home Assistant define-a. Fica guardada depois de reiniciar e é ignorada se tiver mais de 4 h. |
 | **Follow Room Sensor** | Ligado: a temperatura pedida ao AC é corrigida em (sensor do AC − sala), no máximo ±3 °C e no máximo a cada 5 min, até a sala chegar ao teu objetivo. O cartão do AC mostra o teu objetivo e a temperatura da sala. |
 | **AC Sensor Temperature** | O que o sensor do próprio AC mede. |
 
@@ -75,7 +73,7 @@ Se mudares a temperatura no AC (comando ou painel), esse passa a ser o novo obje
 **Shelly H&T (Plus / Gen3 / Gen4), sem Home Assistant:** na app do Shelly ou na página dele, abre **Ações** (ou **Webhooks**), cria uma em **Temperature change** com este URL e grava:
 
 ```
-http://<IP do dispositivo do AC>/number/Room%20Temperature/set?value=${ev.tC}
+http://<IP do dispositivo do AC>/set?room_temp=${ev.tC}
 ```
 
 Dá um IP fixo ao dispositivo do AC no router, para o URL continuar a funcionar.
@@ -86,7 +84,7 @@ Dá um IP fixo ao dispositivo do AC no router, para o URL continuar a funcionar.
 
 ## Horários
 
-Há quatro horários guardados no próprio dispositivo, por isso também funcionam com o Home Assistant em baixo. Cada um tem, em **Configuração**:
+Há quatro horários guardados no próprio dispositivo, por isso também funcionam com o Home Assistant em baixo. Ficam escondidos até os ativares na página do dispositivo. Cada um tem, em **Configuração**:
 
 | Entidade | O que faz |
 |---|---|
@@ -103,29 +101,25 @@ A hora vem do Home Assistant ou, sem ele, da internet (SNTP). O fuso horário é
 
 ## Potência de aquecimento
 
-**Heating Output** (BTU/h) e **Heating Output W** mostram o calor que o AC está a entregar nesse momento, como a app oficial da Hisense mostrava. Vêm dos bytes 55–56 da mensagem de estado de 160 bytes (unidades do tipo W41H1) e só têm valor no modo de aquecimento. A potência de arrefecimento ainda não está decifrada: liga o **Byte Hunt** a arrefecer e envia o CSV num issue.
+**Heating Output** (BTU/h) é o calor que o AC está a entregar nesse momento, como a app oficial da Hisense mostrava. São os bytes 55–56 de uma mensagem de estado longa (150 ou 160 bytes), big-endian, e só têm valor no modo de aquecimento. **Heating Output W** é o mesmo calor em watts e não é potência elétrica. A potência de arrefecimento ainda não está decifrada: liga o **Byte Hunt** a arrefecer e envia o CSV num issue.
 
 ## Arranque antecipado dos horários
 
 Com **Schedule Early Start** ligado, os horários de aquecer e arrefecer começam mais cedo, para a sala já estar à temperatura à hora marcada. O dispositivo aprende quão depressa a tua sala aquece e arrefece (**Learned Heating Rate** / **Learned Cooling Rate**, a partir do Heating / Cooling Rate) e liga (graus que faltam ÷ velocidade) antes, no máximo **Early Start Max** minutos (por defeito 60). Precisa de algumas sessões de aquecimento ou arrefecimento para aprender.
-
-## Custo da eletricidade
-
-Escolhe o **Tariff** (Simple = simples, Bi-hourly = bi-horário, Tri-hourly = tri-horário) e define os preços em €/kWh: **Price Simple**; **Price Off-Peak** (vazio) e **Price Mid** (fora de vazio / cheias); **Price Peak** (ponta, tri-horário). Os períodos são ajustáveis: **Off-Peak Start/End** (por defeito 22:00–08:00) e **Peak 1/2 Start/End** (por defeito 09:00–10:30 e 18:00–20:30, o ciclo diário atual em Portugal continental). Muda-os quando o comercializador ou a ERSE os mudarem.
-
-Ficas com **Cost Today**, **Cost This Month**, **Energy This Month** e **Tariff Period**. São calculados a partir da potência (**Power**) do AC e guardados a cada 15 minutos.
 
 ## Aproveitar o excedente solar
 
 Envia ao dispositivo a potência da rede, em W (positivo = a consumir da rede, negativo = a injetar), a partir de qualquer contador, inversor ou script, sem Home Assistant:
 
 ```
-http://<IP do dispositivo>/number/Grid%20Power/set?value=-1200
+http://<IP do dispositivo>/set?grid_power=-1200
 ```
 
-Envia pelo menos de poucos em poucos minutos. Com **Solar Boost** ligado, depois de 5 minutos a injetar mais do que **Solar Boost Threshold** (por defeito 800 W), a temperatura pedida ao AC sobe (aquecer) ou desce (arrefecer) **Solar Boost Degrees** (1 ou 2 °C): a casa guarda o excedente como calor ou frio. Para depois de 5 minutos a consumir mais de 200 W da rede, ou quando não chega leitura durante 5 minutos. **Solar Boost Active** mostra quando está ligado; o cartão do AC continua a mostrar o teu objetivo.
+Envia pelo menos de poucos em poucos minutos. Com **Solar Boost** ligado, depois de 5 minutos a injetar mais do que **Solar Boost Threshold** (por defeito 800 W), a temperatura pedida ao AC sobe (aquecer) ou desce (arrefecer) **Solar Boost Degrees** (1 ou 2 °C): a casa guarda o excedente como calor ou frio. Para depois de 5 minutos a consumir mais de 200 W da rede, ou quando não chega leitura durante 5 minutos. **Solar Boost Active** mostra quando está ligado; o cartão do AC continua a mostrar o teu objetivo. As entidades do excedente solar ficam escondidas até as ativares.
 
 ## Saúde do compressor e histórico de avarias
+
+Estas entidades ficam escondidas até as ativares. A mesma avaria não volta a ser escrita em cada arranque.
 
 - **Compressor Hours** e **Compressor Starts**: totais, guardados mesmo depois de reiniciar.
 - **Compressor Starts Last Hour** e **Compressor Short Cycling**: mais de 6 arranques numa hora indica AC sobredimensionado, sensor mal colocado ou problema de gás.
@@ -134,11 +128,11 @@ Envia pelo menos de poucos em poucos minutos. Com **Solar Boost** ligado, depois
 
 ## Brilho e modo noturno do ecrã (Sticks)
 
-**Screen Brightness** define o brilho de dia. Com **Screen Night Mode** ligado, entre **Screen Night Start** e **Screen Night End** (por defeito 23:00–07:00) o ecrã usa **Screen Night Brightness** e só acorda com os botões, a não ser que ligues **Screen Night Wake on Changes**.
+**Screen Brightness** define o brilho de dia. Com **Screen Night Mode** ligado, entre **Screen Night Start** e **Screen Night End** (por defeito 23:00–07:00) o ecrã usa **Screen Night Brightness** e só acorda com os botões, a não ser que ligues **Screen Night Wake on Changes**. Estas definições ficam escondidas até as ativares.
 
 ## MQTT (opcional)
 
-Para Node-RED, ioBroker, Domoticz, openHAB e semelhantes. O Home Assistant continua a usar a API nativa. Preenche **MQTT Broker**, **MQTT Port**, **MQTT Username** e **MQTT Password** na página web do dispositivo e liga **MQTT**. Os tópicos seguem o formato do ESPHome: `<nome do dispositivo>/<componente>/<entidade>/state` e `.../command`. A descoberta MQTT do Home Assistant está desligada, para nada aparecer a dobrar. **Só no M5StickC Plus2.** O M5StickC Plus / Plus SE e o ATOM Lite não têm MQTT: não têm PSRAM e precisam dessa memória para as atualizações.
+Para Node-RED, ioBroker, Domoticz, openHAB e semelhantes. O Home Assistant continua a usar a API nativa. Preenche **MQTT Broker**, **MQTT Port**, **MQTT Username** e **MQTT Password** na página web do dispositivo e liga **MQTT**. Os tópicos seguem o formato do ESPHome: `<nome do dispositivo>/<componente>/<entidade>/state` e `.../command`. A descoberta MQTT do Home Assistant está desligada, para nada aparecer a dobrar. **Só no M5StickC Plus2.** Esse firmware liga os 2 MB de PSRAM do ESP32-PICO-V3-02, e é isso que deixa espaço para o MQTT. O M5StickC Plus / Plus SE e o ATOM Lite não têm PSRAM e precisam dessa memória para as atualizações.
 
 ## Luz do painel
 

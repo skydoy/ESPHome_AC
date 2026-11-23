@@ -9,10 +9,11 @@ docs_dir: documentation
 site_dir: site-docs
 copyright: PolyForm Noncommercial 1.0.0 · Independent community project
 
-# Proposed canonical URL above is NOT live. This file does not publish GitHub Pages.
-# Do not build this site from .github/workflows/publish.yml until the visuals are approved.
+# Published site. publish-docs.yml deploys this file's output to GitHub Pages at /docs/
+# on pushes to main. A firmware release (publish.yml) builds the same site into the Pages
+# artifact next to the installer.
 #
-# Local preview (same mount as the Actions artifact and the proposed Pages path):
+# Local check:
 #   mkdocs build --strict
 #   python3 tools/check_docs_links.py site-docs
 #   bash tools/stage-docs-preview.sh

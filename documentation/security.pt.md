@@ -44,10 +44,20 @@ Passo a passo: [Encriptação da API e palavra-passe OTA](configuration.md#encri
 
 Para desligares ou protegeres a página web da placa, vê [Servidor web](configuration.md#servidor-web).
 
+## O que qualquer pessoa na LAN consegue fazer
+
+A API nativa do firmware pré-compilado **não tem encriptação**. Quem estiver na tua rede e fale essa API lê todas as entidades, incluindo **MQTT Password**.
+
+Estes controlos mudam o ar condicionado sem login extra, pela página web, por `GET /set` e pela API nativa:
+
+- a entidade de clima e os horários
+- **Room Temperature** e **Follow Room Sensor** (`http://<ip-da-placa>/set?room_temp=21.5`)
+- **Grid Power** e **Solar Boost** (`http://<ip-da-placa>/set?grid_power=-1200`)
+
+Acrescenta uma chave de encriptação da API e, se quiseres, uma palavra-passe na página web, quando outras pessoas partilham a rede.
+
 ## Reportar uma vulnerabilidade
 
 Vê o [SECURITY.md](https://github.com/skydoy/ESPHome_AC/blob/main/SECURITY.md). **Não** abras um issue público para problemas de segurança.
-
-A tabela de versões suportadas nesse ficheiro ainda diz que a mais recente é `0.2.x`. A secção de release mais nova no changelog é `0.6.1` (2026-11-23). Estas páginas não alteram essa política. Vê [Questões em aberto](open-questions.md#tabela-de-versoes-da-politica-de-seguranca).
 
 O guia no GitHub: [docs/seguranca.md](https://github.com/skydoy/ESPHome_AC/blob/main/docs/seguranca.md).

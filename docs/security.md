@@ -50,5 +50,17 @@ Step-by-step: [API encryption and OTA password](configuration.md#api-encryption-
 To turn off or password-protect the device web page, see
 [Web server](configuration.md#web-server).
 
+## What anyone on the LAN can do
+
+The prebuilt firmware's native API has **no encryption**. Anything on your network that speaks that API can read every entity, including **MQTT Password**.
+
+These controls change the air conditioner with no extra login, from the web page, from `GET /set`, and over the native API:
+
+- the climate entity and the schedules
+- **Room Temperature** and **Follow Room Sensor** (`http://<device-ip>/set?room_temp=21.5`)
+- **Grid Power** and **Solar Boost** (`http://<device-ip>/set?grid_power=-1200`)
+
+Add an API encryption key, and a password on the web page if you want one, when other people share the network.
+
 ## Reporting a vulnerability
 See [SECURITY.md](../SECURITY.md). Please do **not** open a public issue for security problems.

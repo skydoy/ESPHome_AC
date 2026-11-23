@@ -31,7 +31,7 @@ A porta não aparece? Stick: instala o controlador CH9102; ATOM: o controlador F
 - Logo a seguir à instalação, a mesma janela pede o Wi-Fi: escolhe a rede, escreve a palavra-passe → **Connect**.
 - Saltaste este passo? Com o telemóvel, liga-te à rede **`ESPHome_AC Setup`**; abre-se uma página, escolhe o teu Wi-Fi.
   Esta rede volta a aparecer sozinha sempre que a placa não consegue chegar ao Wi-Fi guardado.
-- Também podes configurar o Wi-Fi por Bluetooth (Improv) a partir da app do Home Assistant.
+- O Wi-Fi configura-se na janela do instalador, pelo cabo USB, ou nessa rede. Não há configuração por Bluetooth.
 
 ✅ *Deves ver:* Stick: o ecrã deixa de dizer *Wi-Fi: join "ESPHome_AC Setup"* e mostra o endereço IP
 (*No AC* é normal até estar ligado à máquina). ATOM: o LED passa de **azul** a **vermelho**.
@@ -90,7 +90,7 @@ Atribui-lhe uma divisão (por exemplo, Sala).
 | Entidade | Para que serve |
 |---|---|
 | **Air Conditioner** | Modos Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades, swing, Eco, Boost, Sleep. |
-| **Sensores** | Temperatura exterior e das serpentinas, compressor, humidade, tensão, potência, energia de hoje (quando a máquina os envia). |
+| **Sensores** | Temperatura exterior e das serpentinas, compressor, humidade, tensão, potência de aquecimento (quando a máquina os envia). |
 | **AC Link**, **AC Fault** | Se a ligação à máquina está bem, e os códigos de avaria. |
 | **AC Display**, **Eco**, **Super** | Luz do painel, poupança e turbo. |
 | **Firmware Update**, **Auto Update** | Novas versões com um clique, ou sozinhas de madrugada. |

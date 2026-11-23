@@ -27,10 +27,8 @@ cards:
     entities:
       - entity: sensor.hisense_ac_b04d18_outdoor_temperature
         name: Outdoor
-      - entity: sensor.hisense_ac_b04d18_power
-        name: Power
-      - entity: sensor.hisense_ac_b04d18_energy_today
-        name: Energy today
+      - entity: sensor.hisense_ac_b04d18_heating_output
+        name: Heating output
       - entity: binary_sensor.hisense_ac_b04d18_ac_link
         name: AC link
       - entity: binary_sensor.hisense_ac_b04d18_ac_fault
@@ -62,7 +60,7 @@ A set point changed at the AC (remote or panel) becomes the new target. Without 
 **Shelly H&T (Plus / Gen3 / Gen4), without Home Assistant:** in the Shelly app or its web page, open **Actions** (or **Webhooks**), add one on **Temperature change** with this URL, and save:
 
 ```
-http://<AC device IP>/number/Room%20Temperature/set?value=${ev.tC}
+http://<AC device IP>/set?room_temp=${ev.tC}
 ```
 
 Give the AC device a fixed IP in your router so the URL keeps working.
@@ -90,24 +88,18 @@ The clock comes from Home Assistant, or from internet time (SNTP) without it. Th
 
 ## Heating output
 
-**Heating Output** (BTU/h) and **Heating Output W** show the heat the AC is delivering right now, as the official Hisense app did. They come from bytes 55–56 of the 160-byte status frame (W41H1-type units) and only have a value in Heat mode. The cooling output is not decoded yet: turn on **Byte Hunt** while cooling and send the CSV in an issue.
+**Heating Output** (BTU/h) is the heat the AC is delivering right now, as the official Hisense app showed it. It is bytes 55–56 of a long status frame (150 or 160 bytes), big-endian, and only has a value in Heat mode. **Heating Output W** is the same heat in watts and is not electrical power. The cooling output is not decoded yet: turn on **Byte Hunt** while cooling and send the CSV in an issue.
 
 ## Schedule early start
 
 With **Schedule Early Start** on, Heat and Cool schedules start early so the room is already at the temperature at the schedule time. The device learns how fast your room heats and cools (**Learned Heating Rate** / **Learned Cooling Rate**, from Heating / Cooling Rate) and starts (degrees to go ÷ rate) before, at most **Early Start Max** minutes (default 60). It needs a few heating or cooling sessions to learn.
-
-## Electricity cost
-
-Pick the **Tariff** (Simple, Bi-hourly or Tri-hourly) and set the prices in EUR/kWh: **Price Simple**; **Price Off-Peak** (vazio) and **Price Mid** (fora de vazio / cheias); **Price Peak** (ponta, tri-hourly). The periods are editable: **Off-Peak Start/End** (default 22:00–08:00) and **Peak 1/2 Start/End** (default 09:00–10:30 and 18:00–20:30, the current daily cycle in mainland Portugal). Change them when your supplier or the regulator changes them.
-
-You get **Cost Today**, **Cost This Month**, **Energy This Month** and **Tariff Period**. They are calculated from the AC's **Power** reading and saved every 15 minutes.
 
 ## Solar surplus boost
 
 Send your grid power to the device, in W (positive = importing, negative = exporting), from any meter, inverter or script, without Home Assistant:
 
 ```
-http://<device IP>/number/Grid%20Power/set?value=-1200
+http://<device IP>/set?grid_power=-1200
 ```
 
 Send it at least every few minutes. With **Solar Boost** on, after 5 minutes exporting more than **Solar Boost Threshold** (default 800 W), the AC set point goes up (Heat) or down (Cool) by **Solar Boost Degrees** (1 or 2 °C), so the house stores the surplus as heat or cold. It stops after 5 minutes importing more than 200 W, or when no grid reading arrives for 5 minutes. **Solar Boost Active** shows when it is on; the AC card keeps showing your own target.
@@ -125,7 +117,7 @@ Send it at least every few minutes. With **Solar Boost** on, after 5 minutes exp
 
 ## MQTT (optional)
 
-For Node-RED, ioBroker, Domoticz, openHAB and similar. Home Assistant keeps using the native API. Fill in **MQTT Broker**, **MQTT Port**, **MQTT Username** and **MQTT Password** on the device's web page, then turn on **MQTT**. Topics follow the ESPHome layout: `<device name>/<component>/<entity>/state` and `.../command`. Home Assistant MQTT discovery is off, so nothing appears twice. **M5StickC Plus2 only.** The M5StickC Plus / Plus SE and the ATOM Lite have no MQTT: they have no PSRAM and need that memory for updates.
+For Node-RED, ioBroker, Domoticz, openHAB and similar. Home Assistant keeps using the native API. Fill in **MQTT Broker**, **MQTT Port**, **MQTT Username** and **MQTT Password** on the device's web page, then turn on **MQTT**. Topics follow the ESPHome layout: `<device name>/<component>/<entity>/state` and `.../command`. Home Assistant MQTT discovery is off, so nothing appears twice. **M5StickC Plus2 only.** That firmware enables the 2 MB PSRAM in the ESP32-PICO-V3-02, which is what leaves room for MQTT. The M5StickC Plus / Plus SE and the ATOM Lite have no PSRAM and need that memory for updates.
 
 ## Panel light
 

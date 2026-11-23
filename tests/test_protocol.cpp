@@ -208,8 +208,7 @@ static void test_status_160() {
   CHECK(s.compressor_hz == 58 && s.compressor_target_hz == 60);
   CHECK(s.faults.indoor == 0x40 && s.faults.outdoor == 0x08 && s.faults.protect == 0x02 && s.heat8);
   CHECK(s.has_electrical && s.voltage == 228);
-  float p = power_watts(s);
-  CHECK(p > 933.0f && p < 935.0f);
+  CHECK(heating_output_btuh(s) == (15 << 8));  // bytes 55-56, big-endian BTU/h
   std::string d = describe_faults(s.faults);
   CHECK(d == "Indoor coil sensor, Outdoor temperature sensor, High discharge temperature");
 }
@@ -219,14 +218,14 @@ static void test_status_82_and_150() {
   Status s;
   CHECK(parse_status(f.data(), f.size(), &s));
   CHECK(!s.has_electrical && s.has_outdoor);
-  CHECK(power_watts(s) < 0);
+  CHECK(heating_output_btuh(s) < 0);
 
   f = make_status(150);
   f[55] = 0x01;
   f[56] = 0x2C;
   seal(f.data(), f.size());
   CHECK(parse_status(f.data(), f.size(), &s));
-  CHECK(power_watts(s) == 300.0f);
+  CHECK(heating_output_btuh(s) == 300);  // 0x012C BTU/h, not watts
 
   // Fresh mains power: outdoor bytes read 0xEC.
   f = make_status(82);
@@ -413,17 +412,20 @@ static void test_hex_bytes() {
   CHECK(hex_bytes(nullptr, 5, 0, 16).empty());
 }
 
-static void test_power_steps() {
-  // W41H1 160-byte frames: P = 4.15 * b55^2. The maintainer's unit at 28-30 Hz reads raw 4 and 5.
+static void test_heating_output() {
+  // Bytes 55-56 are a big-endian heating output in BTU/h on long frames. No electrical fit.
   Status s;
+  CHECK(heating_output_btuh(s) < 0);
   s.has_electrical = true;
-  s.frame_len = 160;
-  s.power_raw_hi = 4;
-  CHECK(std::fabs(power_watts(s) - 66.4f) < 0.01f);
-  s.power_raw_hi = 5;
-  CHECK(std::fabs(power_watts(s) - 103.75f) < 0.01f);
-  s.power_raw_hi = 0;
-  CHECK(power_watts(s) == 0.0f);
+  s.heat_btu_hi = 0;
+  s.heat_btu_lo = 4;
+  CHECK(heating_output_btuh(s) == 4);
+  s.heat_btu_hi = 0x0F;
+  s.heat_btu_lo = 0x00;
+  CHECK(heating_output_btuh(s) == 3840);
+  s.heat_btu_hi = 0;
+  s.heat_btu_lo = 0;
+  CHECK(heating_output_btuh(s) == 0);
 }
 
 static void test_command_queue() {
@@ -609,7 +611,7 @@ int main() {
   test_unknown_status_bytes();
   test_identity_and_report_url();
   test_auto_report_json();
-  test_power_steps();
+  test_heating_output();
   test_command_queue();
   std::printf("%d passed, %d failed\n", g_passed, g_failed);
   return g_failed == 0 ? 0 : 1;

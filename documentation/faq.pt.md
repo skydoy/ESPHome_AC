@@ -14,7 +14,7 @@ O instalador e o guia rápido pedem uma rede de **2,4 GHz**. O repositório não
 
 ## O que é a rede `ESPHome_AC Setup`?
 
-Uma rede Wi-Fi de recurso que a placa abre quando não tem rede guardada, ou não consegue chegar-lhe. Liga-te a ela com o telemóvel para configurares o Wi-Fi. É aberta, e só está ativa enquanto o Wi-Fi está em baixo. Também podes usar Bluetooth Improv a partir da app do Home Assistant. [Instalar](install.md) · [Segurança](security.md).
+Uma rede Wi-Fi de recurso que a placa abre quando não tem rede guardada, ou não consegue chegar-lhe. Liga-te a ela com o telemóvel para configurares o Wi-Fi. É aberta, e só está ativa enquanto o Wi-Fi está em baixo. A outra forma é a janela do instalador, pelo cabo USB. Não há configuração por Bluetooth. [Instalar](install.md) · [Segurança](security.md).
 
 ## Posso usar isto comercialmente?
 

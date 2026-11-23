@@ -85,7 +85,7 @@ Se o LED ficar **vermelho** com o Wi-Fi ligado, desliga o disjuntor, troca o A c
 
 | LED | Significado |
 |---|---|
-| Azul | Wi-Fi desligado (rede de configuração `ESPHome_AC Setup` / Improv) |
+| Azul | Wi-Fi desligado (rede de configuração `ESPHome_AC Setup`) |
 | Vermelho | Wi-Fi OK, sem ligação ao AC (verifica A/B e a alimentação) |
 | Verde | Ligação ao AC OK; apaga-se ao fim de 30 s (fica aceso nos primeiros 5 minutos depois do arranque) |
 | Branco | Botão carregado: continua a carregar para a reposição de fábrica; piscar rápido = a reposição está iminente |

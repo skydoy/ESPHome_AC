@@ -31,7 +31,7 @@ Port not in the list? Stick: install the CH9102 driver; ATOM: the FTDI driver. T
 - Right after flashing, the same window asks for Wi-Fi: pick your network, type the password → **Connect**.
 - Skipped it? From your phone join the **`ESPHome_AC Setup`** hotspot; a page opens, pick your Wi-Fi.
   The hotspot comes back on its own whenever the board cannot reach the saved Wi-Fi.
-- You can also set Wi-Fi over Bluetooth (Improv) from the Home Assistant app.
+- Wi-Fi is set in the installer window over USB, or from that hotspot. There is no Bluetooth setup.
 
 ✅ *You should see:* Stick: the screen stops saying *Wi-Fi: join "ESPHome_AC Setup"* and shows the
 IP address (*No AC* is normal until it is wired). ATOM: the LED turns from **blue** to **red**.
@@ -90,7 +90,7 @@ Give it an area (e.g. Living room).
 | Entity | What it does |
 |---|---|
 | **Air Conditioner** | Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 fan speeds, swing, Eco, Boost, Sleep. |
-| **Sensors** | Outdoor and coil temperatures, compressor, humidity, voltage, power, energy today (when the unit reports them). |
+| **Sensors** | Outdoor and coil temperatures, compressor, humidity, voltage, heating output (when the unit reports them). |
 | **AC Link**, **AC Fault** | Whether the link to the unit is up, and fault codes. |
 | **AC Display**, **Eco**, **Super** | Panel light, eco and turbo. |
 | **Firmware Update**, **Auto Update** | New versions in one click, or by themselves at night. |

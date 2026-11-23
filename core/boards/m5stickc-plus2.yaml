@@ -20,6 +20,14 @@ esp32:
   framework:
     type: esp-idf
 
+# The PICO-V3-02 has 2 MB of quad PSRAM in the module. Turning it on is what leaves RAM for
+# optional MQTT and for HTTPS updates on this board. ignore_not_found: false so a board
+# without that chip does not boot as if PSRAM were there.
+psram:
+  mode: quad
+  speed: 40MHz
+  ignore_not_found: false
+
 output:
   # HOLD (G4) must stay HIGH or the Plus2 switches itself off when it is not on USB power.
   - platform: gpio

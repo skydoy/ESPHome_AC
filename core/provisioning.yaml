@@ -1,29 +1,12 @@
 # Generic firmware (no credentials baked in). Wi-Fi is set up with ESP Web Tools
-# (Improv Serial over USB), Improv over BLE, or the fallback hotspot + captive portal.
-#
+# (Improv Serial over USB) or the fallback hotspot + captive portal.
+# No Bluetooth: Improv over BLE and the BLE stack are not in the image, so that RAM stays
+# free for the HTTPS firmware update.
 wifi:
   ap:
     ssid: "ESPHome_AC Setup"
-  # Bluetooth (Improv over BLE) is only for the first Wi-Fi setup. Once on Wi-Fi it is switched
-  # off: the BLE stack holds ~40-60 kB of RAM, and boards without PSRAM (M5StickC Plus / Plus SE,
-  # ATOM Lite) then lack the memory for the HTTPS update download ("PK verify failed with error
-  # 0x4290" = RSA + out of memory). It comes back if Wi-Fi is lost, for a new setup.
-  on_connect:
-    - delay: 60s
-    - if:
-        condition:
-          wifi.connected:
-        then:
-          - logger.log: "Wi-Fi up: Bluetooth setup off (frees RAM for HTTPS updates)"
-          - ble.disable:
-  on_disconnect:
-    - ble.enable:
-esp32_ble:
-  id: ble
 captive_portal:
 improv_serial:
-improv_ble:
-  authorizer: none
 api:
 logger:
 

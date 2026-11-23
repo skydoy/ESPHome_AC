@@ -8,7 +8,7 @@
 # No screen: the RGB LED (SK6812 on G27) shows the state and the button (G39) is a
 # screen-less status / factory-reset button.
 #
-#   LED blue   Wi-Fi not connected (setup hotspot / Improv active)
+#   LED blue   Wi-Fi not connected (setup hotspot, or waiting for USB provisioning)
 #   LED red    Wi-Fi OK but no AC link (check A/B, power)
 #   LED green  AC link OK (turns off after ${status_led_timeout_ms} ms; problems stay lit)
 #   LED white  button held: keep holding for a factory reset (blinks fast just before it)

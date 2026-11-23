@@ -6,7 +6,7 @@ components/<component>/   ESPHome external components (ESPHome requires this fol
 core/                     Brand-agnostic packages
   boards/<board>.yaml     ESP board: chip, power hold, buttons, pins of the adapter header
   screen/<board>.yaml     Status screen; reads only the generic ids listed below
-  provisioning.yaml       Improv serial/BLE, fallback hotspot, API, OTA
+  provisioning.yaml       Improv Serial over USB, fallback hotspot, API, OTA
   diagnostics.yaml        Uptime, Wi-Fi signal, version, restart buttons, time source
   auto-update.yaml        OTA from the GitHub Pages manifest
 brands/<brand>/           Brand package (<brand>-ac.yaml) + wiring and protocol docs

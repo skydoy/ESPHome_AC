@@ -10,7 +10,7 @@ and [brands/hisense/protocol.md → Sources](brands/hisense/protocol.md#sources)
 
 ## Protocol references (MIT)
 - [AndrewDemsDS/hisense-w41h1](https://github.com/AndrewDemsDS/hisense-w41h1) (MIT):
-  W41H1 link bring-up, frame templates, 160-byte status map, power calibration.
+  W41H1 link bring-up, frame templates and the 160-byte status map.
 - [akrabi/hisense_ac_esphome](https://github.com/akrabi/hisense_ac_esphome) (MIT per its README):
   protocol documentation and command layout.
 

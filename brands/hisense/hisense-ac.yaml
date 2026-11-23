@@ -3,7 +3,6 @@
 # The hisense_ac component lives in this repository (components/hisense_ac, PolyForm-Noncommercial-1.0.0).
 #
 # Needs from the board package: substitutions ac_tx_pin / ac_rx_pin / ac_tx_ignore_strapping.
-# Needs from core/diagnostics.yaml: time id "ha_time" (daily energy).
 # Provides the generic ids used by core/screen/*: ac_climate, ac_link, ac_link_status,
 # ac_fault, ac_fault_codes, ac_outdoor_temperature.
 substitutions:
@@ -60,19 +59,13 @@ climate:
       id: ac_compressor_frequency   # used by core/health.yaml
     compressor_target_frequency:
       name: "Compressor Target Frequency"
-    # Humidity, voltage and current are only reported by some units: hidden by default,
+    # Humidity and voltage are only reported by some units: hidden by default,
     # and they stay "unknown" until the AC sends a real value.
     humidity:
       name: "Indoor Humidity"
       disabled_by_default: true
     voltage:
       name: "Supply Voltage"
-      disabled_by_default: true
-    power:
-      name: "Power"
-      id: ac_power
-    current:
-      name: "Current"
       disabled_by_default: true
     connected:
       name: "AC Link"
@@ -181,12 +174,6 @@ climate:
       name: "High Discharge Temperature Protection"
 
 sensor:
-  - platform: total_daily_energy
-    name: "Energy Today"
-    power_id: ac_power
-    method: left
-    restore: true
-
   # ---- Room sensor and heating / cooling rate ----
   # Temperature measured by the AC's own sensor (return air, near the ceiling). With "Follow
   # Room Sensor" on, the climate entity shows the room sensor instead.
@@ -200,9 +187,10 @@ sensor:
     entity_category: diagnostic
     update_interval: 60s
     lambda: return id(ac_climate).ac_sensor_temperature();
-  # Heating output: bytes 55-56 of the 160-byte status frame (W41H1-type units), a 16-bit
-  # number in BTU/h, heating only (as the official app showed it). Published only while the
-  # AC is in Heat mode; empty otherwise. The cooling output is not decoded yet.
+  # Heating output: bytes 55-56 of a long status frame (150 or 160 bytes), a big-endian
+  # 16-bit number in BTU/h. That is the official meaning of those bytes (Heat mode, as the
+  # official app showed it). Published only while the AC is in Heat mode; empty otherwise.
+  # The cooling output is not decoded yet. This is not electrical power.
   - platform: template
     id: ac_heating_output
     name: "Heating Output"
@@ -212,15 +200,15 @@ sensor:
     accuracy_decimals: 0
     update_interval: 10s
     lambda: |-
-      if (id(ac_climate).status_len() < 160 || id(ac_climate).mode != climate::CLIMATE_MODE_HEAT)
+      if (id(ac_climate).status_len() < 150 || id(ac_climate).mode != climate::CLIMATE_MODE_HEAT)
         return NAN;
       const int v = id(ac_climate).status_u16(55);
       return v < 0 ? NAN : (float) v;
+  # Same reading in watts of heat (1 W = 3.412 BTU/h). No device_class: it is not electrical power.
   - platform: template
     name: "Heating Output W"
     icon: mdi:heat-wave
     unit_of_measurement: "W"
-    device_class: power
     state_class: measurement
     accuracy_decimals: 0
     update_interval: 10s
@@ -248,9 +236,11 @@ sensor:
     update_interval: never
 
 # Room temperature input. A Shelly H&T (Plus / Gen3 / Gen4) sends it straight to the device,
-# without Home Assistant, with a webhook on "Temperature change":
-#   http://<device-ip>/number/Room%20Temperature/set?value=${ev.tC}
-# Home Assistant can also set it. Readings older than 4 h are ignored.
+# without Home Assistant. Its webhooks are GET, and /number/.../set only accepts POST, so the
+# webhook URL is:
+#   http://<device-ip>/set?room_temp=${ev.tC}
+# Home Assistant can also set the number. The last reading is kept across reboots and ignored
+# when it is older than 4 h, so Follow Room Sensor still works after a restart.
 number:
   - platform: template
     id: room_temperature_input

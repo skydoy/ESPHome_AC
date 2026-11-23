@@ -1,6 +1,8 @@
 .esphome/
 secrets.yaml
 tests/test_protocol
+tests/test_setup
+tests/test_web_set
 __pycache__/
 tests/test_setup
 

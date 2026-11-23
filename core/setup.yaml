@@ -4,7 +4,7 @@
 # Included by devices/setup-<board>.yaml together with a board package. There is no brand
 # package, no Home Assistant API and no dashboard_import: this image only
 #   1. joins Wi-Fi (Improv Serial from the web installer, or the "ESPHome_AC Setup" hotspot;
-#      no Improv BLE: it would push the image over the 1.2 MB budget),
+#      no Bluetooth),
 #   2. probes the AC bus with read-only requests (ac_setup component, Hisense 0x0A / 0x66-00 / 0x07),
 #   3. shows the result at http://<device-ip>/setup with a raw capture and a "Report this AC" link,
 #   4. on confirmation installs the brand firmware over HTTPS from GitHub Pages (update entity).

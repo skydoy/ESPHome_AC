@@ -18,7 +18,7 @@ Legenda:
 
 | Marca | Unidade interior | Módulo Wi-Fi | Placa testada | Alimentação | Estado | Notas |
 |---|---|---|---|---|---|---|
-| Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados; leituras de potência, tensão, corrente e humidade parciais. [Detalhes](#aeh-w41h1-unidade-do-autor). Reportado por [@skydoy](https://github.com/skydoy). |
+| Hisense | unidade do autor | AEH-W41H1 | M5StickC Plus2 + RS485 Hat | 5 V | ✅ Funciona (2026-10-29) | Modo, temperatura, ventilação e oscilação vertical confirmados. A potência de aquecimento são os bytes 55–56 no modo de aquecimento. Tensão e humidade não vistas nesta unidade. [Detalhes](#aeh-w41h1-unidade-do-autor). Reportado por [@skydoy](https://github.com/skydoy). |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | ATOM Lite + Tail485 | 5 V / 12 V | ❔ Por testar | O mesmo código de protocolo, ainda não experimentado numa máquina real. |
 | Hisense | qualquer | AEH-W41H1 / AEH-W4x | M5StickC Plus / Plus SE + RS485 Hat | 5 V / 12 V | ❔ Por testar | O mesmo código de protocolo e o mesmo ecrã do Plus2; arranque novo do chip de energia AXP192, ainda não experimentado numa máquina real. |
 
@@ -37,9 +37,9 @@ Confirmado (estado reportado e na máquina):
 
 Calibração ainda por fazer (vê [registo de tramas em bruto](configuration.md#registo-de-tramas-em-bruto)):
 
-- **Potência:** descodifica-se como `4.15 × b55²`, como na referência, por isso em carga baixa anda em degraus grosseiros (b55 = 4 → 66,4 W, 5 → 103,75 W). Ainda não foi comparada com um medidor.
+- **Potência de aquecimento:** bytes 55–56 de uma trama de estado longa, big-endian, em BTU/h, publicada no modo de aquecimento. É o significado oficial desses bytes. Não é potência elétrica.
 - **Temperatura da serpentina interior** (byte 21): ficou na temperatura da sala (27–28 °C) durante cerca de 2 minutos de Cool, por isso neste aparelho o byte pode querer dizer outra coisa.
-- **Tensão de alimentação, corrente, humidade:** esta unidade ainda não os enviou. Ficam escondidos por predefinição e leem "unknown".
+- **Tensão de alimentação e humidade:** esta unidade ainda não as enviou. Ficam escondidas por predefinição e leem "unknown".
 
 ## Reportado a funcionar com outro firmware (por testar aqui)
 

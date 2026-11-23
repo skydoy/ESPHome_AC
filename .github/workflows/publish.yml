@@ -70,6 +70,8 @@ jobs:
           version: "2026.10.1"
           complete-manifest: true
           release-url: ${{ github.server_url }}/${{ github.repository }}/releases
+      - name: App image must stay under 90% of its app partition
+        run: python3 tools/check_flash_budget.py "$DEVICE_YAML"
       - name: Stage the firmware in its Pages folder
         run: |
           mkdir -p "out/$SITE_DIR"

@@ -15,7 +15,7 @@ packages:
     files:
       - core/boards/m5stickc-plus2.yaml   # or core/boards/atom-lite.yaml (then drop the screen)
       - core/screen/m5stickc-plus2.yaml   # optional status screen
-      - core/diagnostics.yaml             # provides the time source used by "Energy Today"
+      - core/diagnostics.yaml             # clock for schedules and the filter reminder
       - brands/hisense/hisense-ac.yaml
       - core/web-server.yaml              # optional: web page at http://<device-ip>/ (no login)
 

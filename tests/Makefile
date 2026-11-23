@@ -9,10 +9,13 @@ CMD := ../components/hisense_ac/hisense_command.cpp
 CMD_H := ../components/hisense_ac/hisense_command.h
 SETUP := ../components/ac_setup/probe_engine.cpp
 SETUP_H := ../components/ac_setup/probe_engine.h
+QUERY := ../components/web_set/query.cpp
+QUERY_H := ../components/web_set/query.h
 
-test: test_protocol test_setup
+test: test_protocol test_setup test_web_set
 	./test_protocol
 	./test_setup
+	./test_web_set
 
 test_protocol: $(PROTO) $(PROTO_H) $(CMD) $(CMD_H) test_protocol.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(PROTO) $(CMD) test_protocol.cpp
@@ -21,7 +24,10 @@ test_protocol: $(PROTO) $(PROTO_H) $(CMD) $(CMD_H) test_protocol.cpp
 test_setup: $(PROTO) $(PROTO_H) $(CMD) $(CMD_H) $(SETUP) $(SETUP_H) test_setup.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $(PROTO) $(CMD) $(SETUP) test_setup.cpp
 
+test_web_set: $(QUERY) $(QUERY_H) test_web_set.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $(QUERY) test_web_set.cpp
+
 clean:
-	rm -f test_protocol test_setup
+	rm -f test_protocol test_setup test_web_set
 
 .PHONY: test clean

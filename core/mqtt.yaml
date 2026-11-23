@@ -9,8 +9,9 @@
 #
 # Topics: <device name>/<component>/<entity>/state and .../command (ESPHome MQTT layout).
 # Home Assistant MQTT discovery is off, so entities do not appear twice in Home Assistant.
-# M5StickC Plus2 only: the M5StickC Plus / Plus SE and the ATOM Lite (no PSRAM) do not include
-# this package, because they need that RAM for the HTTPS firmware update.
+# M5StickC Plus2 only. That board's firmware enables the 2 MB PSRAM in the ESP32-PICO-V3-02,
+# which leaves RAM for MQTT and for HTTPS updates. The M5StickC Plus / Plus SE and the ATOM Lite
+# have no PSRAM chip, so they do not include this package: they need that RAM for the update.
 mqtt:
   id: mqtt_client
   broker: "0.0.0.0"          # replaced at runtime by "MQTT Broker"

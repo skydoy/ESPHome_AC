@@ -85,7 +85,7 @@ If the LED stays **red** with Wi-Fi up, switch the breaker off and swap A and B,
 
 | LED | Meaning |
 |---|---|
-| Blue | Wi-Fi not connected (setup hotspot `ESPHome_AC Setup` / Improv) |
+| Blue | Wi-Fi not connected (setup hotspot `ESPHome_AC Setup`) |
 | Red | Wi-Fi OK, no AC link (check A/B and power) |
 | Green | AC link OK; turns off after 30 s (stays on for the first 5 minutes after boot) |
 | White | Button held: keep holding for a factory reset; fast blink = reset imminent |

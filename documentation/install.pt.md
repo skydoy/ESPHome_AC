@@ -20,7 +20,7 @@ Usa um cabo USB-C **de dados**. No ATOM, grava o firmware **antes** de encaixare
 
 Carrega em **Install**, escolhe a porta série e confirma.
 
-Deves ver uma barra de progresso (cerca de 1 minuto) e *Installation complete*. A mesma janela pede depois o Wi-Fi. Escolhe a tua rede de **2,4 GHz** e escreve a palavra-passe, ou liga-te mais tarde à rede `ESPHome_AC Setup` com o telemóvel. Também podes configurar o Wi-Fi por Bluetooth (Improv) a partir da app do Home Assistant.
+Deves ver uma barra de progresso (cerca de 1 minuto) e *Installation complete*. A mesma janela pede depois o Wi-Fi, pelo cabo USB. Escolhe a tua rede de **2,4 GHz** e escreve a palavra-passe, ou liga-te mais tarde à rede `ESPHome_AC Setup` com o telemóvel. Não há configuração por Bluetooth.
 
 Esta rede volta a aparecer sozinha sempre que a placa não consegue chegar ao Wi-Fi guardado. É aberta, e só enquanto o Wi-Fi não está ligado.
 

@@ -139,11 +139,11 @@ struct Status {
   uint8_t compressor_hz{0};         // byte 42 (actual, per W41H1 bench data)
   int16_t outdoor_temp{0};          // byte 44, signed C
   int16_t outdoor_coil_temp{0};     // byte 45, signed C
-  // Electrical block, only in long frames (>= 150 bytes decoded)
+  // Long-frame block (decoded length >= 150): supply voltage and heating output.
   bool has_electrical{false};
   uint8_t voltage{0};               // byte 50, volts
-  uint8_t power_raw_hi{0};          // byte 55
-  uint8_t power_raw_lo{0};          // byte 56
+  uint8_t heat_btu_hi{0};           // byte 55, heating output BTU/h, big-endian
+  uint8_t heat_btu_lo{0};           // byte 56
 };
 
 /// Minimum decoded length of a status frame this decoder accepts.
@@ -188,9 +188,10 @@ bool parse_version(const uint8_t *frame, size_t len, Version *out);
 /// Human readable list of active faults, "" when none. Comma separated.
 std::string describe_faults(const Faults &f);
 
-/// Power estimate in watts. Long (160-byte) W41H1 frames: 4.15 * b55^2 (bench calibrated);
-/// 150-byte frames: big endian b55:b56 (W4G1 bench). Returns < 0 when unknown.
-float power_watts(const Status &s);
+/// Heating output in BTU/h from bytes 55-56 (big-endian) of a long status frame.
+/// Returns < 0 when the frame has no such bytes. The value is the heat the unit is
+/// delivering; publish it in Heat mode (other modes leave the field unused).
+int heating_output_btuh(const Status &s);
 
 /// "XX XX XX" for bytes [off, off + n) of a frame, clamped to len. Used by the frame logger.
 std::string hex_bytes(const uint8_t *frame, size_t len, size_t off, size_t n);

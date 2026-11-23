@@ -1,22 +1,11 @@
-# Electricity cost and solar surplus boost (needs the brand's "ac_power" sensor in W and the
-# climate entity "ac_climate").
+# Solar surplus boost (needs the climate entity "ac_climate").
+# The electricity-cost sensors were removed: bytes 55-56 are heating output in BTU/h, not
+# electrical power, so there is nothing to integrate into kWh or a tariff.
 #
-# COST
-#   select  "Tariff"                Simple / Bi-hourly / Tri-hourly
-#   number  "Price Simple"          EUR/kWh (Simple)
-#   number  "Price Off-Peak"        EUR/kWh, vazio (Bi- and Tri-hourly)
-#   number  "Price Mid"             EUR/kWh, fora de vazio (Bi-hourly) / cheias (Tri-hourly)
-#   number  "Price Peak"            EUR/kWh, ponta (Tri-hourly)
-#   time    "Off-Peak Start/End"    vazio, default 22:00-08:00 (Portugal, daily cycle)
-#   time    "Peak 1 Start/End", "Peak 2 Start/End"   ponta, default 09:00-10:30 and 18:00-20:30
-#   sensor  "Cost Today", "Cost This Month" (EUR), "Energy This Month" (kWh)
-#   text    "Tariff Period"         Simple / Off-Peak / Mid / Peak now
-#   The periods are editable because the regulator changes them (ERSE: new daily cycle in 2027).
-#
-# SOLAR BOOST (no Home Assistant needed)
 #   number  "Grid Power"            W from the grid meter: positive = importing, negative =
-#                                   exporting. Any device or script can send it:
-#                                   http://<device-ip>/number/Grid%20Power/set?value=-1200
+#                                   exporting. Any device or script can send it with a GET
+#                                   (Shelly and most meters cannot POST):
+#                                   http://<device-ip>/set?grid_power=-1200
 #   switch  "Solar Boost"           on = use the surplus
 #   number  "Solar Boost Threshold" W exported before boosting (default 800)
 #   number  "Solar Boost Degrees"   1 or 2 degC (default 1)
@@ -24,30 +13,9 @@
 #   While exporting more than the threshold for 5 min, the AC set point goes up (Heat) or down
 #   (Cool) by the boost degrees: the house stores the surplus as heat / cold. It stops after
 #   5 min of importing more than 200 W, or when no grid reading arrived for 5 min.
+#   These entities are hidden in Home Assistant until you enable them.
 
 globals:
-  # Running totals (RAM), saved to flash every 15 min and at reboot.
-  - id: cost_today_eur
-    type: float
-    initial_value: "0"
-  - id: cost_month_eur
-    type: float
-    initial_value: "0"
-  - id: energy_month_kwh
-    type: float
-    initial_value: "0"
-  - id: cost_saved
-    type: std::array<float, 3>          # today EUR, month EUR, month kWh
-    restore_value: true
-    initial_value: "std::array<float, 3>{0, 0, 0}"
-  - id: cost_day_key                    # year*1000 + day of year of the "today" totals
-    type: int
-    restore_value: true
-    initial_value: "0"
-  - id: cost_month_key                  # year*100 + month of the "month" totals
-    type: int
-    restore_value: true
-    initial_value: "0"
   - id: grid_power_at
     type: uint32_t
     initial_value: "0"
@@ -58,88 +26,14 @@ globals:
     type: uint32_t
     initial_value: "0"
 
-esphome:
-  on_boot:
-    - priority: -100
-      then:
-        - lambda: |-
-            id(cost_today_eur) = id(cost_saved)[0];
-            id(cost_month_eur) = id(cost_saved)[1];
-            id(energy_month_kwh) = id(cost_saved)[2];
-  on_shutdown:
-    - then:
-        - lambda: id(cost_saved) = {id(cost_today_eur), id(cost_month_eur), id(energy_month_kwh)};
-
-select:
-  - platform: template
-    id: tariff_type
-    name: "Tariff"
-    icon: mdi:cash-clock
-    entity_category: config
-    options: ["Simple", "Bi-hourly", "Tri-hourly"]
-    initial_option: "Simple"
-    optimistic: true
-    restore_value: true
-
 number:
-  - platform: template
-    id: price_simple
-    name: "Price Simple"
-    icon: mdi:cash
-    unit_of_measurement: "EUR/kWh"
-    entity_category: config
-    min_value: 0
-    max_value: 2
-    step: 0.0001
-    mode: box
-    optimistic: true
-    restore_value: true
-    initial_value: 0.20
-  - platform: template
-    id: price_offpeak
-    name: "Price Off-Peak"
-    icon: mdi:cash
-    unit_of_measurement: "EUR/kWh"
-    entity_category: config
-    min_value: 0
-    max_value: 2
-    step: 0.0001
-    mode: box
-    optimistic: true
-    restore_value: true
-    initial_value: 0.12
-  - platform: template
-    id: price_mid
-    name: "Price Mid"
-    icon: mdi:cash
-    unit_of_measurement: "EUR/kWh"
-    entity_category: config
-    min_value: 0
-    max_value: 2
-    step: 0.0001
-    mode: box
-    optimistic: true
-    restore_value: true
-    initial_value: 0.22
-  - platform: template
-    id: price_peak
-    name: "Price Peak"
-    icon: mdi:cash
-    unit_of_measurement: "EUR/kWh"
-    entity_category: config
-    min_value: 0
-    max_value: 2
-    step: 0.0001
-    mode: box
-    optimistic: true
-    restore_value: true
-    initial_value: 0.28
   - platform: template
     id: grid_power
     name: "Grid Power"
     icon: mdi:transmission-tower
     unit_of_measurement: "W"
     device_class: power
+    disabled_by_default: true
     min_value: -100000
     max_value: 100000
     step: 1
@@ -153,6 +47,7 @@ number:
     name: "Solar Boost Threshold"
     icon: mdi:solar-power
     unit_of_measurement: "W"
+    disabled_by_default: true
     entity_category: config
     min_value: 100
     max_value: 10000
@@ -166,6 +61,7 @@ number:
     name: "Solar Boost Degrees"
     icon: mdi:thermometer-plus
     unit_of_measurement: "°C"
+    disabled_by_default: true
     entity_category: config
     min_value: 1
     max_value: 2
@@ -175,61 +71,12 @@ number:
     restore_value: true
     initial_value: 1
 
-datetime:
-  - platform: template
-    id: offpeak_start
-    name: "Off-Peak Start"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "22:00"
-  - platform: template
-    id: offpeak_end
-    name: "Off-Peak End"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "08:00"
-  - platform: template
-    id: peak1_start
-    name: "Peak 1 Start"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "09:00"
-  - platform: template
-    id: peak1_end
-    name: "Peak 1 End"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "10:30"
-  - platform: template
-    id: peak2_start
-    name: "Peak 2 Start"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "18:00"
-  - platform: template
-    id: peak2_end
-    name: "Peak 2 End"
-    type: time
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: "20:30"
-
 switch:
   - platform: template
     id: solar_boost_switch
     name: "Solar Boost"
     icon: mdi:solar-power-variant
+    disabled_by_default: true
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -243,101 +90,9 @@ binary_sensor:
     id: solar_boost_active
     name: "Solar Boost Active"
     icon: mdi:solar-power-variant
-
-sensor:
-  - platform: template
-    id: cost_today
-    name: "Cost Today"
-    icon: mdi:cash
-    unit_of_measurement: "EUR"
-    device_class: monetary
-    accuracy_decimals: 2
-    update_interval: never
-  - platform: template
-    id: cost_month
-    name: "Cost This Month"
-    icon: mdi:cash-multiple
-    unit_of_measurement: "EUR"
-    device_class: monetary
-    accuracy_decimals: 2
-    update_interval: never
-  - platform: template
-    id: energy_month
-    name: "Energy This Month"
-    unit_of_measurement: "kWh"
-    device_class: energy
-    state_class: total_increasing
-    accuracy_decimals: 2
-    update_interval: never
-
-text_sensor:
-  - platform: template
-    id: tariff_period
-    name: "Tariff Period"
-    icon: mdi:clock-outline
-    update_interval: never
+    disabled_by_default: true
 
 interval:
-  # Energy and cost: integrate the AC power every 10 s at the price of the current period.
-  - interval: 10s
-    then:
-      - lambda: |-
-          auto now = id(ha_time).now();
-          if (!now.is_valid())
-            now = id(sntp_time).now();
-          if (!now.is_valid())
-            return;
-          // New day / new month: start the totals again.
-          const int day_key = now.year * 1000 + now.day_of_year;
-          const int month_key = now.year * 100 + now.month;
-          if (id(cost_day_key) != day_key) {
-            id(cost_day_key) = day_key;
-            id(cost_today_eur) = 0;
-          }
-          if (id(cost_month_key) != month_key) {
-            id(cost_month_key) = month_key;
-            id(cost_month_eur) = 0;
-            id(energy_month_kwh) = 0;
-          }
-          // Current tariff period.
-          const int m = now.hour * 60 + now.minute;
-          auto in = [m](datetime::TimeEntity *a, datetime::TimeEntity *b) {
-            const int s = a->hour * 60 + a->minute, e = b->hour * 60 + b->minute;
-            return s <= e ? (m >= s && m < e) : (m >= s || m < e);  // may cross midnight
-          };
-          const int type = id(tariff_type).active_index().value_or(0);
-          const char *period = "Simple";
-          float price = id(price_simple).state;
-          if (type >= 1) {
-            if (in(id(offpeak_start), id(offpeak_end))) {
-              period = "Off-Peak";
-              price = id(price_offpeak).state;
-            } else if (type == 2 && (in(id(peak1_start), id(peak1_end)) || in(id(peak2_start), id(peak2_end)))) {
-              period = "Peak";
-              price = id(price_peak).state;
-            } else {
-              period = "Mid";
-              price = id(price_mid).state;
-            }
-          }
-          if (id(tariff_period).state != period)
-            id(tariff_period).publish_state(period);
-          const float w = id(ac_power).state;
-          if (!std::isnan(w) && w > 0 && !std::isnan(price)) {
-            const float kwh = w * 10.0f / 3600.0f / 1000.0f;
-            id(energy_month_kwh) += kwh;
-            id(cost_today_eur) += kwh * price;
-            id(cost_month_eur) += kwh * price;
-          }
-          static uint8_t tick = 0;
-          if (++tick % 6 == 0) {  // publish every minute
-            id(cost_today).publish_state(id(cost_today_eur));
-            id(cost_month).publish_state(id(cost_month_eur));
-            id(energy_month).publish_state(id(energy_month_kwh));
-          }
-  - interval: 15min
-    then:
-      - lambda: id(cost_saved) = {id(cost_today_eur), id(cost_month_eur), id(energy_month_kwh)};
   # Solar boost: decide once a minute.
   - interval: 60s
     then:

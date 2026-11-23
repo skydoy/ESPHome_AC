@@ -19,7 +19,7 @@ Gratuito para uso pessoal e não comercial. Forks são bem-vindos. O uso comerci
 | Entidade | Para que serve |
 |---|---|
 | **Air Conditioner** | Modos Off / Cool / Heat / Dry / Fan / Auto, 16–32 °C, 7 velocidades (incl. silenciosa), swing, predefinições Eco, Boost, Sleep e proteção anti-gelo a 8 °C. |
-| **Sensores** | Temperatura exterior e das serpentinas, frequência do compressor, humidade, tensão, potência, corrente, energia de hoje (quando a máquina os envia). |
+| **Sensores** | Temperatura exterior e das serpentinas, frequência do compressor, humidade, tensão, potência de aquecimento em BTU/h (modo de aquecimento), quando a máquina os envia. |
 | **AC Link**, **AC Fault** | Se a ligação à máquina está bem, e os códigos de avaria. |
 | **AC Display**, **Eco**, **Super**, **Fan Mute**, **Sleep Mode** | Luz do painel e os modos extra da própria máquina. |
 | **Firmware Update**, **Auto Update** | Novas versões com um clique, ou sozinhas de madrugada. |

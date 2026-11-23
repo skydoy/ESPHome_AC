@@ -20,7 +20,7 @@ Use a USB-C **data** cable. On the ATOM, flash **before** you fit the Tail485: t
 
 Press **Install**, pick the serial port, then confirm.
 
-You should see a progress bar (about 1 minute) and *Installation complete*. The same window then asks for Wi-Fi. Pick your **2.4 GHz** network and type the password, or later join the `ESPHome_AC Setup` hotspot from your phone. You can also set Wi-Fi over Bluetooth (Improv) from the Home Assistant app.
+You should see a progress bar (about 1 minute) and *Installation complete*. The same window then asks for Wi-Fi over the USB cable. Pick your **2.4 GHz** network and type the password, or later join the `ESPHome_AC Setup` hotspot from your phone. There is no Bluetooth setup.
 
 The hotspot comes back on its own whenever the board cannot reach the saved Wi-Fi. It is open, and only while Wi-Fi is not connected.
 

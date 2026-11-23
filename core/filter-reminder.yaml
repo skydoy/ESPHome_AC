@@ -11,7 +11,7 @@
 # "Filter Cleaned" dismisses it. The Stick status screen shows "Clean the AC filter".
 #
 # The date of the last cleaning survives reboots and updates. On a new device the count starts
-# the first time the clock is set (from Home Assistant, ha_time in core/diagnostics.yaml).
+# the first time the clock is set (Home Assistant, or SNTP when Home Assistant is down).
 # Air-filter makers usually advise washing the filter every 2-4 weeks in regular use, and
 # more often with pets; pick the interval that fits your home.
 
@@ -45,10 +45,17 @@ button:
     on_press:
       - if:
           condition:
-            lambda: return id(ha_time).now().is_valid();
+            lambda: |-
+              auto now = id(ha_time).now();
+              if (!now.is_valid())
+                now = id(sntp_time).now();
+              return now.is_valid();
           then:
             - lambda: |-
-                id(filter_cleaned_at) = (uint32_t) id(ha_time).now().timestamp;
+                auto now = id(ha_time).now();
+                if (!now.is_valid())
+                  now = id(sntp_time).now();
+                id(filter_cleaned_at) = (uint32_t) now.timestamp;
                 id(filter_notified) = false;
                 ESP_LOGI("filter", "Filter cleaned: the count starts again today");
             - homeassistant.action:
@@ -61,7 +68,7 @@ button:
           else:
             - logger.log:
                 level: WARN
-                format: "Filter Cleaned ignored: the clock is not set yet (needs Home Assistant)"
+                format: "Filter Cleaned ignored: the clock is not set yet"
 
 sensor:
   - platform: template
@@ -96,6 +103,8 @@ script:
           static const int DAYS[] = {0, 30, 60, 90, 182, 365};
           const int days = DAYS[id(filter_interval).active_index().value_or(5)];
           auto now = id(ha_time).now();
+          if (!now.is_valid())
+            now = id(sntp_time).now();
           if (!now.is_valid())
             return;  // no clock yet: checked again on time sync and every hour
           const uint32_t t = (uint32_t) now.timestamp;
@@ -144,12 +153,16 @@ script:
                 variables:
                   nid: !lambda return App.get_name() + "_filter";
                   msg: !lambda |-
+                    auto now = id(ha_time).now();
+                    if (!now.is_valid())
+                      now = id(sntp_time).now();
+                    const double days = now.is_valid()
+                        ? (double) ((now.timestamp - id(filter_cleaned_at)) / 86400) : 0;
                     char buf[200];
                     snprintf(buf, sizeof(buf),
                              "It has been %.0f days since the air filter was cleaned. After cleaning, press \"Filter Cleaned\".\n"
                              "Passaram %.0f dias desde a última limpeza do filtro. Depois de limpar, carrega em \"Filter Cleaned\".",
-                             (double) ((id(ha_time).now().timestamp - id(filter_cleaned_at)) / 86400),
-                             (double) ((id(ha_time).now().timestamp - id(filter_cleaned_at)) / 86400));
+                             days, days);
                     return std::string(buf);
             - lambda: id(filter_notified) = true;
 
@@ -164,5 +177,8 @@ api:
 
 time:
   - id: !extend ha_time
+    on_time_sync:
+      - script.execute: filter_check
+  - id: !extend sntp_time
     on_time_sync:
       - script.execute: filter_check

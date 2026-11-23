@@ -245,8 +245,8 @@ bool parse_status(const uint8_t *f, size_t len, Status *s) {
   if (len >= 150) {
     r.has_electrical = true;
     r.voltage = f[50];
-    r.power_raw_hi = f[55];
-    r.power_raw_lo = f[56];
+    r.heat_btu_hi = f[55];
+    r.heat_btu_lo = f[56];
   }
   *s = r;
   return true;
@@ -421,14 +421,10 @@ std::string hex_bytes(const uint8_t *f, size_t len, size_t off, size_t n) {
   return out;
 }
 
-float power_watts(const Status &s) {
+int heating_output_btuh(const Status &s) {
   if (!s.has_electrical)
-    return -1.0f;
-  if (s.frame_len >= 160) {
-    const float raw = s.power_raw_hi;
-    return 4.15f * raw * raw;
-  }
-  return static_cast<float>((s.power_raw_hi << 8) | s.power_raw_lo);
+    return -1;
+  return (static_cast<int>(s.heat_btu_hi) << 8) | s.heat_btu_lo;
 }
 
 

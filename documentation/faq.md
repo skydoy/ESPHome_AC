@@ -14,7 +14,7 @@ The installer and the quick start ask for a **2.4 GHz** network. The repository 
 
 ## What is the `ESPHome_AC Setup` hotspot?
 
-A fallback Wi-Fi access point the board opens when it has no saved network, or cannot reach it. Join it from your phone to set Wi-Fi. It is open, and only active while Wi-Fi is down. You can also use Bluetooth Improv from the Home Assistant app. [Install](install.md) · [Security](security.md).
+A fallback Wi-Fi access point the board opens when it has no saved network, or cannot reach it. Join it from your phone to set Wi-Fi. It is open, and only active while Wi-Fi is down. The other way is the installer window over USB. There is no Bluetooth setup. [Install](install.md) · [Security](security.md).
 
 ## Can I use this commercially?
 

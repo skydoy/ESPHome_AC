@@ -156,8 +156,6 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   void set_compressor_target_frequency_sensor(sensor::Sensor *s) { this->compressor_target_hz_ = s; }
   void set_humidity_sensor(sensor::Sensor *s) { this->humidity_ = s; }
   void set_voltage_sensor(sensor::Sensor *s) { this->voltage_ = s; }
-  void set_power_sensor(sensor::Sensor *s) { this->power_ = s; }
-  void set_current_sensor(sensor::Sensor *s) { this->current_ = s; }
   void set_humidity_setpoint_sensor(sensor::Sensor *s) { this->humidity_setpoint_ = s; }
   void set_checksum_errors_sensor(sensor::Sensor *s) { this->checksum_errors_ = s; }
   void set_framing_errors_sensor(sensor::Sensor *s) { this->framing_errors_ = s; }
@@ -319,8 +317,6 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   sensor::Sensor *compressor_target_hz_{nullptr};
   sensor::Sensor *humidity_{nullptr};
   sensor::Sensor *voltage_{nullptr};
-  sensor::Sensor *power_{nullptr};
-  sensor::Sensor *current_{nullptr};
   sensor::Sensor *humidity_setpoint_{nullptr};
   sensor::Sensor *checksum_errors_{nullptr};
   sensor::Sensor *framing_errors_{nullptr};
@@ -341,6 +337,11 @@ class HisenseAC : public Component, public climate::Climate, public uart::UARTDe
   float ac_setpoint_{NAN};
   float ext_room_{NAN};
   uint32_t ext_room_at_{0};
+  uint32_t ext_room_epoch_{0};          // unix time of the reading; 0 = not stamped yet
+  bool ext_room_stamp_pending_{false};  // reading arrived before the clock was set
+  ESPPreferenceObject ext_room_pref_;
+  void save_ext_room_();
+  void stamp_ext_room_();
   bool follow_room_{false};
   bool invert_light_{false};
   bool byte_hunt_{false};

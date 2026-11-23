@@ -458,6 +458,7 @@ display:
 number:
   - platform: template
     id: screen_brightness_day
+    disabled_by_default: true
     name: "Screen Brightness"
     icon: mdi:brightness-6
     unit_of_measurement: "%"
@@ -470,6 +471,7 @@ number:
     initial_value: 60
   - platform: template
     id: screen_brightness_night
+    disabled_by_default: true
     name: "Screen Night Brightness"
     icon: mdi:brightness-4
     unit_of_measurement: "%"
@@ -484,6 +486,7 @@ number:
 switch:
   - platform: template
     id: screen_night_switch
+    disabled_by_default: true
     name: "Screen Night Mode"
     icon: mdi:weather-night
     entity_category: config
@@ -491,6 +494,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
   - platform: template
     id: screen_night_wake
+    disabled_by_default: true
     name: "Screen Night Wake on Changes"
     icon: mdi:bell-sleep-outline
     entity_category: config
@@ -500,6 +504,7 @@ switch:
 datetime:
   - platform: template
     id: screen_night_start
+    disabled_by_default: true
     name: "Screen Night Start"
     type: time
     entity_category: config
@@ -508,6 +513,7 @@ datetime:
     initial_value: "23:00"
   - platform: template
     id: screen_night_end
+    disabled_by_default: true
     name: "Screen Night End"
     type: time
     entity_category: config

@@ -72,13 +72,11 @@ Short units send 82 bytes, W4G1-type units 150 bytes, the W41H1 160 bytes. Field
 | 39 / 40 | Indoor / module fault bits |
 | 41 / 42 | Compressor target / actual frequency (Hz) |
 | 44 / 45 | Outdoor / outdoor coil temperature (signed °C; both `EC` = not valid yet) |
-| 50 | Supply voltage (long frames only) |
-| 55 / 56 | Power: 160-byte frames `4.15 * b55^2` W (bench fit, coarse at low load), 150-byte frames `b55:b56` W |
+| 50 | Supply voltage (long frames only, volts) |
+| 55 / 56 | Heating output, big-endian, BTU/h (long frames, 150 and 160 bytes). Official meaning: the heat the unit is delivering, published in Heat mode. Not electrical power. |
 | 64 | Outdoor fault bits |
 | 66 | Protection bits (bit 7 = +8 °C mode) |
 | 77 | bit 0: +8 °C mode (alternative location) |
-
-Current is estimated as `P / (V * 0.95)`.
 
 The `66/40` ProductType reply (capabilities) is published as the `AC Capabilities` text sensor,
 and the `0A` type pair as `AC Device Type` (`XX XX`).
@@ -114,8 +112,7 @@ of a frame. Both count since boot (total increasing).
   (Kelon 168-bit IR protocol). It is not implemented.
 
 ## Sources
-- AndrewDemsDS/hisense-w41h1 (MIT): W41H1 link bring-up, frame templates, 160-byte status map,
-  power calibration.
+- AndrewDemsDS/hisense-w41h1 (MIT): W41H1 link bring-up, frame templates and the 160-byte status map.
 - akrabi/hisense_ac_esphome (MIT per README) and its protocol notes.
 - Facts only (no code copied): Druidblack/AC-Hisense, pio2398/W4G2 (GPL-3.0), straga/scrivo_project,
   vins.vins (4pda forum), zoffypal/esphome_hisence_ac, pslawinski/esphome_airconintl.
