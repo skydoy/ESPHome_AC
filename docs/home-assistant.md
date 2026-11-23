@@ -88,6 +88,10 @@ Example: Schedule 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Schedule 2 = Weekdays
 
 The clock comes from Home Assistant, or from internet time (SNTP) without it. The time zone is the one Home Assistant last sent, saved on the device; until the device has connected to Home Assistant once, it uses UTC.
 
+## Heating output
+
+**Heating Output** (BTU/h) and **Heating Output W** show the heat the AC is delivering right now, as the official Hisense app did. They come from bytes 55–56 of the 160-byte status frame (W41H1-type units) and only have a value in Heat mode. The cooling output is not decoded yet: turn on **Byte Hunt** while cooling and send the CSV in an issue.
+
 ## Schedule early start
 
 With **Schedule Early Start** on, Heat and Cool schedules start early so the room is already at the temperature at the schedule time. The device learns how fast your room heats and cools (**Learned Heating Rate** / **Learned Cooling Rate**, from Heating / Cooling Rate) and starts (degrees to go ÷ rate) before, at most **Early Start Max** minutes (default 60). It needs a few heating or cooling sessions to learn.

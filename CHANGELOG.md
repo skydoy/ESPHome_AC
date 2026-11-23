@@ -8,6 +8,11 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+### Changed
+- **Heating Output** (BTU/h) and **Heating Output W** replace Output Power (experimental):
+  bytes 55–56 of the 160-byte status frame are the heating output in BTU/h, as the official app
+  showed it. Published only in Heat mode. The cooling output is not decoded yet.
+
 ## [0.6.0] - 2026-11-23
 
 ### Added

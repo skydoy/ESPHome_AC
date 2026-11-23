@@ -101,6 +101,10 @@ Exemplo: Horário 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Horário 2 = Weekdays
 
 A hora vem do Home Assistant ou, sem ele, da internet (SNTP). O fuso horário é o último que o Home Assistant enviou e fica guardado no dispositivo; até o dispositivo se ligar uma vez ao Home Assistant, usa UTC.
 
+## Potência de aquecimento
+
+**Heating Output** (BTU/h) e **Heating Output W** mostram o calor que o AC está a entregar nesse momento, como a app oficial da Hisense mostrava. Vêm dos bytes 55–56 da mensagem de estado de 160 bytes (unidades do tipo W41H1) e só têm valor no modo de aquecimento. A potência de arrefecimento ainda não está decifrada: liga o **Byte Hunt** a arrefecer e envia o CSV num issue.
+
 ## Arranque antecipado dos horários
 
 Com **Schedule Early Start** ligado, os horários de aquecer e arrefecer começam mais cedo, para a sala já estar à temperatura à hora marcada. O dispositivo aprende quão depressa a tua sala aquece e arrefece (**Learned Heating Rate** / **Learned Cooling Rate**, a partir do Heating / Cooling Rate) e liga (graus que faltam ÷ velocidade) antes, no máximo **Early Start Max** minutos (por defeito 60). Precisa de algumas sessões de aquecimento ou arrefecimento para aprender.

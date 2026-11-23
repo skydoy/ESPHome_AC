@@ -200,35 +200,33 @@ sensor:
     entity_category: diagnostic
     update_interval: 60s
     lambda: return id(ac_climate).ac_sensor_temperature();
-  # EXPERIMENTAL: bytes 55-56 of the 160-byte status frame (W41H1-type units) as a 16-bit
-  # number. On an AEH-W41H1 unit it ramps smoothly with the compressor (2740 -> 3340 in 30 s
-  # at 45 Hz, heating), which looks like the heating / cooling output the official app showed,
-  # not the electrical power. Not confirmed yet: compare with a meter on the AC circuit.
+  # Heating output: bytes 55-56 of the 160-byte status frame (W41H1-type units), a 16-bit
+  # number in BTU/h, heating only (as the official app showed it). Published only while the
+  # AC is in Heat mode; empty otherwise. The cooling output is not decoded yet.
   - platform: template
-    id: ac_output_power
-    name: "Output Power (experimental)"
+    id: ac_heating_output
+    name: "Heating Output"
+    icon: mdi:heat-wave
+    unit_of_measurement: "BTU/h"
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 10s
+    lambda: |-
+      if (id(ac_climate).status_len() < 160 || id(ac_climate).mode != climate::CLIMATE_MODE_HEAT)
+        return NAN;
+      const int v = id(ac_climate).status_u16(55);
+      return v < 0 ? NAN : (float) v;
+  - platform: template
+    name: "Heating Output W"
     icon: mdi:heat-wave
     unit_of_measurement: "W"
     device_class: power
     state_class: measurement
     accuracy_decimals: 0
-    entity_category: diagnostic
     update_interval: 10s
     lambda: |-
-      if (id(ac_climate).status_len() < 160) return NAN;
-      const int v = id(ac_climate).status_u16(55);
-      return v < 0 ? NAN : (float) v;
-  - platform: template
-    name: "Output Power BTU (experimental)"
-    icon: mdi:heat-wave
-    unit_of_measurement: "BTU/h"
-    state_class: measurement
-    accuracy_decimals: 0
-    entity_category: diagnostic
-    update_interval: 10s
-    lambda: |-
-      const float w = id(ac_output_power).state;
-      return std::isnan(w) ? NAN : w * 3.412f;
+      const float btu = id(ac_heating_output).state;
+      return std::isnan(btu) ? NAN : btu / 3.412f;   // 1 W = 3.412 BTU/h
   # How fast the room warms up / cools down while the AC heats / cools (°C per hour), from
   # the last 30 min (room sensor when following it, otherwise the AC sensor). Empty while
   # the AC is not heating / cooling or during its first 10 min of it.
