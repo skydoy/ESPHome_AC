@@ -134,7 +134,7 @@ Send it at least every few minutes. With **Solar Boost** on, after 5 minutes exp
 
 ## MQTT (optional)
 
-For Node-RED, ioBroker, Domoticz, openHAB and similar. Home Assistant keeps using the native API. Fill in **MQTT Broker**, **MQTT Port**, **MQTT Username** and **MQTT Password** on the device's web page, then turn on **MQTT**. Topics follow the ESPHome layout: `<device name>/<component>/<entity>/state` and `.../command`. Home Assistant MQTT discovery is off, so nothing appears twice. On the M5StickC Plus / Plus SE and the ATOM Lite (no PSRAM), check **Free Heap** after turning it on.
+For Node-RED, ioBroker, Domoticz, openHAB and similar. Home Assistant keeps using the native API. Fill in **MQTT Broker**, **MQTT Port**, **MQTT Username** and **MQTT Password** on the device's web page, then turn on **MQTT**. Topics follow the ESPHome layout: `<device name>/<component>/<entity>/state` and `.../command`. Home Assistant MQTT discovery is off, so nothing appears twice. **M5StickC Plus2 only.** The M5StickC Plus / Plus SE and the ATOM Lite have no MQTT: they have no PSRAM and need that memory for updates.
 
 ## Panel light
 

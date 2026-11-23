@@ -134,7 +134,7 @@ Envia pelo menos de poucos em poucos minutos. Com **Solar Boost** ligado, depois
 
 ## MQTT (opcional)
 
-Para Node-RED, ioBroker, Domoticz, openHAB e semelhantes. O Home Assistant continua a usar a API nativa. Preenche **MQTT Broker**, **MQTT Port**, **MQTT Username** e **MQTT Password** na página web do dispositivo e liga **MQTT**. Os tópicos seguem o formato do ESPHome: `<nome do dispositivo>/<componente>/<entidade>/state` e `.../command`. A descoberta MQTT do Home Assistant está desligada, para nada aparecer a dobrar. No M5StickC Plus / Plus SE e no ATOM Lite (sem PSRAM), vê o **Free Heap** depois de ligar.
+Para Node-RED, ioBroker, Domoticz, openHAB e semelhantes. O Home Assistant continua a usar a API nativa. Preenche **MQTT Broker**, **MQTT Port**, **MQTT Username** e **MQTT Password** na página web do dispositivo e liga **MQTT**. Os tópicos seguem o formato do ESPHome: `<nome do dispositivo>/<componente>/<entidade>/state` e `.../command`. A descoberta MQTT do Home Assistant está desligada, para nada aparecer a dobrar. **Só no M5StickC Plus2.** O M5StickC Plus / Plus SE e o ATOM Lite não têm MQTT: não têm PSRAM e precisam dessa memória para as atualizações.
 
 ## Luz do painel
 
