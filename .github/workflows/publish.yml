@@ -205,7 +205,13 @@ jobs:
           else
             gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/heads/stable -f sha="$GITHUB_SHA"
           fi
-          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/stable" --jq .object.sha)" = "$GITHUB_SHA"
+          # The refs API can answer with the old value for a few seconds after a write (this
+          # failed the v0.4.1 run although stable had moved): check a few times before failing.
+          for i in 1 2 3 4 5 6; do
+            [ "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/stable" --jq .object.sha)" = "$GITHUB_SHA" ] && break
+            [ "$i" = 6 ] && { echo "::error::stable did not move to $GITHUB_SHA"; exit 1; }
+            sleep 5
+          done
           echo "stable -> $GITHUB_REF_NAME ($GITHUB_SHA)"
   verify-adoption:
     # After "stable" moved, resolve the exact YAML that the ESPHome Device Builder generates
