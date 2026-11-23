@@ -8,32 +8,36 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-23
+
 ### Removed
-- Electrical **Power**, **Current**, **Energy Today**, **Energy This Month** and the tariff
-  cost sensors. Bytes 55–56 are heating output in BTU/h (Heat mode), not electrical power.
-  **Heating Output W** stays as heat in watts, without a power device class.
-- Improv over BLE and the Bluetooth stack, including the logic that turned BLE off after
-  Wi-Fi connected. Wi-Fi setup is Improv Serial over USB, or the `ESPHome_AC Setup` hotspot.
+- **Power**, **Current**, **Energy Today** and the electricity-cost sensors (the tariff,
+  Cost Today, Cost This Month and Energy This Month). Bytes 55–56 are the heating output
+  in BTU/h while the unit is in Heat mode. They are not the electrical power it draws.
+- Bluetooth setup. Wi-Fi is set in the installer window over USB, or by joining the
+  `ESPHome_AC Setup` hotspot.
+
+### Added
+- A Shelly, or any other device that can only send a GET, can set the room temperature
+  and the grid power:
+  `http://<device-ip>/set?room_temp=21.5` and `http://<device-ip>/set?grid_power=-1200`.
 
 ### Fixed
-- The filter reminder uses internet time (SNTP) when Home Assistant has not set the clock.
-- Fault history does not record the same fault again on every boot.
-- The last external room temperature is kept across a reboot and ignored after 4 hours, so
-  Follow Room Sensor still works after a restart.
-- A plain GET sets Room Temperature and Grid Power:
-  `http://<device-ip>/set?room_temp=21.5` and `http://<device-ip>/set?grid_power=-1200`.
-  Shelly webhooks are GET; `/number/<name>/set` only applies a value on POST.
+- The filter reminder uses internet time when Home Assistant has not set the clock.
+- A fault that is still active is not written to the history again on every restart.
+- The last room-sensor reading is kept across a restart and ignored after 4 hours, so
+  Follow Room Sensor still works after a reboot.
 
 ### Changed
-- Solar surplus boost stays. It uses Grid Power from your meter, not a power reading from the AC.
+- **Heating Output W** is the same heat, in watts. It is no longer treated as electrical power.
+- Solar surplus boost is unchanged. It uses the grid reading you send, not a power figure from the AC.
 - Schedules, solar boost, compressor health and the screen settings are hidden in Home
-  Assistant until you enable them. Climate, Heating Output, the filter reminder, and the
-  fault and link sensors stay visible.
-- The M5StickC Plus2 firmware enables its 2 MB PSRAM.
-- A factory build fails if an app image is over 90% of its app partition.
-- The supported line in SECURITY.md is `0.6.x`. The native API has no encryption, so the
-  MQTT password is readable on the LAN, and the schedule, room and solar setters change the
-  AC with no extra login.
+  Assistant until you enable them. The climate entity, Heating Output, the filter reminder,
+  and the fault and link sensors stay visible.
+- The M5StickC Plus2 turns on its 2 MB of PSRAM. MQTT stays available only on that board.
+- On the prebuilt firmware the native API is still unencrypted, so the MQTT password can
+  be read by anything on your network. Schedule, room and solar controls change the AC
+  with no extra login.
 
 ## [0.6.1] - 2026-11-23
 
@@ -610,6 +614,7 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
 [Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.1...HEAD
+[0.7.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
