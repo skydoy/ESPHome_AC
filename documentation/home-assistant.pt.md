@@ -101,6 +101,41 @@ Exemplo: Horário 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Horário 2 = Weekdays
 
 A hora vem do Home Assistant ou, sem ele, da internet (SNTP). O fuso horário é o último que o Home Assistant enviou e fica guardado no dispositivo; até o dispositivo se ligar uma vez ao Home Assistant, usa UTC.
 
+## Arranque antecipado dos horários
+
+Com **Schedule Early Start** ligado, os horários de aquecer e arrefecer começam mais cedo, para a sala já estar à temperatura à hora marcada. O dispositivo aprende quão depressa a tua sala aquece e arrefece (**Learned Heating Rate** / **Learned Cooling Rate**, a partir do Heating / Cooling Rate) e liga (graus que faltam ÷ velocidade) antes, no máximo **Early Start Max** minutos (por defeito 60). Precisa de algumas sessões de aquecimento ou arrefecimento para aprender.
+
+## Custo da eletricidade
+
+Escolhe o **Tariff** (Simple = simples, Bi-hourly = bi-horário, Tri-hourly = tri-horário) e define os preços em €/kWh: **Price Simple**; **Price Off-Peak** (vazio) e **Price Mid** (fora de vazio / cheias); **Price Peak** (ponta, tri-horário). Os períodos são ajustáveis: **Off-Peak Start/End** (por defeito 22:00–08:00) e **Peak 1/2 Start/End** (por defeito 09:00–10:30 e 18:00–20:30, o ciclo diário atual em Portugal continental). Muda-os quando o comercializador ou a ERSE os mudarem.
+
+Ficas com **Cost Today**, **Cost This Month**, **Energy This Month** e **Tariff Period**. São calculados a partir da potência (**Power**) do AC e guardados a cada 15 minutos.
+
+## Aproveitar o excedente solar
+
+Envia ao dispositivo a potência da rede, em W (positivo = a consumir da rede, negativo = a injetar), a partir de qualquer contador, inversor ou script, sem Home Assistant:
+
+```
+http://<IP do dispositivo>/number/Grid%20Power/set?value=-1200
+```
+
+Envia pelo menos de poucos em poucos minutos. Com **Solar Boost** ligado, depois de 5 minutos a injetar mais do que **Solar Boost Threshold** (por defeito 800 W), a temperatura pedida ao AC sobe (aquecer) ou desce (arrefecer) **Solar Boost Degrees** (1 ou 2 °C): a casa guarda o excedente como calor ou frio. Para depois de 5 minutos a consumir mais de 200 W da rede, ou quando não chega leitura durante 5 minutos. **Solar Boost Active** mostra quando está ligado; o cartão do AC continua a mostrar o teu objetivo.
+
+## Saúde do compressor e histórico de avarias
+
+- **Compressor Hours** e **Compressor Starts**: totais, guardados mesmo depois de reiniciar.
+- **Compressor Starts Last Hour** e **Compressor Short Cycling**: mais de 6 arranques numa hora indica AC sobredimensionado, sensor mal colocado ou problema de gás.
+- **AC Struggling**: a aquecer ou arrefecer há 2 horas e ainda a mais de 2 °C do objetivo. Verifica o filtro, portas e janelas, ou chama um técnico.
+- **Last Fault** e **Fault History**: os últimos 10 códigos de avaria com data e hora, guardados mesmo depois de reiniciar. **Clear Fault History** limpa a lista.
+
+## Brilho e modo noturno do ecrã (Sticks)
+
+**Screen Brightness** define o brilho de dia. Com **Screen Night Mode** ligado, entre **Screen Night Start** e **Screen Night End** (por defeito 23:00–07:00) o ecrã usa **Screen Night Brightness** e só acorda com os botões, a não ser que ligues **Screen Night Wake on Changes**.
+
+## MQTT (opcional)
+
+Para Node-RED, ioBroker, Domoticz, openHAB e semelhantes. O Home Assistant continua a usar a API nativa. Preenche **MQTT Broker**, **MQTT Port**, **MQTT Username** e **MQTT Password** na página web do dispositivo e liga **MQTT**. Os tópicos seguem o formato do ESPHome: `<nome do dispositivo>/<componente>/<entidade>/state` e `.../command`. A descoberta MQTT do Home Assistant está desligada, para nada aparecer a dobrar. No M5StickC Plus / Plus SE e no ATOM Lite (sem PSRAM), vê o **Free Heap** depois de ligar.
+
 ## Luz do painel
 
 **Light On** / **Light Off** ligam e desligam a luz da unidade interior. Em algumas unidades Hisense os dois comandos estão trocados: se o Light On apagar a luz, liga **Invert Panel Light** (Configuração).

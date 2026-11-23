@@ -57,6 +57,7 @@ climate:
       name: "Outdoor Coil Temperature"
     compressor_frequency:
       name: "Compressor Frequency"
+      id: ac_compressor_frequency   # used by core/health.yaml
     compressor_target_frequency:
       name: "Compressor Target Frequency"
     # Humidity, voltage and current are only reported by some units: hidden by default,

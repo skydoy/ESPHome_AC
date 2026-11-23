@@ -34,11 +34,11 @@ globals:
 
 esphome:
   on_boot:
-    priority: 600
-    then:
-      - lambda: |-
-          if (id(saved_tz_ok))
-            esphome::time::set_global_tz(id(saved_tz));
+    - priority: 600
+      then:
+        - lambda: |-
+            if (id(saved_tz_ok))
+              esphome::time::set_global_tz(id(saved_tz));
 
 sensor:
   - platform: uptime

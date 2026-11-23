@@ -101,6 +101,41 @@ Example: Schedule 1 = Weekdays, 07:00, Heat, 21 °C, Auto; Schedule 2 = Weekdays
 
 The clock comes from Home Assistant, or from internet time (SNTP) without it. The time zone is the one Home Assistant last sent, saved on the device; until the device has connected to Home Assistant once, it uses UTC.
 
+## Schedule early start
+
+With **Schedule Early Start** on, Heat and Cool schedules start early so the room is already at the temperature at the schedule time. The device learns how fast your room heats and cools (**Learned Heating Rate** / **Learned Cooling Rate**, from Heating / Cooling Rate) and starts (degrees to go ÷ rate) before, at most **Early Start Max** minutes (default 60). It needs a few heating or cooling sessions to learn.
+
+## Electricity cost
+
+Pick the **Tariff** (Simple, Bi-hourly or Tri-hourly) and set the prices in EUR/kWh: **Price Simple**; **Price Off-Peak** (vazio) and **Price Mid** (fora de vazio / cheias); **Price Peak** (ponta, tri-hourly). The periods are editable: **Off-Peak Start/End** (default 22:00–08:00) and **Peak 1/2 Start/End** (default 09:00–10:30 and 18:00–20:30, the current daily cycle in mainland Portugal). Change them when your supplier or the regulator changes them.
+
+You get **Cost Today**, **Cost This Month**, **Energy This Month** and **Tariff Period**. They are calculated from the AC's **Power** reading and saved every 15 minutes.
+
+## Solar surplus boost
+
+Send your grid power to the device, in W (positive = importing, negative = exporting), from any meter, inverter or script, without Home Assistant:
+
+```
+http://<device IP>/number/Grid%20Power/set?value=-1200
+```
+
+Send it at least every few minutes. With **Solar Boost** on, after 5 minutes exporting more than **Solar Boost Threshold** (default 800 W), the AC set point goes up (Heat) or down (Cool) by **Solar Boost Degrees** (1 or 2 °C), so the house stores the surplus as heat or cold. It stops after 5 minutes importing more than 200 W, or when no grid reading arrives for 5 minutes. **Solar Boost Active** shows when it is on; the AC card keeps showing your own target.
+
+## Compressor health and fault history
+
+- **Compressor Hours** and **Compressor Starts**: totals, kept across restarts.
+- **Compressor Starts Last Hour** and **Compressor Short Cycling**: more than 6 starts in an hour points to an oversized unit, a badly placed sensor or a refrigerant problem.
+- **AC Struggling**: heating or cooling for 2 hours and still more than 2 °C from the target. Check the filter, doors and windows, or call a technician.
+- **Last Fault** and **Fault History**: the last 10 fault codes with date and time, kept across restarts. **Clear Fault History** empties the list.
+
+## Screen brightness and night mode (Sticks)
+
+**Screen Brightness** sets the day brightness. With **Screen Night Mode** on, between **Screen Night Start** and **Screen Night End** (default 23:00–07:00) the screen uses **Screen Night Brightness** and only the buttons wake it, unless **Screen Night Wake on Changes** is on.
+
+## MQTT (optional)
+
+For Node-RED, ioBroker, Domoticz, openHAB and similar. Home Assistant keeps using the native API. Fill in **MQTT Broker**, **MQTT Port**, **MQTT Username** and **MQTT Password** on the device's web page, then turn on **MQTT**. Topics follow the ESPHome layout: `<device name>/<component>/<entity>/state` and `.../command`. Home Assistant MQTT discovery is off, so nothing appears twice. On the M5StickC Plus / Plus SE and the ATOM Lite (no PSRAM), check **Free Heap** after turning it on.
+
 ## Panel light
 
 **Light On** / **Light Off** switch the light on the indoor unit. Some Hisense units swap the two commands: if Light On turns the light off, turn on **Invert Panel Light** (Configuration).
