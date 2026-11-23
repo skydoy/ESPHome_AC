@@ -8,8 +8,6 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
-## [0.6.0] - 2026-11-23
-
 ### Added
 - Room sensor: **Room Temperature** input and **Follow Room Sensor** switch. While following,
   the set point sent to the AC is shifted by (AC sensor − room), at most ±3 °C and at most
@@ -536,8 +534,7 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...HEAD
-[0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...HEAD
 [0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.0...v0.4.1
