@@ -19,7 +19,7 @@
 # manifest once a night at 03:MM local time (MM is a random minute picked at boot, so devices do
 # not all hit GitHub at once) and installs a newer release. The Pages manifest only ever carries
 # stable releases. It never runs during the first 10 minutes after boot and logs every decision
-# under the "auto_update" tag. Local time comes from Home Assistant, or from SNTP without it (UTC).
+# under the "auto_update" tag. Local time comes from Home Assistant, or from SNTP without it (core/diagnostics.yaml).
 http_request:
   id: ac_http_request
   verify_ssl: true
@@ -67,10 +67,6 @@ switch:
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
-
-time:
-  - platform: sntp
-    id: sntp_time
 
 globals:
   - id: auto_update_minute       # 0-59, picked at random on the first tick; 255 = not yet

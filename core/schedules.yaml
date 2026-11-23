@@ -1,0 +1,306 @@
+# Schedules stored on the device (brand agnostic: drives the climate entity "ac_climate").
+#
+# 4 schedules, each with these Home Assistant entities (category Configuration):
+#   switch   "Schedule N"              on = active
+#   time     "Schedule N Time"         HH:MM, local time
+#   select   "Schedule N Days"         Every day / Weekdays / Weekend / Monday ... Sunday
+#   select   "Schedule N Action"       Off / Cool / Heat / Auto / Dry / Fan
+#   number   "Schedule N Temperature"  16-32 degC (not used by Off and Fan)
+#   select   "Schedule N Fan"          Keep / Auto / Low / Medium / High / Quiet
+# They run without Home Assistant: the clock comes from Home Assistant or, without it, from
+# internet time (SNTP) with the time zone Home Assistant last sent (core/diagnostics.yaml).
+# Everything is kept across restarts and updates. A schedule fires once, at its minute.
+
+switch:
+  - platform: template
+    id: sched1_on
+    name: "Schedule 1"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched2_on
+    name: "Schedule 2"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched3_on
+    name: "Schedule 3"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+  - platform: template
+    id: sched4_on
+    name: "Schedule 4"
+    icon: mdi:calendar-clock
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+datetime:
+  - platform: template
+    id: sched1_time
+    name: "Schedule 1 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "07:00"
+  - platform: template
+    id: sched2_time
+    name: "Schedule 2 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "09:00"
+  - platform: template
+    id: sched3_time
+    name: "Schedule 3 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "18:00"
+  - platform: template
+    id: sched4_time
+    name: "Schedule 4 Time"
+    type: time
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "23:00"
+
+select:
+  - platform: template
+    id: sched1_days
+    name: "Schedule 1 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched1_action
+    name: "Schedule 1 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Cool"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched1_fan
+    name: "Schedule 1 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_days
+    name: "Schedule 2 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_action
+    name: "Schedule 2 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Off"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched2_fan
+    name: "Schedule 2 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_days
+    name: "Schedule 3 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_action
+    name: "Schedule 3 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Cool"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched3_fan
+    name: "Schedule 3 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_days
+    name: "Schedule 4 Days"
+    icon: mdi:calendar-week
+    entity_category: config
+    options: ["Every day", "Weekdays", "Weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    initial_option: "Every day"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_action
+    name: "Schedule 4 Action"
+    icon: mdi:air-conditioner
+    entity_category: config
+    options: ["Off", "Cool", "Heat", "Auto", "Dry", "Fan"]
+    initial_option: "Off"
+    optimistic: true
+    restore_value: true
+  - platform: template
+    id: sched4_fan
+    name: "Schedule 4 Fan"
+    icon: mdi:fan
+    entity_category: config
+    options: ["Keep", "Auto", "Low", "Medium", "High", "Quiet"]
+    initial_option: "Keep"
+    optimistic: true
+    restore_value: true
+
+number:
+  - platform: template
+    id: sched1_temp
+    name: "Schedule 1 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched2_temp
+    name: "Schedule 2 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched3_temp
+    name: "Schedule 3 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+  - platform: template
+    id: sched4_temp
+    name: "Schedule 4 Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    device_class: temperature
+    entity_category: config
+    min_value: 16
+    max_value: 32
+    step: 1
+    mode: box
+    optimistic: true
+    restore_value: true
+    initial_value: 24
+
+interval:
+  - interval: 15s
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          if (!now.is_valid())
+            now = id(sntp_time).now();
+          if (!now.is_valid())
+            return;
+          struct Sched {
+            switch_::Switch *on;
+            datetime::TimeEntity *time;
+            select::Select *days;
+            select::Select *action;
+            number::Number *temp;
+            select::Select *fan;
+          };
+          static const Sched S[4] = {
+              {id(sched1_on), id(sched1_time), id(sched1_days), id(sched1_action), id(sched1_temp), id(sched1_fan)},
+              {id(sched2_on), id(sched2_time), id(sched2_days), id(sched2_action), id(sched2_temp), id(sched2_fan)},
+              {id(sched3_on), id(sched3_time), id(sched3_days), id(sched3_action), id(sched3_temp), id(sched3_fan)},
+              {id(sched4_on), id(sched4_time), id(sched4_days), id(sched4_action), id(sched4_temp), id(sched4_fan)}
+          };
+          static int fired_on[4] = {-1, -1, -1, -1};   // day of year (x minute) already run
+          const int stamp = now.day_of_year * 1440 + now.hour * 60 + now.minute;
+          for (int i = 0; i < 4; i++) {
+            const Sched &s = S[i];
+            if (!s.on->state || !s.time->has_state())
+              continue;
+            if (s.time->hour != now.hour || s.time->minute != now.minute || fired_on[i] == stamp)
+              continue;
+            // Days: 0 every day, 1 weekdays, 2 weekend, 3..9 Monday..Sunday.
+            // ESPTime day_of_week: 1 = Sunday ... 7 = Saturday.
+            const int d = s.days->active_index().value_or(0);
+            const int dow = now.day_of_week;
+            const bool weekend = dow == 1 || dow == 7;
+            const int monday_based = dow == 1 ? 7 : dow - 1;  // 1 = Monday ... 7 = Sunday
+            bool today = d == 0 || (d == 1 && !weekend) || (d == 2 && weekend) || (d >= 3 && d - 2 == monday_based);
+            if (!today)
+              continue;
+            fired_on[i] = stamp;
+            auto call = id(ac_climate).make_call();
+            const int a = s.action->active_index().value_or(0);
+            static const climate::ClimateMode MODES[] = {
+                climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_COOL, climate::CLIMATE_MODE_HEAT,
+                climate::CLIMATE_MODE_AUTO, climate::CLIMATE_MODE_DRY, climate::CLIMATE_MODE_FAN_ONLY};
+            call.set_mode(MODES[a]);
+            if (a != 0 && a != 5)
+              call.set_target_temperature(s.temp->state);
+            const int f = s.fan->active_index().value_or(0);
+            if (a != 0 && f != 0) {
+              static const climate::ClimateFanMode FANS[] = {
+                  climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW,
+                  climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH, climate::CLIMATE_FAN_QUIET};
+              call.set_fan_mode(FANS[f]);
+            }
+            ESP_LOGI("schedule", "Schedule %d: %s %s, %.0f degC, fan %s", i + 1,
+                     s.days->current_option().c_str(), s.action->current_option().c_str(),
+                     s.temp->state, s.fan->current_option().c_str());
+            call.perform();
+          }
