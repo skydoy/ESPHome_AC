@@ -8,6 +8,17 @@ section below, with the factory and OTA images attached.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-23
+
+### Fixed
+- Release workflow: the check that `stable` moved to the release commit retries for 30 s,
+  because the GitHub refs API can briefly return the old value (a false failure in v0.4.1).
+
+### Changed
+- **Heating Output** (BTU/h) and **Heating Output W** replace Output Power (experimental):
+  bytes 55–56 of the 160-byte status frame are the heating output in BTU/h, as the official app
+  showed it. Published only in Heat mode. The cooling output is not decoded yet.
+
 ## [0.6.0] - 2026-11-23
 
 ### Added
@@ -571,7 +582,8 @@ No firmware changes: 0.2.15 behaves exactly like 0.2.14.
 - Modular layout: `core/`, `core/boards/`, `brands/`, `devices/`.
 - ESP Web Tools installer and OTA manifest on GitHub Pages.
 
-[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/skydoy/ESPHome_AC/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/skydoy/ESPHome_AC/compare/v0.4.1...v0.5.0
