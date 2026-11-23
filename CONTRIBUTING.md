@@ -44,6 +44,12 @@ static/index.html         ESP Web Tools installer page
 - Use the [issue forms](https://github.com/skydoy/ESPHome_AC/issues/new/choose); model reports go
   in a **Compatibility report** and end up in [docs/compatibility.md](docs/compatibility.md).
 - Add a line under **Unreleased** in [CHANGELOG.md](CHANGELOG.md).
+- Commit author: every commit in the pull request (`base..head`) must be authored by
+  `skydoy <25871317+skydoy@users.noreply.github.com>`. CI rejects any other author name
+  or email. A merge commit created by the GitHub UI is ignored only when its author
+  email is that noreply address. Fix a commit with
+  `git commit --amend --author='skydoy <25871317+skydoy@users.noreply.github.com>'`,
+  or rebase and amend each author, then push the branch again.
 - Releases: move the Unreleased entries to a new `## [x.y.z]` section, bump `project_version`
   in all three base device configs (`devices/hisense-<board>.yaml`) and the tag in
   `examples/my-ac-livingroom.yaml`, then merge into `main`. The **Auto release** workflow sees

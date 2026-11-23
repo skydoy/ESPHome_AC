@@ -125,3 +125,25 @@ jobs:
           done
           if grep -rn "github://skydoy/ESPHome_AC[^ ]*@main" devices brands core; then
             echo "::error::Shipped configs must not reference @main"; exit 1; fi
+  commit-authors:
+    # Every commit in base..head must be authored by
+    # skydoy <25871317+skydoy@users.noreply.github.com>.
+    # A merge commit created by the GitHub UI is ignored only when its author
+    # email is that noreply address.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Self-test the author check
+        run: bash tools/check-commit-authors-test.sh
+      - name: Required commit author
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git cat-file -e "$BASE_SHA^{commit}"
+          git cat-file -e "$HEAD_SHA^{commit}"
+          bash tools/check-commit-authors.sh "$BASE_SHA" "$HEAD_SHA"
