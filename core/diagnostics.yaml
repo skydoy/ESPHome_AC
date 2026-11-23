@@ -26,7 +26,7 @@ globals:
   - id: saved_tz
     type: esphome::time::ParsedTimezone
     restore_value: true
-    initial_value: "{}"
+    initial_value: "esphome::time::ParsedTimezone{}"
   - id: saved_tz_ok
     type: bool
     restore_value: true
