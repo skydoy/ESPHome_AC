@@ -10,6 +10,10 @@ section below, with the factory and OTA images attached.
 
 ## [0.6.1] - 2026-11-23
 
+### Fixed
+- Release workflow: the check that `stable` moved to the release commit retries for 30 s,
+  because the GitHub refs API can briefly return the old value (a false failure in v0.4.1).
+
 ### Changed
 - **Heating Output** (BTU/h) and **Heating Output W** replace Output Power (experimental):
   bytes 55–56 of the 160-byte status frame are the heating output in BTU/h, as the official app
