@@ -56,6 +56,8 @@ static/index.html         ESP Web Tools installer page
   the new version, creates the `vx.y.z` tag and starts the release build: CI builds the
   firmware, publishes the installer and OTA manifest, and creates the GitHub Release with those
   notes and the images. (Pushing the tag by hand still works the same way.)
+- Auto release starts on a push to `main` only when that push changes firmware (`devices/**/*.yaml`, `core/`, `components/`, `brands/**/*.yaml`, or a secrets template). Documentation, READMEs, the web installer, and CHANGELOG alone do not create a release.
+- `.github/workflows/update-esphome.yml` runs daily: a new stable ESPHome opens a pull request, compiles every factory board, and on success merges and publishes a patch release through Auto release.
 - Be kind: see the [Code of Conduct](CODE_OF_CONDUCT.md). Security problems go through
   [SECURITY.md](SECURITY.md), not public issues.
 

@@ -1,0 +1,401 @@
+name: Update ESPHome
+
+# Daily check for a new stable ESPHome release (PyPI, GitHub releases as fallback;
+# pre-releases and yanked builds are ignored). When the pin in this repo is already
+# current, the run stops. Otherwise it opens a pull request from deps/esphome-<version>,
+# compiles every factory board from the publish.yml matrix (a GITHUB_TOKEN pull request
+# does not start other workflows), and on success rebases it onto main and starts
+# Auto release so the patch is tagged and published. A failure leaves the pull request
+# open and does not create a tag.
+#
+# Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests"
+# must be enabled, and Workflow permissions must allow this token to write.
+
+on:
+  schedule:
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: update-esphome
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      skip: ${{ steps.bump.outputs.skip }}
+      esphome: ${{ steps.bump.outputs.esphome }}
+      project_version: ${{ steps.bump.outputs.project_version }}
+      branch: ${{ steps.bump.outputs.branch }}
+      pr: ${{ steps.bump.outputs.pr }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GIT_AUTHOR_NAME: skydoy
+          GIT_AUTHOR_EMAIL: 25871317+skydoy@users.noreply.github.com
+          GIT_COMMITTER_NAME: skydoy
+          GIT_COMMITTER_EMAIL: 25871317+skydoy@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          emit() {
+            {
+              echo "skip=$1"
+              echo "esphome=$2"
+              echo "project_version=$3"
+              echo "branch=$4"
+              echo "pr=$5"
+            } >> "$GITHUB_OUTPUT"
+          }
+          field() { printf '%s\n' "$plan" | sed -n "s/^$1=//p" | head -n 1; }
+
+          # Bump from the latest main, not the SHA that queued this run.
+          git fetch origin main
+          git checkout --detach origin/main
+          python3 tools/firmware_paths.py --self-test
+          python3 tools/update_esphome_pin.py --self-test
+
+          latest=$(python3 tools/update_esphome_pin.py --latest-only)
+          if ! [[ "$latest" =~ ^[0-9]{4}\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::refusing non-stable ESPHome version: $latest"
+            exit 1
+          fi
+          git ls-remote --refs origin 'refs/tags/v*' > /tmp/tags.txt
+          day=$(date -u +%Y-%m-%d)
+          plan=$(python3 tools/update_esphome_pin.py --plan --latest "$latest" --tags-file /tmp/tags.txt --date "$day")
+          echo "$plan"
+          skip=$(field skip)
+          esphome=$(field esphome)
+          project_version=$(field project_version)
+          old_esphome=$(field old_esphome)
+          branch=$(field branch)
+          if [ "$skip" != "true" ] && [ "$skip" != "false" ]; then
+            echo "::error::bad plan"; exit 1
+          fi
+          if [ "$esphome" != "$latest" ] || [ "$branch" != "deps/esphome-$latest" ]; then
+            echo "::error::plan does not match the resolved ESPHome version"; exit 1
+          fi
+          if ! [[ "$project_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::bad project_version $project_version"; exit 1
+          fi
+          if [ "$skip" = "true" ]; then
+            echo "Pinned ESPHome is already $latest. Nothing to do."
+            emit true "$esphome" "$project_version" "$branch" ""
+            exit 0
+          fi
+
+          existing=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,headRefName,title \
+            --jq ".[] | select(.headRefName == \"$branch\" or .title == \"Update ESPHome to $latest\") | .number" \
+            | head -n 1)
+          if [ -n "$existing" ]; then
+            echo "Open pull request #$existing already tracks ESPHome $latest. Nothing to do."
+            emit true "$esphome" "$project_version" "$branch" "$existing"
+            exit 0
+          fi
+
+          applied=$(python3 tools/update_esphome_pin.py --apply --latest "$latest" --tags-file /tmp/tags.txt --date "$day")
+          if [ "$applied" != "$plan" ]; then
+            echo "::error::apply plan does not match the read-only plan"; exit 1
+          fi
+          git checkout -b "$branch"
+          git add -u
+          if git diff --cached --quiet; then
+            echo "::error::ESPHome bump produced no changes"; exit 1
+          fi
+          git config user.name skydoy
+          git config user.email 25871317+skydoy@users.noreply.github.com
+          git commit -m "Update ESPHome to $latest" -m "Bump project_version to $project_version."
+          author=$(git log -1 --format='%an <%ae>')
+          if [ "$author" != "skydoy <25871317+skydoy@users.noreply.github.com>" ]; then
+            echo "::error::commit author is $author"; exit 1
+          fi
+          if git ls-remote --heads origin "refs/heads/$branch" | grep -q .; then
+            git push origin --delete "$branch"
+          fi
+          git push origin "HEAD:$branch"
+
+          files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          {
+            echo "Updates the pinned ESPHome release from \`$old_esphome\` to \`$latest\` and bumps \`project_version\` to \`$project_version\`."
+            echo
+            echo "This workflow compiles every factory board from the publish matrix, including the flash budget check, and runs validation on this branch. A pull request opened with \`GITHUB_TOKEN\` does not start other workflows. If those checks pass, the commit is merged onto \`main\` and Auto release tags \`v$project_version\` and publishes the firmware. If a check fails, this pull request stays open and no tag is created."
+            echo
+            echo "Files:"
+            printf '%s\n' "$files" | sed 's/^/- /'
+          } > /tmp/pr-body.md
+
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" \
+            --title "Update ESPHome to $latest" --body-file /tmp/pr-body.md
+          pr=$(gh pr view "$branch" --repo "$GITHUB_REPOSITORY" --json number --jq .number)
+          emit false "$esphome" "$project_version" "$branch" "$pr"
+          {
+            echo "Opened #$pr on \`$branch\` for ESPHome $latest (project $project_version)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  compile:
+    needs: prepare
+    if: needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - key: m5stickc-plus2
+            base: devices/hisense-m5stickc-plus2.yaml
+            factory: devices/hisense-m5stickc-plus2.factory.yaml
+          - key: atom-lite-tail485
+            base: devices/hisense-atom-lite-tail485.yaml
+            factory: devices/hisense-atom-lite-tail485.factory.yaml
+          - key: new-m5stickc-plus2
+            base: devices/hisense-m5stickc-plus2.yaml
+            factory: devices/esphome-ac-m5stickc-plus2.factory.yaml
+          - key: new-atom-lite-tail485
+            base: devices/hisense-atom-lite-tail485.yaml
+            factory: devices/esphome-ac-atom-lite-tail485.factory.yaml
+          - key: new-m5stickc-plus
+            base: devices/hisense-m5stickc-plus.yaml
+            factory: devices/esphome-ac-m5stickc-plus.factory.yaml
+    env:
+      BASE_YAML: ${{ matrix.base }}
+      DEVICE_YAML: ${{ matrix.factory }}
+      BRANCH: ${{ needs.prepare.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.branch }}
+      - name: Build the components from this checkout (not from @main)
+        run: sed -i 's|^\(\s*hisense_component_source:\).*|\1 ../components|' brands/hisense/hisense-ac.yaml
+      - name: Record the build source (shown in the "Firmware Version" sensor)
+        run: |
+          src="${BRANCH} @$(git rev-parse --short=7 HEAD)"
+          sed -i "s|^\(\s*firmware_source:\).*|\1 \"$src\"|" "$BASE_YAML"
+          grep -n "firmware_source:\|project_version:" "$BASE_YAML"
+      - id: esphome
+        uses: esphome/build-action@ae5408cdbc4f70692bf8e345c4982bca05a93667 # v8.1.0
+        with:
+          yaml-file: ${{ env.DEVICE_YAML }}
+          version: ${{ needs.prepare.outputs.esphome }}
+          complete-manifest: true
+          release-url: ${{ github.server_url }}/${{ github.repository }}/releases
+      - name: App image must stay under 90% of its app partition
+        run: python3 tools/check_flash_budget.py "$DEVICE_YAML"
+
+  validate:
+    needs: prepare
+    if: needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        device:
+          - devices/hisense-m5stickc-plus2.yaml
+          - devices/hisense-atom-lite-tail485.yaml
+          - devices/hisense-m5stickc-plus2.factory.yaml
+          - devices/hisense-atom-lite-tail485.factory.yaml
+          - devices/esphome-ac-m5stickc-plus2.factory.yaml
+          - devices/esphome-ac-atom-lite-tail485.factory.yaml
+          - devices/hisense-m5stickc-plus.yaml
+          - devices/esphome-ac-m5stickc-plus.factory.yaml
+    env:
+      DEVICE: ${{ matrix.device }}
+      ESPHOME_VERSION: ${{ needs.prepare.outputs.esphome }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install "esphome==${ESPHOME_VERSION}"
+      - name: Validate the device config against the local components
+        run: |
+          set -o pipefail
+          esphome -s hisense_component_source ../components config "$DEVICE" | tee config.txt
+      - name: Only the factory firmware has the "Firmware Update" entity
+        run: |
+          if [[ "$DEVICE" == *.factory.yaml ]]; then
+            grep -q "id: firmware_update" config.txt
+            if grep -q "id: update_check$" config.txt; then
+              echo "::error::Factory configs must drop core/update-check.yaml (duplicate of Firmware Update)"; exit 1; fi
+          else
+            if grep -qE "id: (firmware_update|ota_http)$" config.txt; then
+              echo "::error::Base configs (adopted in the Device Builder) must not include auto-update"
+              exit 1
+            fi
+            grep -q "id: check_for_update" config.txt
+          fi
+
+  pinned-refs:
+    needs: prepare
+    if: needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    env:
+      EXPECT_VERSION: ${{ needs.prepare.outputs.project_version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.branch }}
+      - name: Same version in all boards; dashboard_import and component follow it
+        run: |
+          set -e
+          v1=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-m5stickc-plus2.yaml)
+          v2=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-atom-lite-tail485.yaml)
+          v3=$(grep -oP '^\s*project_version: "\K[^"]+' devices/hisense-m5stickc-plus.yaml)
+          echo "m5stickc-plus2=$v1 atom-lite=$v2 m5stickc-plus=$v3"
+          test "$v1" = "$v2"
+          test "$v1" = "$v3"
+          test "$v1" = "$EXPECT_VERSION"
+          grep -q 'hisense_component_source: github://skydoy/ESPHome_AC@v${project_version}$' brands/hisense/hisense-ac.yaml
+          for f in devices/hisense-m5stickc-plus2.yaml devices/hisense-atom-lite-tail485.yaml devices/hisense-m5stickc-plus.yaml; do
+            grep -q "package_import_url: github://skydoy/ESPHome_AC/$f@stable$" "$f"
+          done
+          if grep -rn "github://skydoy/ESPHome_AC[^ ]*@main" devices brands core; then
+            echo "::error::Shipped configs must not reference @main"; exit 1; fi
+
+  unit-tests:
+    needs: prepare
+    if: needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.branch }}
+      - name: Protocol unit tests (host C++)
+        run: make -C tests
+
+  setup-firmware:
+    needs: prepare
+    if: needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [m5stickc-plus2, atom-lite-tail485, m5stickc-plus]
+    env:
+      CFG: devices/setup-${{ matrix.board }}.yaml
+      BUILD: devices/.esphome/build/esphome-ac-setup/build
+      MAX_BYTES: "1200000"
+      ESPHOME_VERSION: ${{ needs.prepare.outputs.esphome }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install "esphome==${ESPHOME_VERSION}"
+      - name: No API, no brand package, no static Wi-Fi networks
+        run: |
+          set -o pipefail
+          esphome config "$CFG" | tee config.txt
+          if grep -qE "^(api|dashboard_import|climate):" config.txt; then
+            echo "::error::The setup image must not contain api, dashboard_import or a climate"; exit 1; fi
+          if grep -qE "^  networks:|^  ssid:" config.txt; then
+            echo "::error::The setup image must not have static Wi-Fi networks"; exit 1; fi
+          grep -q "next_url: http://{{ip_address}}/setup" config.txt
+      - name: Compile (no warnings allowed)
+        run: |
+          set -o pipefail
+          esphome compile "$CFG" 2>&1 | tee build.log
+          if grep -E "warning:" build.log | grep -vE "/(\.platformio|\.espressif|managed_components)/"; then
+            echo "::error::Compiler warnings in the setup image"; exit 1; fi
+      - name: Size budget
+        run: |
+          size=$(stat -c %s "$BUILD/firmware.ota.bin")
+          echo "firmware.ota.bin: $size bytes (max $MAX_BYTES)"
+          test "$size" -le "$MAX_BYTES"
+      - name: Only allow-listed Hisense frames are linked in
+        run: |
+          NM=$(find ~/.cache/esphome ~/.platformio ~/.espressif \( -type f -o -type l \) -name "xtensa-esp32-elf-nm" 2>/dev/null | head -n 1)
+          echo "nm: $NM"
+          test -n "$NM"
+          "$NM" -C "$BUILD/firmware.elf" > syms.txt
+          if grep -E "build_command|build_heartbeat|CommandQueue|hisense_ac::HisenseAC" syms.txt; then
+            echo "::error::Brand command code is linked into the setup image"; exit 1; fi
+          builders=$(grep -oE "hisense_ac::proto::build_[a-z_]+" syms.txt | sort -u)
+          echo "$builders"
+          extra=$(echo "$builders" | grep -vxE "hisense_ac::proto::build_(devtype|status|version)_request" || true)
+          if [ -n "$extra" ]; then
+            echo "::error::Unexpected frame builders: $extra"; exit 1; fi
+
+  finish:
+    needs: [prepare, compile, validate, pinned-refs, unit-tests, setup-firmware]
+    if: always() && needs.prepare.result == 'success' && needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ needs.prepare.outputs.pr }}
+      ESPHOME: ${{ needs.prepare.outputs.esphome }}
+      PROJECT_VERSION: ${{ needs.prepare.outputs.project_version }}
+      COMPILE: ${{ needs.compile.result }}
+      VALIDATE: ${{ needs.validate.result }}
+      PINNED: ${{ needs.pinned-refs.result }}
+      TESTS: ${{ needs.unit-tests.result }}
+      SETUP: ${{ needs.setup-firmware.result }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Merge and release, or leave the pull request open
+        run: |
+          set -euo pipefail
+          failed=0
+          details=""
+          for pair in "compile:$COMPILE" "validate:$VALIDATE" "pinned-refs:$PINNED" "unit-tests:$TESTS" "setup-firmware:$SETUP"; do
+            name=${pair%%:*}
+            result=${pair#*:}
+            echo "$name: $result"
+            if [ "$result" != "success" ]; then
+              failed=1
+              details="${details}- ${name}: ${result}"$'\n'
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            {
+              echo "ESPHome ${ESPHOME} was not merged, and no release tag was created."
+              echo
+              echo "Failed checks:"
+              printf '%s\n' "$details"
+              echo "Run: ${RUN_URL}"
+            } > /tmp/comment.md
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file /tmp/comment.md
+            exit 1
+          fi
+
+          method=$(gh api "repos/${GITHUB_REPOSITORY}" --jq 'if .allow_rebase_merge then "rebase" elif .allow_squash_merge then "squash" elif .allow_merge_commit then "merge" else "" end')
+          if [ -z "$method" ]; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "Checks passed, but this repository allows no merge method. No tag was created."
+            exit 1
+          fi
+          echo "Merging #$PR with $method"
+          if [ "$method" = "squash" ]; then
+            merge_ok=0
+            gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch \
+              --subject "Update ESPHome to ${ESPHOME}" \
+              --body "Bump the pinned ESPHome release to ${ESPHOME} and project_version to ${PROJECT_VERSION}." || merge_ok=$?
+          else
+            merge_ok=0
+            gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" "--${method}" --delete-branch || merge_ok=$?
+          fi
+          if [ "$merge_ok" -ne 0 ]; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "Checks passed, but the pull request could not be merged (${method}). No tag was created. Run: ${RUN_URL}"
+            exit 1
+          fi
+
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v${PROJECT_VERSION}" --jq .ref >/dev/null 2>&1; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "Merged. \`v${PROJECT_VERSION}\` already exists, so Auto release was not started again."
+            exit 0
+          fi
+          if ! gh workflow run auto-release.yml --repo "$GITHUB_REPOSITORY" --ref main; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "The pull request was merged, but Auto release could not be started. No tag was created by this workflow. Run the Auto release workflow on \`main\` to publish \`v${PROJECT_VERSION}\`."
+            exit 1
+          fi
+          echo "Dispatched auto-release.yml on main for v${PROJECT_VERSION}." >> "$GITHUB_STEP_SUMMARY"

@@ -4,11 +4,34 @@ name: Auto release
 # (installer + OTA manifests, GitHub Release, "stable" branch). So a release is just: bump
 # project_version in the three base device configs, add the CHANGELOG section, merge.
 #
+# A push to main runs this only when firmware sources change. The path filter starts the
+# job; tools/firmware_paths.py then refuses a push whose diff is only markdown or other
+# non-firmware files. Documentation, READMEs, the web installer (static/), CHANGELOG,
+# examples, and other non-firmware files do not create a release. workflow_dispatch is not
+# path-filtered, so a manual run and the daily ESPHome bump still release.
+#
+# Firmware: devices/**/*.yaml (device, factory, and setup configs), core/** (packages,
+# screen assets, web-ui.js), components/** (C++/Python and setup_page.html),
+# brands/**/*.yaml, and a secrets template (secrets.yaml, secrets.yaml.example,
+# secrets.yaml.template, secrets.yaml.sample). There is no packages/ directory and no
+# secrets template in the tree today (secrets.yaml is gitignored).
+#
 # A tag pushed with GITHUB_TOKEN does not start other workflows, so publish.yml is started
 # with workflow_dispatch on the tag ref (it then runs exactly as for a pushed v* tag).
 on:
   push:
     branches: [main]
+    paths:
+      - "devices/**/*.yaml"
+      - "devices/**/*.yml"
+      - "core/**"
+      - "components/**"
+      - "brands/**/*.yaml"
+      - "brands/**/*.yml"
+      - "secrets.yaml"
+      - "secrets.yaml.example"
+      - "secrets.yaml.template"
+      - "secrets.yaml.sample"
   workflow_dispatch:
 permissions:
   contents: write   # create the tag
@@ -23,10 +46,36 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Decide
         id: decide
+        env:
+          BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              echo "First push of this branch; firmware path check skipped."
+            elif [[ ! "$BEFORE" =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "::error::unexpected before SHA"
+              exit 1
+            else
+              set +e
+              python3 tools/firmware_paths.py --changed "$BEFORE" "$GITHUB_SHA"
+              status=$?
+              set -e
+              if [ "$status" -eq 1 ]; then
+                echo "No firmware files changed; not releasing."
+                echo "go=false" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              if [ "$status" -ne 0 ]; then
+                echo "::error::firmware path check failed"
+                exit 1
+              fi
+            fi
+          fi
           ver() { grep -oP '^\s*project_version: "\K[^"]+' "$1"; }
           v=$(ver devices/hisense-m5stickc-plus2.yaml)
           for f in devices/hisense-atom-lite-tail485.yaml devices/hisense-m5stickc-plus.yaml; do
